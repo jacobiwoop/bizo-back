@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('bizo:update-reactivity-badges')->dailyAt('02:00');
     })
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->trustProxies(at: '*');
         $middleware->throttleApi();
         $middleware->alias([
             'last_seen' => \App\Http\Middleware\SetLastSeenAt::class,
