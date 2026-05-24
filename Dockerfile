@@ -34,15 +34,21 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
+COPY composer.json composer.lock ./
+
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer dump-autoload --no-dev --optimize \
+    && php artisan package:discover --ansi
 
 RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views \
     && mkdir -p storage/logs bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
+COPY docker/Caddyfile /etc/caddy/Caddyfile
 COPY docker/start.sh /start.sh
 RUN chmod +x /start.sh
 

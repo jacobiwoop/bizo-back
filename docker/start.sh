@@ -4,20 +4,30 @@ set -e
 echo "==> Bizo API - Demarrage container..."
 cd /app
 
+APP_PORT="${PORT:-10000}"
+RUN_MIGRATIONS="${RUN_MIGRATIONS:-true}"
+RUN_QUEUE="${RUN_QUEUE:-true}"
+RUN_SCHEDULER="${RUN_SCHEDULER:-true}"
+WAIT_FOR_DB="${WAIT_FOR_DB:-true}"
+
 if [ -z "$APP_KEY" ]; then
   echo "==> Generation APP_KEY..."
   php artisan key:generate --force
 fi
 
-echo "==> Attente MySQL..."
-for i in $(seq 1 15); do
-  php artisan db:monitor --max=1 >/dev/null 2>&1 && break || true
-  echo "   MySQL pas encore pret, attente 2s... ($i/15)"
-  sleep 2
-done
+if [ "$WAIT_FOR_DB" = "true" ]; then
+  echo "==> Attente MySQL..."
+  for i in $(seq 1 30); do
+    php artisan migrate:status >/dev/null 2>&1 && break || true
+    echo "   MySQL pas encore pret, attente 2s... ($i/30)"
+    sleep 2
+  done
+fi
 
-echo "==> Migrations..."
-php artisan migrate --force --no-interaction
+if [ "$RUN_MIGRATIONS" = "true" ]; then
+  echo "==> Migrations..."
+  php artisan migrate --force --no-interaction
+fi
 
 echo "==> Storage link..."
 php artisan storage:link --force 2>/dev/null || true
@@ -29,11 +39,15 @@ php artisan view:cache
 
 chown -R www-data:www-data storage bootstrap/cache
 
-echo "==> Demarrage queue worker..."
-php artisan queue:work --sleep=5 --tries=3 --timeout=90 --max-time=3600 &
+if [ "$RUN_QUEUE" = "true" ]; then
+  echo "==> Demarrage queue worker..."
+  php artisan queue:work --sleep=5 --tries=3 --timeout=90 --max-time=3600 &
+fi
 
-echo "==> Demarrage scheduler..."
-while true; do php artisan schedule:run --no-interaction; sleep 60; done &
+if [ "$RUN_SCHEDULER" = "true" ]; then
+  echo "==> Demarrage scheduler..."
+  while true; do php artisan schedule:run --no-interaction; sleep 60; done &
+fi
 
-echo "==> Demarrage FrankenPHP..."
+echo "==> Demarrage FrankenPHP sur le port ${APP_PORT}..."
 exec frankenphp run --config /etc/caddy/Caddyfile
