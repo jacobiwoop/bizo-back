@@ -97,6 +97,33 @@
             color: var(--muted);
             font-size: 14px;
         }
+        .password-wrap {
+            position: relative;
+        }
+        .password-wrap input {
+            padding-right: 52px;
+        }
+        .password-toggle {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            border: 0;
+            border-radius: 999px;
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .password-toggle:hover {
+            background: rgba(18,33,44,.06);
+            color: var(--ink);
+        }
         .actions {
             display: flex;
             gap: 12px;
@@ -164,25 +191,31 @@
 
                 <div class="field">
                     <label for="password">Nouveau mot de passe</label>
-                    <input
-                        id="password"
-                        name="password"
-                        type="password"
-                        autocomplete="new-password"
-                        required
-                    >
+                    <div class="password-wrap">
+                        <input
+                            id="password"
+                            name="password"
+                            type="password"
+                            autocomplete="new-password"
+                            required
+                        >
+                        <button type="button" class="password-toggle" data-target="password" aria-label="Afficher le mot de passe" aria-pressed="false">👁</button>
+                    </div>
                     <div class="help">Minimum 8 caractères.</div>
                 </div>
 
                 <div class="field">
                     <label for="password_confirmation">Confirmer le mot de passe</label>
-                    <input
-                        id="password_confirmation"
-                        name="password_confirmation"
-                        type="password"
-                        autocomplete="new-password"
-                        required
-                    >
+                    <div class="password-wrap">
+                        <input
+                            id="password_confirmation"
+                            name="password_confirmation"
+                            type="password"
+                            autocomplete="new-password"
+                            required
+                        >
+                        <button type="button" class="password-toggle" data-target="password_confirmation" aria-label="Afficher le mot de passe" aria-pressed="false">👁</button>
+                    </div>
                 </div>
 
                 <div class="actions">
@@ -196,5 +229,17 @@
             </div>
         </main>
     </div>
+    <script>
+        document.querySelectorAll('.password-toggle').forEach((button) => {
+            button.addEventListener('click', () => {
+                const input = document.getElementById(button.dataset.target);
+                const isHidden = input.type === 'password';
+                input.type = isHidden ? 'text' : 'password';
+                button.textContent = isHidden ? '🙈' : '👁';
+                button.setAttribute('aria-label', isHidden ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+                button.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
+            });
+        });
+    </script>
 </body>
 </html>
