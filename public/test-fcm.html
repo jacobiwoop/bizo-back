@@ -86,7 +86,8 @@
         }
 
         async function ensureServiceWorker() {
-            return navigator.serviceWorker.register("/firebase-messaging-sw.js");
+            await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+            return navigator.serviceWorker.ready;
         }
 
         generateButton.addEventListener("click", async () => {
