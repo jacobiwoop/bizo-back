@@ -5,6 +5,7 @@ Backend API de Bizo construit avec `Laravel 11`, `Sanctum`, `MySQL`, `database q
 ## Documents utiles
 
 - [API.md](./API.md) : documentation des routes HTTP, auth, payloads et comportements attendus.
+- [MOBILE_INTEGRATION.md](./MOBILE_INTEGRATION.md) : guide d'integration mobile oriente client Android/iOS et IA frontend.
 - [PROGRESS.md](./PROGRESS.md) : suivi d'avancement par phase.
 - [bizo-backend-spec.md](./bizo-backend-spec.md) : spec technique de reference.
 
