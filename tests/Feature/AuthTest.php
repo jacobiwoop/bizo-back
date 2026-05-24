@@ -254,6 +254,16 @@ class AuthTest extends TestCase
             ]);
     }
 
+    public function test_web_reset_password_page_renders_html_form(): void
+    {
+        $response = $this->get('/reset-password/sample-token?email=test@bizo.ci');
+
+        $response->assertStatus(200)
+            ->assertSee('Réinitialiser le mot de passe')
+            ->assertSee('test@bizo.ci')
+            ->assertDontSee('Utilisez l application mobile');
+    }
+
     public function test_reset_password_updates_password_and_revokes_tokens(): void
     {
         $user = User::factory()->create([
@@ -279,6 +289,29 @@ class AuthTest extends TestCase
 
         $this->assertTrue(Hash::check('newpassword123', $user->password));
         $this->assertDatabaseCount('personal_access_tokens', 0);
+    }
+
+    public function test_web_reset_password_updates_password_and_redirects_to_success_page(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'test@bizo.ci',
+            'password' => bcrypt('oldpassword123'),
+        ]);
+
+        $token = Password::createToken($user);
+
+        $response = $this->post('/reset-password', [
+            'email' => 'test@bizo.ci',
+            'token' => $token,
+            'password' => 'newpassword123',
+            'password_confirmation' => 'newpassword123',
+        ]);
+
+        $response->assertRedirect(route('password.reset.complete'));
+
+        $user->refresh();
+
+        $this->assertTrue(Hash::check('newpassword123', $user->password));
     }
 
     public function test_reset_password_requires_valid_token(): void

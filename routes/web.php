@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\WebPasswordResetController;
 use App\Http\Controllers\WebPreviewController;
 use Illuminate\Support\Facades\Route;
 
@@ -10,13 +11,9 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/reset-password/{token}', function (string $token) {
-    return response()->json([
-        'message' => 'Utilisez l application mobile pour finaliser la reinitialisation du mot de passe.',
-        'token' => $token,
-        'email' => request()->query('email'),
-    ]);
-})->name('password.reset');
+Route::get('/reset-password-complete', [WebPasswordResetController::class, 'complete'])->name('password.reset.complete');
+Route::get('/reset-password/{token}', [WebPasswordResetController::class, 'show'])->name('password.reset');
+Route::post('/reset-password', [WebPasswordResetController::class, 'store'])->name('password.update.web');
 
 Route::get('/a/{listingId}', [WebPreviewController::class, 'listing'])->name('preview.listing');
 Route::get('/u/{username}', [WebPreviewController::class, 'seller'])->name('preview.seller');
