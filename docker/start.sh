@@ -29,6 +29,15 @@ if [ "$RUN_MIGRATIONS" = "true" ]; then
   php artisan migrate --force --no-interaction
 fi
 
+echo "==> Preparation storage..."
+mkdir -p \
+  storage/app/public \
+  storage/framework/cache \
+  storage/framework/sessions \
+  storage/framework/views \
+  storage/logs \
+  bootstrap/cache
+
 echo "==> Storage link..."
 php artisan storage:link --force 2>/dev/null || true
 
