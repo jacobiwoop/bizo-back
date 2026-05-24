@@ -9,6 +9,7 @@
 .env
 .env.backup
 .env.production
+bizo-f2187-firebase-adminsdk-fbsvc-1f4ac49a69.json
 .phpactor.json
 .phpunit.result.cache
 Homestead.json
