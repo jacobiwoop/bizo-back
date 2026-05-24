@@ -49,6 +49,7 @@ RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framewor
     && chmod -R 775 storage bootstrap/cache
 
 COPY docker/Caddyfile /etc/caddy/Caddyfile
+COPY docker/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
 COPY docker/start.sh /start.sh
 RUN chmod +x /start.sh
 

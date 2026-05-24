@@ -29,7 +29,7 @@ class StoreListingRequest extends FormRequest
             'tags' => ['nullable', 'array'],
             'tags.*' => ['string', 'max:30'],
             'photos' => ['required', 'array', 'min:1', 'max:10'],
-            'photos.*' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'photos.*' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:61440'],
         ];
     }
 
@@ -59,7 +59,7 @@ class StoreListingRequest extends FormRequest
             'photos.max' => 'Maximum 10 photos autorisées.',
             'photos.*.image' => 'Chaque fichier doit être une image.',
             'photos.*.mimes' => 'Formats acceptés : jpg, jpeg, png, webp.',
-            'photos.*.max' => 'Chaque photo ne doit pas dépasser 5 Mo.',
+            'photos.*.max' => 'Chaque photo ne doit pas dépasser 60 Mo.',
         ];
     }
 }

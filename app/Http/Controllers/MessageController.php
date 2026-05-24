@@ -49,7 +49,7 @@ class MessageController extends Controller
         $validated = $request->validate([
             'type' => ['required', 'string', 'in:text,image,troc_proposal'],
             'text' => ['required_if:type,text', 'nullable', 'string', 'max:1000'],
-            'image' => ['required_if:type,image', 'nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
+            'image' => ['required_if:type,image', 'nullable', 'image', 'mimes:jpg,jpeg,png', 'max:61440'],
             'offered_listing_id' => ['required_if:type,troc_proposal', 'nullable', 'string', 'exists:listings,id'],
             'cash_amount' => ['nullable', 'integer', 'min:0'],
         ]);
