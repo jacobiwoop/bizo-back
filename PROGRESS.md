@@ -4,9 +4,9 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 
 ## Etat actuel
 
-- Statut global: `phase 8 en cours`
-- Phase en cours: `Phase 8 - Finition`
-- Prochaine tache prioritaire: `Ajouter la documentation API`
+- Statut global: `phase 8 terminee`
+- Phase en cours: `Aucune`
+- Prochaine tache prioritaire: `Stabilisation, revue finale ou nouvelles fonctionnalites`
 - Derniere mise a jour: `2026-05-24`
 
 ## Decisions verrouillees
@@ -129,7 +129,7 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 - [x] Implementer upload avatar
 - [x] Implementer suppression compte
 - [x] Configurer CORS
-- [ ] Ajouter documentation API
+- [x] Ajouter documentation API
 
 ## Journal
 
@@ -190,6 +190,7 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 - `ProfileController` ajoute avec profil prive, edition, avatar, suppression compte et endpoints publics vendeur.
 - Phase 8 profil validee: `6 passed` sur `ProfileTest`.
 - CORS configure sur `api/*` et valide: `2 passed` sur `CorsTest`.
+- Documentation projet ajoutee: `API.md` et `README.md` reecrit pour pointer vers la doc API, le suivi et la spec.
 - Total Phases 2-8: `84 tests` valides.
 
 ## Blocages
