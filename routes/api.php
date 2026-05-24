@@ -7,6 +7,8 @@ use App\Http\Controllers\ListingController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RequestController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Http\Request;
@@ -33,6 +35,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/listings/{id}', [ListingController::class, 'show']);
     Route::get('/listings/{id}/similar', [ListingController::class, 'similar']);
     Route::get('/search', [SearchController::class, 'index']);
+    Route::get('/requests', [RequestController::class, 'index']);
 
     // ─── Routes authentifiées ─────────────────────────────
     Route::middleware('auth:sanctum')->group(function () {
@@ -63,6 +66,9 @@ Route::prefix('v1')->group(function () {
 
         Route::post('/transactions', [TransactionController::class, 'store']);
         Route::post('/reviews', [ReviewController::class, 'store']);
+        Route::post('/reports', [ReportController::class, 'store']);
+        Route::post('/requests', [RequestController::class, 'store']);
+        Route::get('/my/requests', [RequestController::class, 'myRequests']);
 
         Route::get('/favorites', [FavoriteController::class, 'index']);
         Route::post('/favorites/{listingId}', [FavoriteController::class, 'store']);

@@ -4,9 +4,9 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 
 ## Etat actuel
 
-- Statut global: `phase 4 terminee`
+- Statut global: `phase 5 terminee, phase 6 en cours`
 - Phase en cours: `Phase 6 - Recherche et extras`
-- Prochaine tache prioritaire: `Implementer ReportController, RequestController et CheckRequestMatches`
+- Prochaine tache prioritaire: `Valider ExtrasTest et finaliser la Phase 6`
 - Derniere mise a jour: `2026-05-24`
 
 ## Decisions verrouillees
@@ -99,19 +99,19 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 
 ### Phase 5 - Notifications et Scheduler
 
-- [ ] Creer `NotificationController`
-- [ ] Creer commande `SendListingReminders`
-- [ ] Creer commande `ExpireListings`
-- [ ] Creer commande `UpdateReactivityBadges`
-- [ ] Configurer scheduler Laravel
+- [x] Creer `NotificationController`
+- [x] Creer commande `SendListingReminders`
+- [x] Creer commande `ExpireListings`
+- [x] Creer commande `UpdateReactivityBadges`
+- [x] Configurer scheduler Laravel
 
 ### Phase 6 - Recherche et extras
 
 - [x] Creer `SearchController`
 - [x] Implementer `GET /search`
-- [ ] Creer `ReportController`
-- [ ] Creer `RequestController`
-- [ ] Creer job `CheckRequestMatches`
+- [x] Creer `ReportController`
+- [x] Creer `RequestController`
+- [x] Creer job `CheckRequestMatches`
 
 ### Phase 7 - Web Preview
 
@@ -179,6 +179,8 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 - Phase 5 validee localement: `6 passed` (`NotificationsTest` 3, `SchedulerCommandsTest` 3).
 - Phase 6 amorcee: `SearchController` et route `GET /search` ajoutes.
 - Phase 6 recherche validee: `5 passed` sur `SearchTest`.
+- Phase 6 extras implementes: `ReportController`, `RequestController`, `CheckRequestMatches`, resources et routes associees ajoutes.
+- Verification syntaxe OK sur les nouveaux fichiers Phase 6 extras.
 - Total Phases 2-6: `64 tests` valides.
 
 ## Blocages
