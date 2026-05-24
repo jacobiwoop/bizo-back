@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bizo FCM Web Test</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 720px;
+            margin: 40px auto;
+            padding: 0 16px;
+            line-height: 1.5;
+        }
+
+        textarea,
+        input,
+        button {
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 8px;
+            margin-bottom: 16px;
+            padding: 12px;
+            font: inherit;
+        }
+
+        textarea {
+            min-height: 140px;
+            resize: vertical;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .status {
+            padding: 12px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test FCM Web</h1>
+    <p>Cette page récupère un token FCM Web, puis peut l'envoyer au backend Bizo.</p>
+
+    <label for="bearerToken">Token API Bizo (Bearer)</label>
+    <input id="bearerToken" type="text" placeholder="Colle ici un token Sanctum de test">
+
+    <button id="generateToken">1. Générer le token FCM</button>
+
+    <label for="fcmToken">Token FCM Web</label>
+    <textarea id="fcmToken" readonly placeholder="Le token apparaîtra ici"></textarea>
+
+    <button id="saveToken">2. Enregistrer le token sur /api/v1/auth/fcm-token</button>
+
+    <div id="status" class="status">En attente.</div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA91_N7nrEWsm12e8XBd7xpKqbOpX4pLB4",
+            authDomain: "bizo-f2187.firebaseapp.com",
+            projectId: "bizo-f2187",
+            storageBucket: "bizo-f2187.firebasestorage.app",
+            messagingSenderId: "733271569706",
+            appId: "1:733271569706:web:7bd34a264cbc2bbefb5a53",
+            measurementId: "G-HN9GS5WPSJ"
+        };
+
+        const vapidKey = "BAfO632yMrQM4Qul6x2A7QUD78dTNOufttTGU9EE9AsCft7zrfeYPEhCCIzsIcG8T3uCC9uLlmF--ifGY5DYKyU";
+        const app = initializeApp(firebaseConfig);
+        const messaging = getMessaging(app);
+
+        const bearerTokenInput = document.getElementById("bearerToken");
+        const fcmTokenField = document.getElementById("fcmToken");
+        const status = document.getElementById("status");
+        const generateButton = document.getElementById("generateToken");
+        const saveButton = document.getElementById("saveToken");
+
+        function setStatus(message) {
+            status.textContent = message;
+        }
+
+        async function ensureServiceWorker() {
+            return navigator.serviceWorker.register("/firebase-messaging-sw.js");
+        }
+
+        generateButton.addEventListener("click", async () => {
+            try {
+                setStatus("Demande de permission navigateur...");
+
+                const permission = await Notification.requestPermission();
+                if (permission !== "granted") {
+                    setStatus("Permission refusée. Impossible de générer le token.");
+                    return;
+                }
+
+                const registration = await ensureServiceWorker();
+                const token = await getToken(messaging, {
+                    vapidKey,
+                    serviceWorkerRegistration: registration,
+                });
+
+                if (!token) {
+                    setStatus("Aucun token FCM n'a été retourné.");
+                    return;
+                }
+
+                fcmTokenField.value = token;
+                setStatus("Token FCM généré avec succès.");
+            } catch (error) {
+                setStatus(`Erreur de génération FCM: ${error.message}`);
+            }
+        });
+
+        saveButton.addEventListener("click", async () => {
+            const bearerToken = bearerTokenInput.value.trim();
+            const fcmToken = fcmTokenField.value.trim();
+
+            if (!bearerToken) {
+                setStatus("Colle d'abord un token API Bizo.");
+                return;
+            }
+
+            if (!fcmToken) {
+                setStatus("Génère d'abord un token FCM.");
+                return;
+            }
+
+            try {
+                setStatus("Enregistrement du token FCM sur le backend...");
+
+                const response = await fetch("/api/v1/auth/fcm-token", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${bearerToken}`,
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                    },
+                    body: JSON.stringify({ fcm_token: fcmToken }),
+                });
+
+                const data = await response.json();
+                setStatus(`Réponse backend (${response.status}): ${JSON.stringify(data, null, 2)}`);
+            } catch (error) {
+                setStatus(`Erreur backend: ${error.message}`);
+            }
+        });
+
+        onMessage(messaging, (payload) => {
+            setStatus(`Notification reçue en foreground:\n${JSON.stringify(payload, null, 2)}`);
+        });
+    </script>
+</body>
+</html>
