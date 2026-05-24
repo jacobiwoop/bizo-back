@@ -6,6 +6,7 @@ use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RequestController;
@@ -36,12 +37,16 @@ Route::prefix('v1')->group(function () {
     Route::get('/listings/{id}/similar', [ListingController::class, 'similar']);
     Route::get('/search', [SearchController::class, 'index']);
     Route::get('/requests', [RequestController::class, 'index']);
+    Route::get('/users/{uid}', [ProfileController::class, 'publicShow']);
+    Route::get('/users/{uid}/listings', [ProfileController::class, 'publicListings']);
 
     // ─── Routes authentifiées ─────────────────────────────
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::get('/me', function (Request $request) {
-            return new \App\Http\Resources\UserResource($request->user());
-        });
+    Route::middleware(['auth:sanctum', 'last_seen'])->group(function () {
+        Route::get('/me', [ProfileController::class, 'show']);
+        Route::get('/profile', [ProfileController::class, 'show']);
+        Route::put('/profile', [ProfileController::class, 'update']);
+        Route::post('/profile/avatar', [ProfileController::class, 'uploadAvatar']);
+        Route::delete('/profile', [ProfileController::class, 'destroy']);
 
         Route::post('/auth/logout', [AuthController::class, 'logout']);
         Route::post('/auth/fcm-token', [AuthController::class, 'updateFcmToken']);

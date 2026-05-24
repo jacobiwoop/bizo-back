@@ -4,9 +4,9 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 
 ## Etat actuel
 
-- Statut global: `phase 7 terminee`
+- Statut global: `phase 8 en cours`
 - Phase en cours: `Phase 8 - Finition`
-- Prochaine tache prioritaire: `Configurer rate limiting et SetLastSeenAt`
+- Prochaine tache prioritaire: `Configurer CORS et ajouter la documentation API`
 - Derniere mise a jour: `2026-05-24`
 
 ## Decisions verrouillees
@@ -123,11 +123,11 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 ### Phase 8 - Finition
 
 - [ ] Configurer rate limiting
-- [ ] Creer middleware `SetLastSeenAt`
-- [ ] Creer `ProfileController`
-- [ ] Implementer mise a jour profil
-- [ ] Implementer upload avatar
-- [ ] Implementer suppression compte
+- [x] Creer middleware `SetLastSeenAt`
+- [x] Creer `ProfileController`
+- [x] Implementer mise a jour profil
+- [x] Implementer upload avatar
+- [x] Implementer suppression compte
 - [ ] Configurer CORS
 - [ ] Ajouter documentation API
 
@@ -185,7 +185,11 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 - Phase 7 implementee: previews web `/a/{listingId}`, `/u/{username}` et `/.well-known/assetlinks.json` ajoutes.
 - Correction de la configuration test: `APP_KEY` definie dans `phpunit.xml` pour la pile web Laravel.
 - Phase 7 validee: `4 passed` sur `WebPreviewTest`.
-- Total Phases 2-7: `73 tests` valides.
+- Infrastructure Phase 8 ajoutee: `RateLimiter api` et middleware `SetLastSeenAt`.
+- Infrastructure Phase 8 validee: `3 passed` sur `InfrastructureTest`.
+- `ProfileController` ajoute avec profil prive, edition, avatar, suppression compte et endpoints publics vendeur.
+- Phase 8 profil validee: `6 passed` sur `ProfileTest`.
+- Total Phases 2-8: `82 tests` valides.
 
 ## Blocages
 
