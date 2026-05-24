@@ -1,0 +1,45 @@
+services:
+  - type: web
+    name: bizo-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: APP_NAME
+        value: BizoAPI
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        value: http://0.0.0.0
+      - key: APP_KEY
+        generateValue: true
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        value: mnz.domcloud.co
+      - key: DB_PORT
+        value: 3306
+      - key: DB_DATABASE
+        value: bizowoop_db
+      - key: DB_USERNAME
+        value: bizowoop
+      - key: DB_PASSWORD
+        sync: false
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: FRONTEND_URL
+        value: "*"
+      - key: SANCTUM_STATEFUL_DOMAINS
+        value: "*"
+      - key: SESSION_DOMAIN
+        value: "*"
+      - key: FCM_PROJECT_ID
+        value: bizo-f2187
+      - key: FCM_SERVICE_ACCOUNT_JSON
+        sync: false

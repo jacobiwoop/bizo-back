@@ -1,0 +1,341 @@
+// Bizo — Database Schema (DBML)
+// Woopchi Digital · v1.0 · 2026
+// Tool: dbdiagram.io
+
+Project Bizo {
+  database_type: 'PostgreSQL'
+  Note: 'Marketplace troc/vente Afrique de l Ouest'
+}
+
+// ─────────────────────────────────────────
+// USERS
+// ─────────────────────────────────────────
+Table users {
+  id                  uuid        [pk, default: `gen_random_uuid()`]
+  email               varchar     [unique, not null]
+  password            varchar     [not null]
+  display_name        varchar(80) [not null]
+  username            varchar(30) [unique, null, note: 'handle public @kouassi']
+  bio                 text        [null, note: 'max 150 chars']
+  photo_url           text        [null]
+  country_code        varchar(5)  [null, note: 'BJ, SN, CI...']
+  rating              float       [default: 0]
+  review_count        int         [default: 0]
+  total_sales         int         [default: 0]
+  fcm_token           text        [null, note: 'Firebase push token']
+  is_verified         boolean     [default: false]
+  is_profile_public   boolean     [default: true, note: 'page vendeur activée']
+  has_seen_onboarding boolean     [default: false]
+  response_rate       float       [null, note: '% messages avec réponse']
+  avg_response_time   int         [null, note: 'minutes — badge reactif']
+  blocked_users       jsonb       [default: '[]', note: 'array de uuids']
+  saved_searches      jsonb       [default: '[]', note: 'array de strings']
+  notif_messages      boolean     [default: true]
+  notif_troc          boolean     [default: true]
+  notif_rappels       boolean     [default: true]
+  notif_favoris       boolean     [default: true]
+  last_seen_at        timestamp   [null]
+  created_at          timestamp   [default: `now()`]
+  updated_at          timestamp   [default: `now()`]
+  deleted_at          timestamp   [null, note: 'soft delete']
+
+  indexes {
+    email
+    username
+    (is_profile_public, rating) [name: 'idx_users_public_rating']
+  }
+
+  Note: 'Utilisateurs de l application'
+}
+
+// ─────────────────────────────────────────
+// LISTINGS (annonces)
+// ─────────────────────────────────────────
+Table listings {
+  id              uuid        [pk, default: `gen_random_uuid()`]
+  owner_id        uuid        [not null, ref: > users.id]
+  title           varchar(80) [not null]
+  title_search    varchar(80) [not null, note: 'version lowercase pour ILIKE']
+  description     text        [not null]
+  type            varchar(15) [not null, note: 'VENTE | TROC | TROC_CASH']
+  price           bigint      [null, note: 'FCFA — null si TROC pur']
+  cash_complement bigint      [null, note: 'complément FCFA pour TROC_CASH']
+  exchange_for    text        [null, note: 'ce que le vendeur cherche en échange']
+  category        varchar(50) [not null, note: 'electronique | vetements | maison...']
+  condition       varchar(15) [not null, note: 'neuf | excellent | bon | correct']
+  delivery_mode   varchar(15) [not null, note: 'main_propre | livraison | les_deux']
+  photos          jsonb       [default: '[]', note: 'array URLs Storage max 10']
+  country         varchar(5)  [not null]
+  city            varchar(80) [not null]
+  neighborhood    varchar(80) [null]
+  tags            jsonb       [default: '[]', note: 'mots-clés recherche']
+  view_count      int         [default: 0]
+  favorite_count  int         [default: 0]
+  status          varchar(10) [default: 'active', note: 'active|sold|expired|draft|deleted']
+  is_boosted      boolean     [default: false]
+  boosted_until   timestamp   [null]
+  price_history   jsonb       [default: '[]', note: '[{price, changed_at}]']
+  reminder_sent_at timestamp  [null, note: 'rappel J+3 déjà envoyé']
+  expires_at      timestamp   [null, note: 'created_at + 30 jours']
+  created_at      timestamp   [default: `now()`]
+  updated_at      timestamp   [default: `now()`]
+  deleted_at      timestamp   [null]
+
+  indexes {
+    (status, is_boosted, created_at) [name: 'idx_listings_feed']
+    (owner_id, status)               [name: 'idx_listings_owner']
+    (category, status)               [name: 'idx_listings_category']
+    (country, city, status)          [name: 'idx_listings_location']
+    title_search                     [name: 'idx_listings_search']
+    (status, expires_at)             [name: 'idx_listings_expiry', note: 'pour le cron expiration']
+    (status, created_at, reminder_sent_at) [name: 'idx_listings_reminder', note: 'pour le cron rappel']
+  }
+
+  Note: 'Annonces publiées par les vendeurs'
+}
+
+// ─────────────────────────────────────────
+// CONVERSATIONS
+// ─────────────────────────────────────────
+Table conversations {
+  id              varchar     [pk, note: '{minUid}_{maxUid}_{listingId}']
+  listing_id      uuid        [not null, ref: > listings.id]
+  listing_title   varchar(80) [not null, note: 'dénormalisé']
+  listing_photo   text        [null, note: 'dénormalisé']
+  participant_1   uuid        [not null, ref: > users.id, note: 'min(uid1,uid2)']
+  participant_2   uuid        [not null, ref: > users.id, note: 'max(uid1,uid2)']
+  last_message    text        [null]
+  last_message_at timestamp   [null]
+  last_sender_id  uuid        [null, ref: > users.id]
+  unread_p1       int         [default: 0, note: 'messages non lus pour participant_1']
+  unread_p2       int         [default: 0, note: 'messages non lus pour participant_2']
+  created_at      timestamp   [default: `now()`]
+  updated_at      timestamp   [default: `now()`]
+
+  indexes {
+    (participant_1, last_message_at) [name: 'idx_conv_p1']
+    (participant_2, last_message_at) [name: 'idx_conv_p2']
+    listing_id                       [name: 'idx_conv_listing']
+  }
+
+  Note: 'Conversations entre acheteur et vendeur'
+}
+
+// ─────────────────────────────────────────
+// MESSAGES
+// ─────────────────────────────────────────
+Table messages {
+  id                    uuid        [pk, default: `gen_random_uuid()`]
+  conv_id               varchar     [not null, ref: > conversations.id]
+  sender_id             uuid        [not null, ref: > users.id]
+  type                  varchar(15) [not null, note: 'text | image | troc_proposal']
+  text                  text        [null]
+  image_url             text        [null]
+  // Champs spécifiques troc_proposal
+  offered_listing_id    uuid        [null, ref: > listings.id]
+  offered_listing_title varchar(80) [null, note: 'dénormalisé']
+  offered_listing_photo text        [null, note: 'dénormalisé']
+  cash_amount           bigint      [null]
+  proposal_status       varchar(10) [null, note: 'pending | accepted | refused']
+  refusal_reason        text        [null]
+  // Lecture
+  is_read               boolean     [default: false]
+  created_at            timestamp   [default: `now()`]
+  updated_at            timestamp   [default: `now()`]
+
+  indexes {
+    (conv_id, created_at) [name: 'idx_messages_conv']
+    sender_id             [name: 'idx_messages_sender']
+    (conv_id, is_read)    [name: 'idx_messages_unread']
+  }
+
+  Note: 'Messages dans les conversations'
+}
+
+// ─────────────────────────────────────────
+// FAVORITES
+// ─────────────────────────────────────────
+Table favorites {
+  id            uuid      [pk, default: `gen_random_uuid()`]
+  user_id       uuid      [not null, ref: > users.id]
+  listing_id    uuid      [not null, ref: > listings.id]
+  listing_title varchar(80) [not null, note: 'dénormalisé']
+  listing_photo text      [null, note: 'dénormalisé']
+  listing_price bigint    [null, note: 'dénormalisé']
+  listing_type  varchar(15) [not null, note: 'dénormalisé']
+  created_at    timestamp [default: `now()`]
+  updated_at    timestamp [default: `now()`]
+
+  indexes {
+    (user_id, listing_id) [unique, name: 'idx_favorites_unique']
+    (user_id, created_at) [name: 'idx_favorites_user']
+  }
+
+  Note: 'Annonces mises en favoris'
+}
+
+// ─────────────────────────────────────────
+// TRANSACTIONS
+// ─────────────────────────────────────────
+Table transactions {
+  id              uuid        [pk, default: `gen_random_uuid()`]
+  listing_id      uuid        [not null, ref: > listings.id]
+  seller_id       uuid        [not null, ref: > users.id]
+  buyer_id        uuid        [not null, ref: > users.id]
+  type            varchar(15) [not null, note: 'VENTE | TROC | TROC_CASH']
+  final_price     bigint      [null]
+  seller_reviewed boolean     [default: false]
+  buyer_reviewed  boolean     [default: false]
+  created_at      timestamp   [default: `now()`]
+  updated_at      timestamp   [default: `now()`]
+
+  indexes {
+    (seller_id, created_at) [name: 'idx_tx_seller']
+    (buyer_id, created_at)  [name: 'idx_tx_buyer']
+    listing_id              [name: 'idx_tx_listing']
+  }
+
+  Note: 'Transactions finalisées — déclencheur des avis'
+}
+
+// ─────────────────────────────────────────
+// REVIEWS (avis)
+// ─────────────────────────────────────────
+Table reviews {
+  id             uuid      [pk, default: `gen_random_uuid()`]
+  from_uid       uuid      [not null, ref: > users.id]
+  to_uid         uuid      [not null, ref: > users.id]
+  listing_id     uuid      [not null, ref: > listings.id]
+  transaction_id uuid      [not null, ref: > transactions.id, note: 'valide que l echange a eu lieu']
+  rating         smallint  [not null, note: '1 à 5']
+  comment        text      [null, note: 'max 300 chars']
+  created_at     timestamp [default: `now()`]
+  updated_at     timestamp [default: `now()`]
+
+  indexes {
+    (from_uid, transaction_id) [unique, name: 'idx_reviews_unique', note: 'un seul avis par transaction']
+    (to_uid, created_at)       [name: 'idx_reviews_to_uid']
+  }
+
+  Note: 'Avis entre utilisateurs apres transaction'
+}
+
+// ─────────────────────────────────────────
+// NOTIFICATIONS
+// ─────────────────────────────────────────
+Table notifications {
+  id         uuid        [pk, default: `gen_random_uuid()`]
+  user_id    uuid        [not null, ref: > users.id]
+  type       varchar(30) [not null, note: 'new_message | troc_proposal | listing_expired...']
+  title      varchar(100)[not null]
+  body       text        [not null]
+  data       jsonb       [default: '{}', note: 'payload selon le type (conv_id, listing_id...)']
+  is_read    boolean     [default: false]
+  created_at timestamp   [default: `now()`]
+  updated_at timestamp   [default: `now()`]
+
+  indexes {
+    (user_id, is_read, created_at) [name: 'idx_notifs_user']
+  }
+
+  Note: 'Notifications in-app persistées'
+}
+
+// ─────────────────────────────────────────
+// REPORTS (signalements)
+// ─────────────────────────────────────────
+Table reports {
+  id          uuid        [pk, default: `gen_random_uuid()`]
+  from_uid    uuid        [not null, ref: > users.id]
+  target_type varchar(10) [not null, note: 'listing | user | message']
+  target_id   uuid        [not null]
+  reason      varchar(20) [not null, note: 'spam | fake | inappropriate | scam']
+  status      varchar(10) [default: 'pending', note: 'pending | reviewed | resolved']
+  created_at  timestamp   [default: `now()`]
+  updated_at  timestamp   [default: `now()`]
+
+  indexes {
+    (status, created_at) [name: 'idx_reports_status']
+    from_uid             [name: 'idx_reports_from']
+  }
+
+  Note: 'Signalements utilisateurs — lecture admin uniquement'
+}
+
+// ─────────────────────────────────────────
+// LISTING REQUESTS (mode "Je cherche")
+// ─────────────────────────────────────────
+Table listing_requests {
+  id          uuid        [pk, default: `gen_random_uuid()`]
+  owner_id    uuid        [not null, ref: > users.id]
+  title       varchar(80) [not null, note: 'ex: Je cherche un iPhone 12']
+  description text        [null]
+  category    varchar(50) [not null]
+  max_price   bigint      [null, note: 'budget max en FCFA']
+  country     varchar(5)  [not null]
+  city        varchar(80) [not null]
+  status      varchar(10) [default: 'active', note: 'active | fulfilled | expired']
+  expires_at  timestamp   [null, note: 'created_at + 30 jours']
+  created_at  timestamp   [default: `now()`]
+  updated_at  timestamp   [default: `now()`]
+
+  indexes {
+    (status, category, country) [name: 'idx_requests_match', note: 'pour le matching nouvelles annonces']
+    (owner_id, status)          [name: 'idx_requests_owner']
+  }
+
+  Note: 'Demandes inverses — acheteurs cherchant un article'
+}
+
+// ─────────────────────────────────────────
+// PERSONAL ACCESS TOKENS (Laravel Sanctum)
+// ─────────────────────────────────────────
+Table personal_access_tokens {
+  id             bigint      [pk, increment]
+  tokenable_type varchar     [not null]
+  tokenable_id   uuid        [not null]
+  name           varchar     [not null]
+  token          varchar(64) [unique, not null]
+  abilities      text        [null]
+  last_used_at   timestamp   [null]
+  expires_at     timestamp   [null]
+  created_at     timestamp   [default: `now()`]
+  updated_at     timestamp   [default: `now()`]
+
+  indexes {
+    (tokenable_type, tokenable_id) [name: 'idx_pat_tokenable']
+  }
+
+  Note: 'Tokens API Laravel Sanctum'
+}
+
+// ─────────────────────────────────────────
+// JOBS QUEUE (Laravel Queue driver: database)
+// ─────────────────────────────────────────
+Table jobs {
+  id           bigint  [pk, increment]
+  queue        varchar [not null, default: 'default']
+  payload      text    [not null]
+  attempts     smallint[not null, default: 0]
+  reserved_at  int     [null]
+  available_at int     [not null]
+  created_at   int     [not null]
+
+  indexes {
+    queue [name: 'idx_jobs_queue']
+  }
+
+  Note: 'File de jobs asynchrones (push, storage cleanup...)'
+}
+
+Table failed_jobs {
+  id         bigint    [pk, increment]
+  uuid       varchar   [unique, not null]
+  connection text      [not null]
+  queue      text      [not null]
+  payload    text      [not null]
+  exception  text      [not null]
+  failed_at  timestamp [default: `now()`]
+
+  Note: 'Jobs échoués — pour debug'
+}
