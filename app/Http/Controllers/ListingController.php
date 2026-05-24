@@ -173,7 +173,7 @@ class ListingController extends Controller
 
         $request->validate([
             'photos' => ['required', 'array', 'max:10'],
-            'photos.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:61440'],
+            'photos.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:15360'],
         ]);
 
         $incomingPhotos = $request->file('photos', []);
