@@ -4,9 +4,9 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 
 ## Etat actuel
 
-- Statut global: `phase 6 terminee`
-- Phase en cours: `Phase 7 - Web Preview`
-- Prochaine tache prioritaire: `Implementer WebPreviewController et les vues de preview`
+- Statut global: `phase 7 terminee`
+- Phase en cours: `Phase 8 - Finition`
+- Prochaine tache prioritaire: `Configurer rate limiting et SetLastSeenAt`
 - Derniere mise a jour: `2026-05-24`
 
 ## Decisions verrouillees
@@ -115,10 +115,10 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 
 ### Phase 7 - Web Preview
 
-- [ ] Creer `WebPreviewController`
-- [ ] Creer vue `listing.blade.php`
-- [ ] Creer vue `seller.blade.php`
-- [ ] Ajouter `/.well-known/assetlinks.json`
+- [x] Creer `WebPreviewController`
+- [x] Creer vue `listing.blade.php`
+- [x] Creer vue `seller.blade.php`
+- [x] Ajouter `/.well-known/assetlinks.json`
 
 ### Phase 8 - Finition
 
@@ -182,7 +182,10 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 - Phase 6 extras implementes: `ReportController`, `RequestController`, `CheckRequestMatches`, resources et routes associees ajoutes.
 - Verification syntaxe OK sur les nouveaux fichiers Phase 6 extras.
 - Phase 6 extras valides: `5 passed` sur `ExtrasTest`.
-- Total Phases 2-6: `69 tests` valides.
+- Phase 7 implementee: previews web `/a/{listingId}`, `/u/{username}` et `/.well-known/assetlinks.json` ajoutes.
+- Correction de la configuration test: `APP_KEY` definie dans `phpunit.xml` pour la pile web Laravel.
+- Phase 7 validee: `4 passed` sur `WebPreviewTest`.
+- Total Phases 2-7: `73 tests` valides.
 
 ## Blocages
 

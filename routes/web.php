@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\WebPreviewController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -16,3 +17,7 @@ Route::get('/reset-password/{token}', function (string $token) {
         'email' => request()->query('email'),
     ]);
 })->name('password.reset');
+
+Route::get('/a/{listingId}', [WebPreviewController::class, 'listing'])->name('preview.listing');
+Route::get('/u/{username}', [WebPreviewController::class, 'seller'])->name('preview.seller');
+Route::get('/.well-known/assetlinks.json', [WebPreviewController::class, 'assetLinks'])->name('assetlinks');

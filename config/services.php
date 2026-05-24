@@ -35,4 +35,13 @@ return [
         ],
     ],
 
+    'android_app' => [
+        'package_name' => env('ANDROID_APP_PACKAGE_NAME'),
+        'sha256_cert_fingerprints' => array_values(array_filter(array_map(
+            static fn (string $fingerprint) => trim($fingerprint),
+            explode(',', (string) env('ANDROID_APP_SHA256_CERT_FINGERPRINTS', ''))
+        ))),
+        'play_store_url' => env('ANDROID_APP_PLAY_STORE_URL', '#'),
+    ],
+
 ];
