@@ -39,6 +39,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/requests', [RequestController::class, 'index']);
     Route::get('/users/{uid}', [ProfileController::class, 'publicShow']);
     Route::get('/users/{uid}/listings', [ProfileController::class, 'publicListings']);
+    Route::get('/users/{uid}/reviews', [ReviewController::class, 'indexForUser']);
 
     // ─── Routes authentifiées ─────────────────────────────
     Route::middleware(['auth:sanctum', 'last_seen'])->group(function () {
@@ -64,15 +65,19 @@ Route::prefix('v1')->group(function () {
 
         // ─── Social ───────────────────────────────────────
         Route::get('/conversations', [ConversationController::class, 'index']);
+        Route::get('/conversations/{id}', [ConversationController::class, 'show']);
         Route::post('/conversations', [ConversationController::class, 'store']);
         Route::get('/conversations/{id}/messages', [MessageController::class, 'index']);
         Route::post('/conversations/{id}/messages', [MessageController::class, 'store']);
         Route::post('/conversations/{id}/read', [MessageController::class, 'markRead']);
+        Route::put('/conversations/{id}/read', [MessageController::class, 'markRead']);
 
         Route::post('/transactions', [TransactionController::class, 'store']);
+        Route::get('/transactions/{id}', [TransactionController::class, 'show']);
         Route::post('/reviews', [ReviewController::class, 'store']);
         Route::post('/reports', [ReportController::class, 'store']);
         Route::post('/requests', [RequestController::class, 'store']);
+        Route::delete('/requests/{id}', [RequestController::class, 'destroy']);
         Route::get('/my/requests', [RequestController::class, 'myRequests']);
 
         Route::get('/favorites', [FavoriteController::class, 'index']);

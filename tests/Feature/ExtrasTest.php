@@ -80,6 +80,28 @@ class ExtrasTest extends TestCase
         $this->assertCount(1, $response->json('data'));
     }
 
+    public function test_owner_can_delete_own_request(): void
+    {
+        $user = User::factory()->create();
+        $listingRequest = ListingRequest::create([
+            'owner_id' => $user->id,
+            'title' => 'Recherche console',
+            'category' => 'electronique',
+            'country' => 'BJ',
+            'city' => 'Cotonou',
+            'status' => 'active',
+            'expires_at' => now()->addDays(30),
+        ]);
+
+        $this->actingAs($user)
+            ->deleteJson("/api/v1/requests/{$listingRequest->id}")
+            ->assertNoContent();
+
+        $this->assertDatabaseMissing('listing_requests', [
+            'id' => $listingRequest->id,
+        ]);
+    }
+
     public function test_public_requests_list_only_returns_active_requests(): void
     {
         $user = User::factory()->create();

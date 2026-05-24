@@ -191,7 +191,10 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 - Phase 8 profil validee: `6 passed` sur `ProfileTest`.
 - CORS configure sur `api/*` et valide: `2 passed` sur `CorsTest`.
 - Documentation projet ajoutee: `API.md` et `README.md` reecrit pour pointer vers la doc API, le suivi et la spec.
-- Total Phases 2-8: `84 tests` valides.
+- Ecarts spec complementaires corriges: detail conversation, detail transaction, avis publics vendeur, suppression de demande, garde `buyer != seller`, alias `PUT /conversations/{id}/read`.
+- Suppression de compte renforcee pour nettoyer conversations, messages, annonces, photos et donnees rattachees avant soft delete utilisateur.
+- Validation complementaire: `SocialTest` passe a `15 passed`, `ExtrasTest` a `6 passed`.
+- Total Phases 2-8: `88 tests` valides.
 
 ## Blocages
 

@@ -2,13 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Conversation;
+use App\Models\Favorite;
 use App\Http\Resources\ListingResource;
 use App\Http\Resources\UserResource;
+use App\Models\Listing;
+use App\Models\ListingRequest;
+use App\Models\Message;
+use App\Models\Notification;
+use App\Models\Report;
 use App\Models\User;
 use App\Services\StorageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
@@ -74,8 +82,45 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        $user->tokens()->delete();
-        $user->delete();
+        DB::transaction(function () use ($user) {
+            $listingIds = Listing::where('owner_id', $user->id)->pluck('id');
+            $conversationIds = Conversation::query()
+                ->where('participant_1', $user->id)
+                ->orWhere('participant_2', $user->id)
+                ->orWhereIn('listing_id', $listingIds)
+                ->pluck('id');
+
+            $listingPhotos = Listing::whereIn('id', $listingIds)
+                ->pluck('photos')
+                ->flatten()
+                ->filter()
+                ->values()
+                ->all();
+
+            if (!empty($listingPhotos)) {
+                $this->storageService->deleteMany($listingPhotos);
+            }
+
+            if ($user->photo_url) {
+                $this->storageService->deleteByUrl($user->photo_url);
+            }
+
+            Favorite::where('user_id', $user->id)->delete();
+            Notification::where('user_id', $user->id)->delete();
+            ListingRequest::where('owner_id', $user->id)->delete();
+            Report::where('from_uid', $user->id)->delete();
+
+            if ($conversationIds->isNotEmpty()) {
+                Message::whereIn('conv_id', $conversationIds)->delete();
+                Conversation::whereIn('id', $conversationIds)->delete();
+            }
+
+            Listing::whereIn('id', $listingIds)->update(['status' => 'deleted']);
+            Listing::whereIn('id', $listingIds)->delete();
+
+            $user->tokens()->delete();
+            $user->delete();
+        });
 
         return response()->json(null, 204);
     }

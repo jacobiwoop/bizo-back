@@ -32,6 +32,20 @@ class ConversationController extends Controller
         return ConversationResource::collection($conversations);
     }
 
+    public function show(Request $request, string $id): JsonResponse
+    {
+        $conversation = Conversation::with(['participant1', 'participant2', 'listing'])
+            ->findOrFail($id);
+
+        if (!in_array($request->user()->id, [$conversation->participant_1, $conversation->participant_2], true)) {
+            return response()->json(['message' => 'Non autorise.'], 403);
+        }
+
+        return response()->json([
+            'data' => new ConversationResource($conversation),
+        ]);
+    }
+
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([

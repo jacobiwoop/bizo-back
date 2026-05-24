@@ -99,6 +99,26 @@ class SocialTest extends TestCase
         $this->assertCount(1, $response->json('data'));
     }
 
+    public function test_participant_can_view_conversation_detail(): void
+    {
+        $conversation = Conversation::create([
+            'id' => $this->conversationId(),
+            'listing_id' => $this->listing->id,
+            'listing_title' => $this->listing->title,
+            'listing_photo' => $this->listing->photos[0],
+            'participant_1' => min($this->seller->id, $this->buyer->id),
+            'participant_2' => max($this->seller->id, $this->buyer->id),
+            'last_message' => 'Salut',
+            'last_message_at' => now(),
+        ]);
+
+        $response = $this->actingAs($this->buyer)
+            ->getJson("/api/v1/conversations/{$conversation->id}");
+
+        $response->assertOk()
+            ->assertJsonPath('data.id', $conversation->id);
+    }
+
     public function test_can_send_text_message_to_conversation(): void
     {
         $conversation = Conversation::create([
@@ -196,6 +216,19 @@ class SocialTest extends TestCase
         $response->assertStatus(403);
     }
 
+    public function test_seller_cannot_create_transaction_with_self_as_buyer(): void
+    {
+        $response = $this->actingAs($this->seller)
+            ->postJson('/api/v1/transactions', [
+                'listing_id' => $this->listing->id,
+                'buyer_id' => $this->seller->id,
+                'type' => 'VENTE',
+                'final_price' => 150000,
+            ]);
+
+        $response->assertStatus(400);
+    }
+
     public function test_participant_can_leave_review_and_rating_is_recomputed(): void
     {
         $transaction = Transaction::create([
@@ -288,5 +321,48 @@ class SocialTest extends TestCase
 
         $response->assertStatus(204);
         $this->assertDatabaseMissing('favorites', ['id' => $favorite->id]);
+    }
+
+    public function test_participant_can_view_transaction_detail(): void
+    {
+        $transaction = Transaction::create([
+            'listing_id' => $this->listing->id,
+            'seller_id' => $this->seller->id,
+            'buyer_id' => $this->buyer->id,
+            'type' => 'VENTE',
+            'final_price' => 150000,
+        ]);
+
+        $response = $this->actingAs($this->buyer)
+            ->getJson("/api/v1/transactions/{$transaction->id}");
+
+        $response->assertOk()
+            ->assertJsonPath('data.id', $transaction->id);
+    }
+
+    public function test_public_user_reviews_returns_received_reviews(): void
+    {
+        $transaction = Transaction::create([
+            'listing_id' => $this->listing->id,
+            'seller_id' => $this->seller->id,
+            'buyer_id' => $this->buyer->id,
+            'type' => 'VENTE',
+            'final_price' => 150000,
+        ]);
+
+        Review::create([
+            'from_uid' => $this->buyer->id,
+            'to_uid' => $this->seller->id,
+            'listing_id' => $this->listing->id,
+            'transaction_id' => $transaction->id,
+            'rating' => 5,
+            'comment' => 'Tres bon vendeur',
+        ]);
+
+        $response = $this->getJson("/api/v1/users/{$this->seller->id}/reviews");
+
+        $response->assertOk()
+            ->assertJsonPath('data.0.to_uid', $this->seller->id)
+            ->assertJsonPath('data.0.rating', 5);
     }
 }

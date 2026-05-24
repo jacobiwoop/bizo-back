@@ -58,4 +58,17 @@ class RequestController extends Controller
             'data' => new ListingRequestResource($listingRequest),
         ], 201);
     }
+
+    public function destroy(Request $request, string $id): JsonResponse
+    {
+        $listingRequest = ListingRequest::findOrFail($id);
+
+        if ($listingRequest->owner_id !== $request->user()->id) {
+            return response()->json(['message' => 'Non autorise.'], 403);
+        }
+
+        $listingRequest->delete();
+
+        return response()->json(null, 204);
+    }
 }

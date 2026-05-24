@@ -32,6 +32,10 @@ class TransactionController extends Controller
             return response()->json(['message' => 'Annonce inactive.'], 400);
         }
 
+        if ($validated['buyer_id'] === $request->user()->id) {
+            return response()->json(['message' => 'Vous ne pouvez pas vous vendre a vous-meme.'], 400);
+        }
+
         $transaction = Transaction::create([
             'listing_id' => $listing->id,
             'seller_id' => $request->user()->id,
@@ -71,5 +75,18 @@ class TransactionController extends Controller
         return response()->json([
             'data' => new TransactionResource($transaction->fresh()),
         ], 201);
+    }
+
+    public function show(Request $request, string $id): JsonResponse
+    {
+        $transaction = Transaction::findOrFail($id);
+
+        if (!in_array($request->user()->id, [$transaction->seller_id, $transaction->buyer_id], true)) {
+            return response()->json(['message' => 'Non autorise.'], 403);
+        }
+
+        return response()->json([
+            'data' => new TransactionResource($transaction),
+        ]);
     }
 }

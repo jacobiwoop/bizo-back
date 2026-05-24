@@ -8,6 +8,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ReviewController extends Controller
 {
@@ -55,5 +56,15 @@ class ReviewController extends Controller
         return response()->json([
             'data' => new ReviewResource($review->fresh()->load('author')),
         ], 201);
+    }
+
+    public function indexForUser(string $uid, Request $request): AnonymousResourceCollection
+    {
+        $reviews = Review::with('author')
+            ->where('to_uid', $uid)
+            ->latest()
+            ->paginate($request->integer('per_page', 20));
+
+        return ReviewResource::collection($reviews);
     }
 }
