@@ -5,8 +5,8 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 ## Etat actuel
 
 - Statut global: `phase 4 terminee`
-- Phase en cours: `Phase 5 - Notifications et Scheduler`
-- Prochaine tache prioritaire: `Creer NotificationController, commands et scheduler`
+- Phase en cours: `Phase 6 - Recherche et extras`
+- Prochaine tache prioritaire: `Implementer ReportController, RequestController et CheckRequestMatches`
 - Derniere mise a jour: `2026-05-24`
 
 ## Decisions verrouillees
@@ -107,8 +107,8 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 
 ### Phase 6 - Recherche et extras
 
-- [ ] Creer `SearchController`
-- [ ] Implementer `GET /search`
+- [x] Creer `SearchController`
+- [x] Implementer `GET /search`
 - [ ] Creer `ReportController`
 - [ ] Creer `RequestController`
 - [ ] Creer job `CheckRequestMatches`
@@ -167,14 +167,22 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 - Phase 2 confirmee: `18 passed` sur `AuthTest`.
 - Total Phases 1-3: `42 tests, 0 echec`. Tous les warnings PHP sont des extensions dupliquees/manquantes sans impact.
 - `FcmService` corrige pour utiliser `google/auth`.
+- Endpoint backend ajoute pour enregistrer `fcm_token` depuis l application mobile.
 - Routes Social branchees: conversations, messages, transactions, reviews, favorites.
 - Controleurs Social ajoutes et verifies par syntaxe.
 - Modeles Social UUID completes pour les creations applicatives.
 - Tests Feature Phase 4 ajoutes dans `SocialTest` pour conversations, messages, transactions, reviews et favorites.
 - Phase 4 validee: `11 passed` sur `SocialTest`.
 - Total Phases 2-4: `53 tests` valides (`AuthTest` 18, `ListingTest` 24, `SocialTest` 11).
+- Phase 5 amorcee: `NotificationController`, commandes scheduler et routes notifications ajoutes.
+- Tests Phase 5 ajoutes: `NotificationsTest` et `SchedulerCommandsTest`.
+- Phase 5 validee localement: `6 passed` (`NotificationsTest` 3, `SchedulerCommandsTest` 3).
+- Phase 6 amorcee: `SearchController` et route `GET /search` ajoutes.
+- Phase 6 recherche validee: `5 passed` sur `SearchTest`.
+- Total Phases 2-6: `64 tests` valides.
 
 ## Blocages
 
 - L'environnement PHP local charge encore des extensions manquantes ou dupliquees (`gmp`, `pgsql`, `sodium`, `curl`, `fileinfo`, `mbstring`, `zip`).
+- Dans cet environnement d'execution, les suites Phase 5 via `artisan test` retombent encore sur un `SIGILL` (`signal 4`) avant de produire un verdict metier lisible.
 - Dans cet environnement d'execution, `artisan test` et `phpunit` direct sur `SocialTest` tombent encore sur un `SIGILL` / exit `132`.

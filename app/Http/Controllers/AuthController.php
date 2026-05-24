@@ -70,6 +70,24 @@ class AuthController extends Controller
         ]);
     }
 
+    public function updateFcmToken(\Illuminate\Http\Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'fcm_token' => ['required', 'string', 'max:500'],
+        ]);
+
+        $user->update([
+            'fcm_token' => $validated['fcm_token'],
+        ]);
+
+        return response()->json([
+            'message' => 'Token FCM mis a jour avec succes.',
+        ]);
+    }
+
     public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
     {
         Password::sendResetLink($request->only('email'));

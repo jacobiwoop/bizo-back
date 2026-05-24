@@ -5,7 +5,9 @@ use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +32,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/listings', [ListingController::class, 'index']);
     Route::get('/listings/{id}', [ListingController::class, 'show']);
     Route::get('/listings/{id}/similar', [ListingController::class, 'similar']);
+    Route::get('/search', [SearchController::class, 'index']);
 
     // ─── Routes authentifiées ─────────────────────────────
     Route::middleware('auth:sanctum')->group(function () {
@@ -38,6 +41,7 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::post('/auth/logout', [AuthController::class, 'logout']);
+        Route::post('/auth/fcm-token', [AuthController::class, 'updateFcmToken']);
 
         // ─── Annonces authentifiées ───────────────────────
         Route::post('/listings', [ListingController::class, 'store']);
@@ -63,5 +67,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/favorites', [FavoriteController::class, 'index']);
         Route::post('/favorites/{listingId}', [FavoriteController::class, 'store']);
         Route::delete('/favorites/{listingId}', [FavoriteController::class, 'destroy']);
+
+        Route::get('/notifications', [NotificationController::class, 'index']);
+        Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead']);
+        Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead']);
     });
 });

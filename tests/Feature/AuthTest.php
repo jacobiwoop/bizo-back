@@ -198,6 +198,36 @@ class AuthTest extends TestCase
         $response->assertStatus(401);
     }
 
+    public function test_authenticated_user_can_update_fcm_token(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('auth-token')->plainTextToken;
+
+        $response = $this->withToken($token)
+            ->postJson('/api/v1/auth/fcm-token', [
+                'fcm_token' => 'fcm_token_device_123',
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'Token FCM mis a jour avec succes.',
+            ]);
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'fcm_token' => 'fcm_token_device_123',
+        ]);
+    }
+
+    public function test_fcm_token_update_requires_auth(): void
+    {
+        $response = $this->postJson('/api/v1/auth/fcm-token', [
+            'fcm_token' => 'fcm_token_device_123',
+        ]);
+
+        $response->assertStatus(401);
+    }
+
     public function test_forgot_password_returns_generic_message_for_existing_email(): void
     {
         User::factory()->create(['email' => 'test@bizo.ci']);
