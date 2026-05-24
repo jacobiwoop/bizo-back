@@ -4,9 +4,9 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 
 ## Etat actuel
 
-- Statut global: `phase 5 terminee, phase 6 en cours`
-- Phase en cours: `Phase 6 - Recherche et extras`
-- Prochaine tache prioritaire: `Valider ExtrasTest et finaliser la Phase 6`
+- Statut global: `phase 6 terminee`
+- Phase en cours: `Phase 7 - Web Preview`
+- Prochaine tache prioritaire: `Implementer WebPreviewController et les vues de preview`
 - Derniere mise a jour: `2026-05-24`
 
 ## Decisions verrouillees
@@ -181,7 +181,8 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 - Phase 6 recherche validee: `5 passed` sur `SearchTest`.
 - Phase 6 extras implementes: `ReportController`, `RequestController`, `CheckRequestMatches`, resources et routes associees ajoutes.
 - Verification syntaxe OK sur les nouveaux fichiers Phase 6 extras.
-- Total Phases 2-6: `64 tests` valides.
+- Phase 6 extras valides: `5 passed` sur `ExtrasTest`.
+- Total Phases 2-6: `69 tests` valides.
 
 ## Blocages
 

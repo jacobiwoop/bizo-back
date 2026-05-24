@@ -136,7 +136,7 @@ class ExtrasTest extends TestCase
             'status' => 'active',
         ]);
 
-        dispatch_sync(new CheckRequestMatches($listingRequest));
+        (new CheckRequestMatches($listingRequest))->handle();
 
         Queue::assertPushed(\App\Jobs\SendPushNotification::class);
     }
