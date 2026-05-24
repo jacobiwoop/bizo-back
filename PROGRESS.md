@@ -6,7 +6,7 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 
 - Statut global: `phase 8 en cours`
 - Phase en cours: `Phase 8 - Finition`
-- Prochaine tache prioritaire: `Configurer CORS et ajouter la documentation API`
+- Prochaine tache prioritaire: `Ajouter la documentation API`
 - Derniere mise a jour: `2026-05-24`
 
 ## Decisions verrouillees
@@ -122,13 +122,13 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 
 ### Phase 8 - Finition
 
-- [ ] Configurer rate limiting
+- [x] Configurer rate limiting
 - [x] Creer middleware `SetLastSeenAt`
 - [x] Creer `ProfileController`
 - [x] Implementer mise a jour profil
 - [x] Implementer upload avatar
 - [x] Implementer suppression compte
-- [ ] Configurer CORS
+- [x] Configurer CORS
 - [ ] Ajouter documentation API
 
 ## Journal
@@ -189,7 +189,8 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 - Infrastructure Phase 8 validee: `3 passed` sur `InfrastructureTest`.
 - `ProfileController` ajoute avec profil prive, edition, avatar, suppression compte et endpoints publics vendeur.
 - Phase 8 profil validee: `6 passed` sur `ProfileTest`.
-- Total Phases 2-8: `82 tests` valides.
+- CORS configure sur `api/*` et valide: `2 passed` sur `CorsTest`.
+- Total Phases 2-8: `84 tests` valides.
 
 ## Blocages
 
