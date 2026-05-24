@@ -1,6 +1,7 @@
-# Bizo Mobile Integration Guide
+# Bizo Mobile API Integration Spec
 
-Guide d'integration pratique pour une app mobile Android/iOS ou une IA chargee du client mobile.
+Ce document est destine a une equipe mobile ou a une IA chargee du client Android/iOS.
+Il decrit les contrats reels de l'API, les user flows, les formats de reponse, les erreurs a gerer et les contraintes metier observees.
 
 Base URL de production :
 
@@ -8,38 +9,175 @@ Base URL de production :
 https://bizo.aiko.qzz.io/api/v1
 ```
 
-## Etat valide
+## 1. Resume executif
 
-Les flux suivants ont ete testes en conditions reelles sur la prod :
+Backend valide en production sur les flux suivants :
 
-- inscription / connexion
-- logout
-- password reset complet
-- profil + avatar
-- creation d'annonce avec upload image
+- inscription / connexion / deconnexion
+- reset password complet
+- lecture / mise a jour du profil
+- upload avatar
+- creation et lecture d'annonces avec upload image
+- recherche
 - favoris
-- conversations / messages lus
+- conversations
+- lecture / envoi de messages
 - transactions
 - avis
-- previews web
-- FCM token save
-- envoi FCM direct Firebase
-- envoi FCM via backend Laravel jusqu'a reception reelle
+- notifications in-app
+- enregistrement FCM token
+- notifications FCM reelles via backend
+- previews web vendeur / annonce
 
-## Regles client
+Ce document privilegie l'integration mobile reelle, pas seulement la description des routes.
 
-- Auth API : `Authorization: Bearer <token>`
-- Format standard : `application/json`
-- Upload image : `multipart/form-data`
-- Pagination Laravel : `data`, `links`, `meta`
-- Rate limit nominal : `120 req/min`
-- Les dates sont en ISO 8601 UTC
+## 2. Regles globales
 
-## Flux d'authentification
+### 2.1 Authentification
 
-### Register
+Les routes protegees utilisent un Bearer token Sanctum.
 
-`POST /auth/register`
+Header a envoyer :
+
+```txt
+Authorization: Bearer <token>
+```
+
+### 2.2 Format de reponse
+
+L'API retourne principalement :
+
+- des objets JSON simples
+- des objets enveloppes sous `data`
+- des collections Laravel paginees sous `data`, `links`, `meta`
+
+### 2.3 Formats de requete
+
+- JSON : `Content-Type: application/json`
+- Uploads : `multipart/form-data`
+
+### 2.4 Pagination
+
+Les listes paginees suivent le format Laravel standard :
+
+```json
+{
+  "data": [],
+  "links": {
+    "first": "https://...",
+    "last": "https://...",
+    "prev": null,
+    "next": null
+  },
+  "meta": {
+    "current_page": 1,
+    "from": 1,
+    "last_page": 1,
+    "path": "https://...",
+    "per_page": 20,
+    "to": 3,
+    "total": 3
+  }
+}
+```
+
+### 2.5 Rate limit
+
+Rate limit nominal observe :
+
+- `120 req/min`
+
+Le client mobile doit gerer les `429`.
+
+### 2.6 Dates
+
+Les dates sont retournees en ISO 8601 UTC.
+
+Exemple :
+
+```txt
+2026-05-24T15:03:43.000000Z
+```
+
+### 2.7 Erreurs
+
+Codes les plus utiles :
+
+- `200` succes standard
+- `201` creation
+- `204` suppression sans body
+- `400` erreur metier
+- `401` authentification invalide
+- `403` action interdite
+- `404` ressource introuvable
+- `409` conflit metier
+- `422` validation
+- `429` rate limit
+- `500` erreur serveur
+
+Format `422` typique :
+
+```json
+{
+  "message": "The given data was invalid.",
+  "errors": {
+    "field_name": [
+      "Message d'erreur"
+    ]
+  }
+}
+```
+
+## 3. Modele de session mobile
+
+Strategie recommande cote app :
+
+1. `login` ou `register`
+2. stocker le `token` en local securise
+3. appeler `GET /profile`
+4. recuperer ou generer le token FCM local
+5. appeler `POST /auth/fcm-token`
+6. a la deconnexion, appeler `POST /auth/logout` puis supprimer le token local
+
+## 4. User object
+
+Format reel du `UserResource` :
+
+```json
+{
+  "id": "uuid",
+  "email": "user@example.com",
+  "display_name": "Aiko",
+  "username": "aiko_dev",
+  "photo_url": "/storage/avatars/xxx.png",
+  "bio": "Bio utilisateur",
+  "country_code": "BJ",
+  "rating": 4.5,
+  "review_count": 12,
+  "total_sales": 4,
+  "is_verified": false,
+  "has_seen_onboarding": true,
+  "created_at": "2026-05-24T15:03:43.000000Z"
+}
+```
+
+Notes :
+
+- `username` peut etre `null`
+- `photo_url` peut etre `null`
+- `rating`, `review_count`, `total_sales` existent reellement et sont a afficher cote profil vendeur
+
+## 5. Auth flows
+
+### 5.1 Register
+
+Route :
+
+```txt
+POST /auth/register
+```
+
+Body :
 
 ```json
 {
@@ -51,7 +189,20 @@ Les flux suivants ont ete testes en conditions reelles sur la prod :
 }
 ```
 
-Reponse utile :
+Contraintes :
+
+- `email` unique
+- `password` min 8
+- `password_confirmation` doit matcher
+- `display_name` max 80
+- `username` nullable, regex `^[a-z0-9_]{3,30}$`
+
+Succes :
+
+- code `201`
+- retourne `token` + `user`
+
+Exemple :
 
 ```json
 {
@@ -60,14 +211,35 @@ Reponse utile :
     "id": "uuid",
     "email": "user@example.com",
     "display_name": "Aiko",
-    "username": "aiko_dev"
+    "username": "aiko_dev",
+    "photo_url": null,
+    "bio": null,
+    "country_code": null,
+    "rating": 0,
+    "review_count": 0,
+    "total_sales": 0,
+    "is_verified": false,
+    "has_seen_onboarding": false,
+    "created_at": "2026-05-24T15:03:43.000000Z"
   }
 }
 ```
 
-### Login
+Erreurs a gerer :
 
-`POST /auth/login`
+- `422` email deja pris
+- `422` username deja pris
+- `422` validation password
+
+### 5.2 Login
+
+Route :
+
+```txt
+POST /auth/login
+```
+
+Body :
 
 ```json
 {
@@ -76,26 +248,52 @@ Reponse utile :
 }
 ```
 
-Reponses :
+Succes :
 
-- `200` avec `token` et `user`
-- `401` si identifiants invalides
+- code `200`
+- retourne `token` + `user`
 
-### Logout
+Erreur :
 
-`POST /auth/logout`
+- `401`
 
-Header :
+Body observe :
 
-```txt
-Authorization: Bearer <token>
+```json
+{
+  "message": "Identifiants incorrects"
+}
 ```
 
-## Reset password
+### 5.3 Logout
 
-### Demande de reset
+Route :
 
-`POST /auth/password/reset`
+```txt
+POST /auth/logout
+```
+
+Succes :
+
+```json
+{
+  "message": "Déconnexion réussie."
+}
+```
+
+Comportement :
+
+- supprime le token courant si present
+
+### 5.4 Forgot password
+
+Route :
+
+```txt
+POST /auth/password/reset
+```
+
+Body :
 
 ```json
 {
@@ -103,7 +301,12 @@ Authorization: Bearer <token>
 }
 ```
 
-Reponse :
+Succes :
+
+- code `200`
+- message generique, meme si l'email n'existe pas
+
+Reponse observee :
 
 ```json
 {
@@ -111,9 +314,15 @@ Reponse :
 }
 ```
 
-### Validation du reset
+### 5.5 Reset password
 
-`POST /auth/password/update`
+Route :
+
+```txt
+POST /auth/password/update
+```
+
+Body :
 
 ```json
 {
@@ -124,51 +333,77 @@ Reponse :
 }
 ```
 
-## Gestion du token FCM
-
-Apres login, l'app doit envoyer son token FCM au backend.
-
-`POST /auth/fcm-token`
+Succes :
 
 ```json
 {
-  "fcm_token": "fcm-device-token"
+  "message": "Mot de passe réinitialisé avec succès."
 }
 ```
 
-Comportement recommande cote app :
+Effet metier :
+
+- change le mot de passe
+- revoque les tokens Sanctum existants de l'utilisateur
+
+### 5.6 Save FCM token
+
+Route :
+
+```txt
+POST /auth/fcm-token
+```
+
+Body :
+
+```json
+{
+  "fcm_token": "device-token"
+}
+```
+
+Succes observe :
+
+```json
+{
+  "message": "Token FCM mis a jour avec succes."
+}
+```
+
+User flow recommande :
 
 1. login
-2. recuperation du token FCM local
-3. appel de `/auth/fcm-token`
-4. re-appel si le token change
+2. generer / recuperer le token FCM
+3. appeler `/auth/fcm-token`
+4. refaire l'appel si Firebase regenere le token
 
-## Profil courant
+## 6. Profil courant
 
-### Lire le profil
+### 6.1 Lire son profil
 
-`GET /profile`
+Routes :
 
-Champs utiles en pratique :
+- `GET /me`
+- `GET /profile`
 
-- `id`
-- `email`
-- `display_name`
-- `username`
-- `photo_url`
-- `bio`
-- `country_code`
-- `rating`
-- `review_count`
-- `total_sales`
-- `is_verified`
-- `has_seen_onboarding`
+Les deux servent au profil courant.
 
-### Modifier le profil
+Succes :
 
-`PUT /profile`
+- code `200`
+- retourne un `UserResource`
 
-Champs supportes :
+### 6.2 Mettre a jour le profil
+
+Route :
+
+```txt
+PUT /profile
+```
+
+Body partiel supporte.
+
+Champs acceptes :
 
 - `display_name`
 - `username`
@@ -181,34 +416,162 @@ Champs supportes :
 - `notif_rappels`
 - `notif_favoris`
 
-### Upload avatar
+Exemple :
 
-`POST /profile/avatar`
+```json
+{
+  "display_name": "Seller A Updated",
+  "bio": "Bio de test",
+  "notif_messages": false
+}
+```
 
-`multipart/form-data`
+Validation utile :
+
+- `display_name` max 80
+- `username` nullable, unique, regex `^[a-z0-9_]{3,30}$`
+- `bio` max 500
+
+Succes :
+
+- retourne le `UserResource` a jour
+
+### 6.3 Upload avatar
+
+Route :
+
+```txt
+POST /profile/avatar
+```
+
+Format :
+
+- `multipart/form-data`
 
 Champ :
 
 - `avatar`
 
-Formats acceptes :
+Validation :
 
-- `jpg`
-- `jpeg`
-- `png`
-- `webp`
+- image requise
+- `jpg|jpeg|png|webp`
+- max `5 Mo`
 
-Taille max :
+Succes :
 
-- `5 Mo`
+- code `200`
+- retourne le `UserResource` mis a jour
 
-## Listings
+Comportement :
 
-### Feed
+- si un ancien avatar existe, il est supprime
 
-`GET /listings`
+### 6.4 Delete account
 
-Filtres utiles :
+Route :
+
+```txt
+DELETE /profile
+```
+
+Succes :
+
+- `204`
+
+Effets metier :
+
+- suppression des tokens API
+- soft delete user
+- nettoyage conversations/messages lies
+- nettoyage favoris/notifications/demandes/reports lies
+- suppression logique des annonces du user
+- nettoyage photos annonce + avatar
+
+## 7. Profils publics vendeur
+
+### 7.1 Lire un profil public
+
+Route :
+
+```txt
+GET /users/{uid}
+```
+
+Retourne uniquement un profil avec `is_profile_public = true`.
+
+Sinon :
+
+- `404`
+
+### 7.2 Lire les annonces publiques d'un vendeur
+
+Route :
+
+```txt
+GET /users/{uid}/listings
+```
+
+Comportement :
+
+- seulement si le profil est public
+- seulement les annonces `active`
+- tri boostees puis recentes
+
+## 8. Listing object
+
+Format reel du `ListingResource` :
+
+```json
+{
+  "id": "uuid",
+  "title": "iPhone 13",
+  "description": "Description",
+  "type": "VENTE",
+  "price": "180000",
+  "cash_complement": null,
+  "exchange_for": null,
+  "category": "electronique",
+  "condition": "bon",
+  "delivery_mode": "les_deux",
+  "photos": [
+    "/storage/photos/xxx.webp"
+  ],
+  "country": "BJ",
+  "city": "Cotonou",
+  "neighborhood": "Cadjehoun",
+  "tags": [],
+  "view_count": 0,
+  "favorite_count": 0,
+  "status": "active",
+  "is_boosted": false,
+  "price_history": [],
+  "expires_at": "2026-06-23T13:58:02.000000Z",
+  "created_at": "2026-05-24T13:58:02.000000Z",
+  "updated_at": "2026-05-24T13:58:02.000000Z",
+  "owner": {
+    "...": "UserResource"
+  }
+}
+```
+
+Notes :
+
+- `photos` est toujours un tableau
+- les images sont stockees en WebP pour les annonces
+- `owner` est embarque sur plusieurs endpoints publics
+
+## 9. Feed, recherche, annonces
+
+### 9.1 Feed principal
+
+Route :
+
+```txt
+GET /listings
+```
+
+Filtres supportes :
 
 - `per_page`
 - `category`
@@ -219,9 +582,18 @@ Filtres utiles :
 - `min_price`
 - `max_price`
 
-### Recherche
+Comportement :
 
-`GET /search?q=iphone`
+- seulement annonces actives
+- tri `is_boosted desc`, puis `created_at desc`
+
+### 9.2 Recherche
+
+Route :
+
+```txt
+GET /search?q=iphone
+```
 
 Filtres supportes :
 
@@ -232,93 +604,415 @@ Filtres supportes :
 - `min_price`
 - `max_price`
 
-### Detail annonce
+Comportement :
 
-`GET /listings/{id}`
+- cherche dans `title_search` et `description`
+- favorise les titres qui commencent par la requete
+- retourne seulement les annonces actives
 
-### Creer une annonce
+### 9.3 Detail annonce
 
-`POST /listings`
+Route :
 
-`multipart/form-data`
+```txt
+GET /listings/{id}
+```
+
+Effet metier :
+
+- incremente `view_count`
+
+### 9.4 Creer une annonce
+
+Route :
+
+```txt
+POST /listings
+```
+
+Format :
+
+- `multipart/form-data`
 
 Champs :
 
-- `title`
-- `description`
-- `type`
+- `title` requis
+- `description` requis
+- `type` requis : `VENTE|TROC|TROC_CASH`
 - `price`
 - `cash_complement`
 - `exchange_for`
-- `category`
-- `condition`
-- `delivery_mode`
-- `country`
-- `city`
+- `category` requis
+- `condition` requis : `neuf|excellent|bon|correct`
+- `delivery_mode` requis : `main_propre|livraison|les_deux`
+- `country` requis
+- `city` requis
 - `neighborhood`
 - `tags[]`
-- `photos[]`
+- `photos[]` requis
 
-Contraintes metier :
+Regles metier :
 
 - `type = VENTE` => `price` requis
 - `type = TROC|TROC_CASH` => `exchange_for` requis
 - `photos[]` min `1`, max `10`
+- chaque photo max `5 Mo`
 
-### Mettre a jour une annonce
+Succes :
 
-`PUT /listings/{id}`
+- `201`
+- retourne `data` avec `ListingResource`
 
-Mise a jour partielle supportee.
+### 9.5 Mettre a jour une annonce
 
-### Ajouter des photos
+Route :
 
-`POST /listings/{id}/photos`
+```txt
+PUT /listings/{id}
+```
 
-### Supprimer une photo
+Regles :
 
-`DELETE /listings/{id}/photos/{idx}`
+- proprietaire uniquement
+- mise a jour partielle
+- si changement vers `VENTE`, `price` doit etre coherent
+- si changement vers `TROC|TROC_CASH`, `exchange_for` doit etre coherent
 
-### Mes annonces
+### 9.6 Supprimer une annonce
 
-`GET /my/listings`
+Route :
 
-## Social
+```txt
+DELETE /listings/{id}
+```
 
-### Conversations
+Regles :
 
-- `GET /conversations`
-- `GET /conversations/{id}`
-- `POST /conversations`
+- proprietaire uniquement
 
-Creation :
+Effet metier :
+
+- `status = deleted`
+- soft delete
+- suppression des photos associees
+
+### 9.7 Ajouter des photos
+
+Route :
+
+```txt
+POST /listings/{id}/photos
+```
+
+Regles :
+
+- proprietaire uniquement
+- max total absolu `10`
+
+Erreur observee si depassement :
+
+- `422`
+
+### 9.8 Supprimer une photo
+
+Route :
+
+```txt
+DELETE /listings/{id}/photos/{idx}
+```
+
+`idx` = index du tableau `photos`
+
+### 9.9 Boost
+
+Route :
+
+```txt
+POST /listings/{id}/boost
+```
+
+### 9.10 Renew
+
+Route :
+
+```txt
+POST /listings/{id}/renew
+```
+
+### 9.11 Mes annonces
+
+Route :
+
+```txt
+GET /my/listings
+```
+
+## 10. Conversations et messages
+
+## 10.1 Conversation object
+
+Format reel :
+
+```json
+{
+  "id": "conv-id",
+  "listing_id": "listing-uuid",
+  "listing_title": "Titre",
+  "listing_photo": "/storage/photos/xxx.webp",
+  "last_message": "Bonjour",
+  "last_message_at": "2026-05-24T13:58:02.000000Z",
+  "unread_count": 1,
+  "other_user": {
+    "id": "uuid",
+    "display_name": "Autre utilisateur",
+    "photo_url": null,
+    "last_seen_at": "2026-05-24T13:58:02.000000Z"
+  },
+  "created_at": "2026-05-24T13:58:02.000000Z"
+}
+```
+
+### 10.2 Lister les conversations
+
+Route :
+
+```txt
+GET /conversations
+```
+
+Comportement :
+
+- uniquement les conversations du user courant
+- triees par `last_message_at desc`
+
+### 10.3 Lire le detail d'une conversation
+
+Route :
+
+```txt
+GET /conversations/{id}
+```
+
+Erreur :
+
+- `403` si le user n'est pas participant
+
+### 10.4 Creer une conversation
+
+Route :
+
+```txt
+POST /conversations
+```
+
+Body :
 
 ```json
 {
   "listing_id": "uuid",
-  "message": "Bonjour, est-ce disponible ?"
+  "message": "Bonjour, est-ce toujours disponible ?"
 }
 ```
 
-### Messages
+Regles metier :
 
-- `GET /conversations/{id}/messages`
-- `POST /conversations/{id}/messages`
+- annonce doit etre `active`
+- l'acheteur ne peut pas etre le proprietaire de l'annonce
+- `conv_id` est deterministe et evite les doublons
+
+Succes :
+
+- `201`
+- retourne :
+  - `data` = `ConversationResource`
+  - `message` = `MessageResource`
+
+### 10.5 Message object
+
+Format reel :
+
+```json
+{
+  "id": "uuid",
+  "conv_id": "conv-id",
+  "sender_id": "uuid",
+  "type": "text",
+  "text": "Bonjour",
+  "image_url": null,
+  "proposal": null,
+  "is_read": false,
+  "created_at": "2026-05-24T13:58:02.000000Z"
+}
+```
+
+Cas `troc_proposal` :
+
+```json
+{
+  "proposal": {
+    "offered_listing_id": "uuid",
+    "offered_listing_title": "Titre",
+    "offered_listing_photo": "/storage/photos/xxx.webp",
+    "cash_amount": 10000,
+    "status": "pending",
+    "refusal_reason": null
+  }
+}
+```
+
+### 10.6 Lister les messages
+
+Route :
+
+```txt
+GET /conversations/{id}/messages
+```
+
+Effet metier :
+
+- marque la conversation comme lue pour le user courant
+
+### 10.7 Envoyer un message
+
+Route :
+
+```txt
+POST /conversations/{id}/messages
+```
+
+Body selon le type.
+
+#### Message texte
+
+```json
+{
+  "type": "text",
+  "text": "Bonjour"
+}
+```
+
+#### Message image
+
+Format :
+
+- `multipart/form-data`
+
+Champs :
+
+- `type=image`
+- `image=@...`
+
+#### Proposition de troc
+
+```json
+{
+  "type": "troc_proposal",
+  "offered_listing_id": "uuid",
+  "cash_amount": 10000
+}
+```
+
+Regles metier :
+
+- l'annonce proposee doit appartenir a l'expediteur
+
+### 10.8 Marquer comme lu
+
+Routes :
+
 - `POST /conversations/{id}/read`
 - `PUT /conversations/{id}/read`
 
-### Favoris
+Reponse :
 
-- `GET /favorites`
-- `POST /favorites/{listingId}`
-- `DELETE /favorites/{listingId}`
+```json
+{
+  "message": "Messages marques comme lus."
+}
+```
 
-### Transactions
+## 11. Favoris
 
-- `POST /transactions`
-- `GET /transactions/{id}`
+### 11.1 Favorite object
 
-Creation :
+```json
+{
+  "id": "uuid",
+  "user_id": "uuid",
+  "listing_id": "uuid",
+  "listing_title": "Titre",
+  "listing_photo": "/storage/photos/xxx.webp",
+  "listing_price": "150000",
+  "listing_type": "VENTE",
+  "created_at": "2026-05-24T13:58:02.000000Z",
+  "listing": {
+    "...": "ListingResource"
+  }
+}
+```
+
+### 11.2 Lister les favoris
+
+Route :
+
+```txt
+GET /favorites
+```
+
+### 11.3 Ajouter un favori
+
+Route :
+
+```txt
+POST /favorites/{listingId}
+```
+
+Comportement :
+
+- idempotent en base via `firstOrCreate`
+- renvoie quand meme `201`
+- incremente `favorite_count` seulement si creation reelle
+- declenche une push `new_favorite` au proprietaire
+
+### 11.4 Supprimer un favori
+
+Route :
+
+```txt
+DELETE /favorites/{listingId}
+```
+
+Effet metier :
+
+- decremente `favorite_count` si possible
+
+## 12. Transactions
+
+### 12.1 Transaction object
+
+```json
+{
+  "id": "uuid",
+  "listing_id": "uuid",
+  "seller_id": "uuid",
+  "buyer_id": "uuid",
+  "type": "VENTE",
+  "final_price": 150000,
+  "seller_reviewed": false,
+  "buyer_reviewed": false,
+  "created_at": "2026-05-24T13:58:02.000000Z"
+}
+```
+
+### 12.2 Creer une transaction
+
+Route :
+
+```txt
+POST /transactions
+```
+
+Body :
 
 ```json
 {
@@ -329,16 +1023,41 @@ Creation :
 }
 ```
 
-Regle :
+Regles metier :
 
-- le vendeur ne peut pas etre son propre acheteur
+- seul le proprietaire de l'annonce peut creer la transaction
+- l'annonce doit etre active
+- `buyer_id` ne peut pas etre le vendeur lui-meme
 
-### Reviews
+Effets metier :
 
-- `POST /reviews`
-- `GET /users/{uid}/reviews`
+- `listing.status` devient `sold`
+- notifications in-app creees
+- push `transaction_done` au buyer
 
-Creation :
+### 12.3 Lire une transaction
+
+Route :
+
+```txt
+GET /transactions/{id}
+```
+
+Regles :
+
+- seulement buyer ou seller
+
+## 13. Reviews
+
+### 13.1 Creer un avis
+
+Route :
+
+```txt
+POST /reviews
+```
+
+Body :
 
 ```json
 {
@@ -348,11 +1067,159 @@ Creation :
 }
 ```
 
-## Notifications
+Regles metier :
 
-- `GET /notifications`
-- `POST /notifications/read-all`
-- `POST /notifications/{id}/read`
+- seul un participant de la transaction peut noter
+- un seul avis par auteur et par transaction
+
+Erreur duplication :
+
+- `409`
+- body :
+
+```json
+{
+  "message": "Avis deja existant."
+}
+```
+
+Effets metier :
+
+- recalcul `rating` du destinataire
+- recalcul `review_count`
+- mise a jour de `seller_reviewed` ou `buyer_reviewed`
+
+### 13.2 Lire les avis recus d'un vendeur
+
+Route :
+
+```txt
+GET /users/{uid}/reviews
+```
+
+## 14. Requests et Reports
+
+### 14.1 Demandes publiques
+
+Route :
+
+```txt
+GET /requests
+```
+
+Retourne seulement les demandes `active`.
+
+### 14.2 Mes demandes
+
+Route :
+
+```txt
+GET /my/requests
+```
+
+### 14.3 Creer une demande
+
+Route :
+
+```txt
+POST /requests
+```
+
+Body :
+
+```json
+{
+  "title": "Je cherche un iPhone",
+  "description": "Budget serieux",
+  "category": "electronique",
+  "max_price": 200000,
+  "country": "BJ",
+  "city": "Cotonou"
+}
+```
+
+Effets metier :
+
+- `status = active`
+- `expires_at = now + 30 jours`
+- dispatch du job `CheckRequestMatches`
+
+### 14.4 Supprimer une demande
+
+Route :
+
+```txt
+DELETE /requests/{id}
+```
+
+Regles :
+
+- proprietaire uniquement
+
+### 14.5 Signaler un contenu
+
+Route :
+
+```txt
+POST /reports
+```
+
+Body :
+
+```json
+{
+  "target_type": "listing",
+  "target_id": "uuid",
+  "reason": "spam"
+}
+```
+
+Valeurs supportees :
+
+- `target_type`: `listing|user|message`
+- `reason`: `spam|fake|inappropriate|scam`
+
+## 15. Notifications in-app
+
+### 15.1 Notification object
+
+```json
+{
+  "id": "uuid",
+  "type": "new_favorite",
+  "title": "Nouveau favori",
+  "body": "Quelqu un a ajoute votre annonce en favori.",
+  "data": {
+    "listing_id": "uuid"
+  },
+  "is_read": false,
+  "created_at": "2026-05-24T13:58:02.000000Z"
+}
+```
+
+### 15.2 Lister les notifications
+
+Route :
+
+```txt
+GET /notifications
+```
+
+### 15.3 Marquer une notification comme lue
+
+Route :
+
+```txt
+POST /notifications/{id}/read
+```
+
+### 15.4 Marquer tout comme lu
+
+Route :
+
+```txt
+POST /notifications/read-all
+```
 
 Types observes en pratique :
 
@@ -360,73 +1227,157 @@ Types observes en pratique :
 - `new_favorite`
 - `transaction_done`
 
-## Pages web utiles au mobile
+## 16. Push notifications FCM
 
-Pour partage social / ouverture externe :
+Etat valide :
 
-- preview annonce : `/a/{listingId}`
-- preview vendeur : `/u/{username}`
+- token FCM sauvegarde via `/auth/fcm-token`
+- notification directe Firebase v1 recue
+- notification backend Laravel recue en reel
 
-## Erreurs a gerer cote app
-
-- `401` : token invalide / expire
-- `403` : action interdite
-- `404` : ressource introuvable
-- `409` : doublon metier, ex. avis deja existant
-- `422` : validation
-- `429` : rate limit
-
-Format `422` typique :
+Exemple recu en foreground :
 
 ```json
 {
-  "message": "The given data was invalid.",
-  "errors": {
-    "field_name": [
-      "message erreur"
-    ]
+  "from": "733271569706",
+  "messageId": "uuid",
+  "notification": {
+    "title": "Nouveau favori",
+    "body": "Quelqu un a ajoute votre annonce en favori."
+  },
+  "data": {
+    "type": "new_favorite",
+    "listing_id": "uuid"
   }
 }
 ```
 
-## Strategie client recommandee
+Strategie mobile :
 
-### Session
+1. recuperer token FCM device
+2. login API
+3. envoyer `/auth/fcm-token`
+4. router la notification selon `data.type`
 
-- stocker le Bearer token en local securise
-- charger `/profile` juste apres login
-- supprimer le token local apres logout
+## 17. Web previews et deep-linking
 
-### Uploads
+Pages publiques :
 
-- compresser/redimensionner cote app si possible
-- garder un timeout plus long pour `multipart/form-data`
+- `/a/{listingId}`
+- `/u/{username}`
 
-### Notifications push
+Balises Open Graph validees :
 
-- demander permission push au bon moment UX
-- envoyer le token FCM apres login
-- re-synchroniser si Firebase regenere le token
+- `og:title`
+- `og:description`
+- `og:image`
 
-### Synchronisation UI
+Utilisation mobile :
 
-- feed / search / lists : support pagination Laravel
-- utiliser `created_at`, `updated_at`, `expires_at`
-- rafraichir detail annonce apres action transaction / favori / boost / renew
+- partage social
+- preview de lien
+- fallback web si l'app n'est pas ouverte
 
-## Endpoints minimaux a implementer en premier cote mobile
+App Links Android :
 
-### MVP auth/profil
+- `/.well-known/assetlinks.json`
+- a completer avec les vraies infos Android en phase mobile native
+
+## 18. User flows mobile recommandes
+
+### 18.1 Onboarding
+
+1. register ou login
+2. fetch `/profile`
+3. sauvegarder token
+4. eventuellement upload avatar
+5. envoyer token FCM
+6. marquer `has_seen_onboarding = true`
+
+### 18.2 Parcours acheteur
+
+1. ouvrir feed `/listings`
+2. utiliser `/search`
+3. ouvrir `/listings/{id}`
+4. ajouter en favori ou contacter vendeur
+5. creer conversation
+6. suivre messages
+7. transaction finalisee par vendeur
+8. laisser un avis via `/reviews`
+
+### 18.3 Parcours vendeur
+
+1. creer annonce via `/listings`
+2. gerer ses annonces via `/my/listings`
+3. recevoir favoris / messages / notifications
+4. conclure transaction via `/transactions`
+5. consulter reviews recues via `/users/{uid}/reviews`
+
+### 18.4 Reset password flow
+
+1. app demande email
+2. `/auth/password/reset`
+3. l'utilisateur ouvre le lien recu
+4. ecran reset password
+5. `/auth/password/update`
+6. retour login
+
+## 19. Recommandations d'implementation mobile
+
+### 19.1 Cache local
+
+Mettre en cache :
+
+- profil courant
+- dernier feed consulte
+- derniers favoris
+- conversations recentes
+
+### 19.2 Retry
+
+Retries limites pour :
+
+- `/auth/fcm-token`
+- uploads image
+- fetch notifications
+
+Pas de retry aveugle sur :
+
+- `POST /transactions`
+- `POST /reviews`
+
+### 19.3 UX erreurs
+
+- `401` => retour login
+- `403` => snackbar / toast clair
+- `404` => ressource retiree ou non publique
+- `409` => action deja effectuee
+- `422` => mapping field-by-field dans le formulaire
+- `500` => message generique + retry manuel
+
+### 19.4 Images
+
+Conseille :
+
+- compresser cote app avant upload
+- limiter la resolution
+- afficher placeholder si `photo_url` ou `photos` vide
+
+## 20. MVP endpoints a integrer en premier
+
+### Auth / profil
 
 - `POST /auth/register`
 - `POST /auth/login`
 - `POST /auth/logout`
+- `POST /auth/password/reset`
+- `POST /auth/password/update`
 - `GET /profile`
 - `PUT /profile`
 - `POST /profile/avatar`
 - `POST /auth/fcm-token`
 
-### MVP annonces
+### Feed / listings
 
 - `GET /listings`
 - `GET /search`
@@ -434,8 +1385,9 @@ Format `422` typique :
 - `POST /listings`
 - `PUT /listings/{id}`
 - `GET /my/listings`
+- `POST /listings/{id}/photos`
 
-### MVP social
+### Social
 
 - `GET /conversations`
 - `GET /conversations/{id}`
@@ -446,9 +1398,12 @@ Format `422` typique :
 - `GET /favorites`
 - `POST /favorites/{listingId}`
 - `DELETE /favorites/{listingId}`
+- `POST /transactions`
+- `POST /reviews`
+- `GET /notifications`
 
-## References repo
+## 21. References
 
-- doc API generale : [API.md](./API.md)
+- doc backend generale : [API.md](./API.md)
 - scenarios de test reels : [API_TEST_SCENARIOS.md](./API_TEST_SCENARIOS.md)
 - suivi projet : [PROGRESS.md](./PROGRESS.md)
