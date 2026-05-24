@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use Google\Auth\Credentials\ServiceAccountCredentials;
+use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class FcmService
 {
@@ -52,18 +54,27 @@ class FcmService
             return null;
         }
 
-        return Cache::remember('fcm_access_token', 3300, function () use ($serviceAccountJson) {
-            $serviceAccount = json_decode(base64_decode($serviceAccountJson), true);
+        $serviceAccount = json_decode(base64_decode($serviceAccountJson), true);
 
-            if (!$serviceAccount || !isset($serviceAccount['client_email'])) {
-                return null;
-            }
+        if (!$serviceAccount || !isset($serviceAccount['client_email'])) {
+            return null;
+        }
 
-            $client = new \Google\Client();
-            $client->setAuthConfig($serviceAccount);
-            $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
+        try {
+            $credentials = new ServiceAccountCredentials(
+                'https://www.googleapis.com/auth/firebase.messaging',
+                $serviceAccount
+            );
 
-            return $client->fetchAccessTokenWithAssertion()['access_token'] ?? null;
-        });
+            $token = $credentials->fetchAuthToken(HttpHandlerFactory::build());
+
+            return $token['access_token'] ?? null;
+        } catch (\Throwable $e) {
+            Log::warning('Unable to fetch FCM access token.', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
     }
 }

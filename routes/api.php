@@ -1,7 +1,12 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\ListingController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -44,5 +49,19 @@ Route::prefix('v1')->group(function () {
         Route::post('/listings/{id}/renew', [ListingController::class, 'renew']);
 
         Route::get('/my/listings', [ListingController::class, 'myListings']);
+
+        // ─── Social ───────────────────────────────────────
+        Route::get('/conversations', [ConversationController::class, 'index']);
+        Route::post('/conversations', [ConversationController::class, 'store']);
+        Route::get('/conversations/{id}/messages', [MessageController::class, 'index']);
+        Route::post('/conversations/{id}/messages', [MessageController::class, 'store']);
+        Route::post('/conversations/{id}/read', [MessageController::class, 'markRead']);
+
+        Route::post('/transactions', [TransactionController::class, 'store']);
+        Route::post('/reviews', [ReviewController::class, 'store']);
+
+        Route::get('/favorites', [FavoriteController::class, 'index']);
+        Route::post('/favorites/{listingId}', [FavoriteController::class, 'store']);
+        Route::delete('/favorites/{listingId}', [FavoriteController::class, 'destroy']);
     });
 });

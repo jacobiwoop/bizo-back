@@ -4,9 +4,9 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 
 ## Etat actuel
 
-- Statut global: `phase 3 terminee`
-- Phase en cours: `Phase 4 - Social`
-- Prochaine tache prioritaire: `ConversationController + MessageController + FcmService + TransactionController + ReviewController + FavoriteController`
+- Statut global: `phase 4 terminee`
+- Phase en cours: `Phase 5 - Notifications et Scheduler`
+- Prochaine tache prioritaire: `Creer NotificationController, commands et scheduler`
 - Derniere mise a jour: `2026-05-24`
 
 ## Decisions verrouillees
@@ -83,18 +83,19 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 
 ### Phase 4 - Social
 
-- [ ] Creer `ConversationController`
-- [ ] Creer `ConversationService`
-- [ ] Implementer generation `conv_id`
-- [ ] Creer `MessageController`
-- [ ] Implementer liste messages
-- [ ] Implementer envoi message
-- [ ] Implementer marquage lu
-- [ ] Creer `FcmService`
-- [ ] Creer job `SendPushNotification`
-- [ ] Creer `TransactionController`
-- [ ] Creer `ReviewController`
-- [ ] Creer `FavoriteController`
+- [x] Creer `ConversationController`
+- [x] Creer `ConversationService`
+- [x] Implementer generation `conv_id`
+- [x] Creer `MessageController`
+- [x] Implementer liste messages
+- [x] Implementer envoi message
+- [x] Implementer marquage lu
+- [x] Creer `FcmService`
+- [x] Creer job `SendPushNotification`
+- [x] Creer `TransactionController`
+- [x] Creer `ReviewController`
+- [x] Creer `FavoriteController`
+- [x] Ajouter tests Phase 4
 
 ### Phase 5 - Notifications et Scheduler
 
@@ -165,7 +166,15 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 - Phase 3 validee: `24 passed` sur `ListingTest`.
 - Phase 2 confirmee: `18 passed` sur `AuthTest`.
 - Total Phases 1-3: `42 tests, 0 echec`. Tous les warnings PHP sont des extensions dupliquees/manquantes sans impact.
+- `FcmService` corrige pour utiliser `google/auth`.
+- Routes Social branchees: conversations, messages, transactions, reviews, favorites.
+- Controleurs Social ajoutes et verifies par syntaxe.
+- Modeles Social UUID completes pour les creations applicatives.
+- Tests Feature Phase 4 ajoutes dans `SocialTest` pour conversations, messages, transactions, reviews et favorites.
+- Phase 4 validee: `11 passed` sur `SocialTest`.
+- Total Phases 2-4: `53 tests` valides (`AuthTest` 18, `ListingTest` 24, `SocialTest` 11).
 
 ## Blocages
 
 - L'environnement PHP local charge encore des extensions manquantes ou dupliquees (`gmp`, `pgsql`, `sodium`, `curl`, `fileinfo`, `mbstring`, `zip`).
+- Dans cet environnement d'execution, `artisan test` et `phpunit` direct sur `SocialTest` tombent encore sur un `SIGILL` / exit `132`.
