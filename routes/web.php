@@ -20,5 +20,7 @@ Route::get('/a/{listingId}', [WebPreviewController::class, 'listing'])->name('pr
 Route::get('/u/{username}', [WebPreviewController::class, 'seller'])->name('preview.seller');
 Route::get('/.well-known/assetlinks.json', [WebPreviewController::class, 'assetLinks'])->name('assetlinks');
 Route::get('/downloads/android', [WebApkController::class, 'index'])->name('downloads.android');
+Route::post('/downloads/android/authorize', [WebApkController::class, 'authorizeBuild'])->name('downloads.android.authorize');
 Route::post('/downloads/android/build', [WebApkController::class, 'triggerBuild'])->name('downloads.android.build');
+Route::post('/downloads/android/logout', [WebApkController::class, 'logoutBuild'])->name('downloads.android.logout');
 Route::get('/downloads/android/latest.apk', [WebApkController::class, 'downloadLatest'])->name('downloads.android.latest');

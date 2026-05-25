@@ -168,15 +168,15 @@
             <div class="flash flash-error">{{ session('build_error') }}</div>
         @endif
 
-        @if($showBuildControls)
-            <form method="post" action="{{ route('downloads.android.build') }}" class="stack">
+        @if($showBuildLogin)
+            <form method="post" action="{{ route('downloads.android.authorize') }}" class="stack">
                 @csrf
                 <div class="field">
                     <label for="token"><strong>Token build</strong></label>
-                    <input id="token" name="token" type="password" value="{{ old('token', $tokenPrefilled) }}" placeholder="Entrer le token admin de build">
+                    <input id="token" name="token" type="password" value="{{ old('token') }}" placeholder="Entrer le token admin de build">
                 </div>
                 <div class="actions">
-                    <button class="btn" type="submit">Lancer un nouveau build APK</button>
+                    <button class="btn" type="submit">Activer le mode build</button>
                 </div>
             </form>
         @endif
@@ -190,6 +190,21 @@
                 @if($buildStatus['log_tail'])
                     <div class="log">{{ $buildStatus['log_tail'] }}</div>
                 @endif
+            </div>
+        @endif
+
+        @if($showBuildControls)
+            <div class="subcard stack">
+                <div class="actions">
+                    <form method="post" action="{{ route('downloads.android.build') }}">
+                        @csrf
+                        <button class="btn" type="submit">Lancer un nouveau build APK</button>
+                    </form>
+                    <form method="post" action="{{ route('downloads.android.logout') }}">
+                        @csrf
+                        <button class="btn btn-secondary" type="submit">Quitter le mode build</button>
+                    </form>
+                </div>
             </div>
         @endif
 

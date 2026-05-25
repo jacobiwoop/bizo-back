@@ -12,6 +12,8 @@ use Symfony\Component\Process\Process;
 
 class WebApkController extends Controller
 {
+    private const BUILD_SESSION_KEY = 'downloads.android.build_authorized';
+
     public function index(Request $request): View
     {
         $build = $this->latestBuild();
@@ -19,8 +21,8 @@ class WebApkController extends Controller
         return view('downloads.apk', [
             'build' => $build,
             'buildStatus' => $this->buildStatus(),
-            'showBuildControls' => filled(config('mobile.build_trigger_token')),
-            'tokenPrefilled' => $request->query('token', ''),
+            'showBuildControls' => $this->isBuildAuthorized($request),
+            'showBuildLogin' => filled(config('mobile.build_trigger_token')) && ! $this->isBuildAuthorized($request),
         ]);
     }
 
@@ -39,14 +41,10 @@ class WebApkController extends Controller
 
     public function triggerBuild(Request $request): RedirectResponse
     {
-        $expectedToken = (string) config('mobile.build_trigger_token');
+        abort_unless(filled(config('mobile.build_trigger_token')), 404);
 
-        abort_unless($expectedToken !== '', 404);
-
-        $providedToken = (string) $request->input('token', '');
-
-        if (! hash_equals($expectedToken, $providedToken)) {
-            return back()->withInput()->with('build_error', 'Token de build invalide.');
+        if (! $this->isBuildAuthorized($request)) {
+            return back()->with('build_error', 'Session build non autorisee.');
         }
 
         $scriptPath = (string) config('mobile.build_script_path');
@@ -81,6 +79,34 @@ class WebApkController extends Controller
         return redirect()
             ->route('downloads.android')
             ->with('build_success', $pid !== '' ? "Build lance en arriere-plan (PID $pid)." : 'Build lance en arriere-plan.');
+    }
+
+    public function authorizeBuild(Request $request): RedirectResponse
+    {
+        $expectedToken = (string) config('mobile.build_trigger_token');
+
+        abort_unless($expectedToken !== '', 404);
+
+        $providedToken = (string) $request->input('token', '');
+
+        if (! hash_equals($expectedToken, $providedToken)) {
+            return back()->with('build_error', 'Token de build invalide.');
+        }
+
+        $request->session()->put(self::BUILD_SESSION_KEY, true);
+
+        return redirect()
+            ->route('downloads.android')
+            ->with('build_success', 'Mode build active pour cette session.');
+    }
+
+    public function logoutBuild(Request $request): RedirectResponse
+    {
+        $request->session()->forget(self::BUILD_SESSION_KEY);
+
+        return redirect()
+            ->route('downloads.android')
+            ->with('build_success', 'Mode build desactive.');
     }
 
     private function latestBuild(): ?array
@@ -132,5 +158,10 @@ class WebApkController extends Controller
             'log_tail' => $logTail,
             'log_updated_at' => $logUpdatedAt,
         ];
+    }
+
+    private function isBuildAuthorized(Request $request): bool
+    {
+        return (bool) $request->session()->get(self::BUILD_SESSION_KEY, false);
     }
 }

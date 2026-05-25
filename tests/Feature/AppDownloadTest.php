@@ -83,30 +83,61 @@ class AppDownloadTest extends TestCase
 
         $this->get('/downloads/android')
             ->assertOk()
-            ->assertSee('Lancer un nouveau build APK');
+            ->assertSee('Activer le mode build');
     }
 
-    public function test_trigger_build_rejects_invalid_token(): void
+    public function test_authorize_build_rejects_invalid_token(): void
     {
         config()->set('mobile.build_trigger_token', 'secret-build-token');
 
-        $this->post('/downloads/android/build', [
+        $this->post('/downloads/android/authorize', [
             'token' => 'wrong-token',
         ])
             ->assertRedirect()
             ->assertSessionHas('build_error', 'Token de build invalide.');
     }
 
-    public function test_trigger_build_accepts_valid_token(): void
+    public function test_authorize_build_accepts_valid_token(): void
+    {
+        config()->set('mobile.build_trigger_token', 'secret-build-token');
+
+        $this->post('/downloads/android/authorize', [
+            'token' => 'secret-build-token',
+        ])
+            ->assertRedirect(route('downloads.android'))
+            ->assertSessionHas('build_success', 'Mode build active pour cette session.');
+    }
+
+    public function test_trigger_build_requires_authorized_session(): void
+    {
+        config()->set('mobile.build_trigger_token', 'secret-build-token');
+
+        $this->post('/downloads/android/build')
+            ->assertRedirect()
+            ->assertSessionHas('build_error', 'Session build non autorisee.');
+    }
+
+    public function test_trigger_build_accepts_authorized_session_without_reentering_token(): void
     {
         config()->set('mobile.build_trigger_token', 'secret-build-token');
         File::put($this->scriptPath, "#!/usr/bin/env bash\necho 'fake build' >> ".escapeshellarg($this->logPath)."\n");
         chmod($this->scriptPath, 0755);
 
-        $this->post('/downloads/android/build', [
-            'token' => 'secret-build-token',
-        ])
+        $this->withSession([
+            'downloads.android.build_authorized' => true,
+        ])->post('/downloads/android/build')
             ->assertRedirect(route('downloads.android'))
             ->assertSessionHas('build_success');
+    }
+
+    public function test_logout_build_clears_authorized_session(): void
+    {
+        config()->set('mobile.build_trigger_token', 'secret-build-token');
+
+        $this->withSession([
+            'downloads.android.build_authorized' => true,
+        ])->post('/downloads/android/logout')
+            ->assertRedirect(route('downloads.android'))
+            ->assertSessionHas('build_success', 'Mode build desactive.');
     }
 }
