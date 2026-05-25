@@ -61,6 +61,24 @@ class ExtrasTest extends TestCase
         Queue::assertPushed(CheckRequestMatches::class);
     }
 
+    public function test_listing_request_normalizes_category_aliases(): void
+    {
+        Queue::fake();
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->postJson('/api/v1/requests', [
+            'title' => 'Je cherche une veste',
+            'description' => 'Budget max 50000 FCFA',
+            'category' => 'Vêtements',
+            'max_price' => 50000,
+            'country' => 'BJ',
+            'city' => 'Cotonou',
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('data.category', 'vetements');
+    }
+
     public function test_user_can_list_own_requests(): void
     {
         $user = User::factory()->create();

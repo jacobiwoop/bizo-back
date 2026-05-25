@@ -4,16 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ListingResource;
 use App\Models\Listing;
+use App\Support\ListingCategory;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Validation\Rule;
 
 class SearchController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
+        $request->merge([
+            'category' => ListingCategory::normalize($request->input('category')),
+        ]);
+
         $validated = $request->validate([
             'q' => ['required', 'string', 'min:2'],
-            'category' => ['nullable', 'string', 'max:50'],
+            'category' => ['nullable', 'string', Rule::in(ListingCategory::values())],
             'type' => ['nullable', 'string', 'in:VENTE,TROC,TROC_CASH'],
             'city' => ['nullable', 'string', 'max:80'],
             'min_price' => ['nullable', 'integer', 'min:0'],
@@ -31,7 +37,7 @@ class SearchController extends Controller
                 $query->where('title_search', 'like', "%{$queryTerm}%")
                     ->orWhereRaw('LOWER(description) LIKE ?', ["%{$queryTerm}%"]);
             })
-            ->when($request->category, fn ($q, $v) => $q->where('category', $v))
+            ->when($validated['category'] ?? null, fn ($q, $v) => $q->where('category', $v))
             ->when($request->type, fn ($q, $v) => $q->where('type', $v))
             ->when($request->city, fn ($q, $v) => $q->where('city', 'like', "%{$v}%"))
             ->when($request->condition, fn ($q, $v) => $q->where('condition', $v))

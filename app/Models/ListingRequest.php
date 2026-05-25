@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\ListingCategory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -32,6 +33,13 @@ class ListingRequest extends Model
         return [
             'expires_at' => 'datetime',
         ];
+    }
+
+    protected function category(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            set: fn (?string $value) => ListingCategory::normalize($value),
+        );
     }
 
     public function owner(): BelongsTo

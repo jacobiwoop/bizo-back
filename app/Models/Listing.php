@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\ListingCategory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -64,6 +65,13 @@ class Listing extends Model
                 'title' => $value,
                 'title_search' => mb_strtolower($value),
             ],
+        );
+    }
+
+    protected function category(): Attribute
+    {
+        return Attribute::make(
+            set: fn (?string $value) => ListingCategory::normalize($value),
         );
     }
 

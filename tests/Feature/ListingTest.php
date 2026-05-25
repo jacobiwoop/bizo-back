@@ -114,6 +114,27 @@ class ListingTest extends TestCase
             'title' => 'iPhone 13 128Go Noir',
             'owner_id' => $this->user->id,
             'status' => 'active',
+            'category' => 'electronique',
+        ]);
+    }
+
+    public function test_create_listing_normalizes_category_aliases(): void
+    {
+        Storage::fake('local');
+
+        $data = $this->validListingData();
+        $data['category'] = 'Vêtements';
+        $data['photos'] = [$this->fakePhoto()];
+
+        $response = $this->actingAs($this->user)
+            ->postJson('/api/v1/listings', $data);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('data.category', 'vetements');
+
+        $this->assertDatabaseHas('listings', [
+            'id' => $response->json('data.id'),
+            'category' => 'vetements',
         ]);
     }
 

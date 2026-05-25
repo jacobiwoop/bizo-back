@@ -75,6 +75,21 @@ class SearchTest extends TestCase
         $response->assertJsonPath('data.0.price', 150000);
     }
 
+    public function test_search_normalizes_category_filter_aliases(): void
+    {
+        Listing::factory()->create([
+            'title' => 'iPhone 13',
+            'category' => 'electronique',
+            'price' => 150000,
+            'status' => 'active',
+        ]);
+
+        $response = $this->getJson('/api/v1/search?q=iphone&category=Électronique');
+
+        $response->assertStatus(200);
+        $this->assertCount(1, $response->json('data'));
+    }
+
     public function test_search_can_match_description(): void
     {
         Listing::factory()->create([

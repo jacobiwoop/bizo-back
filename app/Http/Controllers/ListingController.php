@@ -6,6 +6,7 @@ use App\Http\Requests\StoreListingRequest;
 use App\Http\Resources\ListingResource;
 use App\Models\Listing;
 use App\Services\StorageService;
+use App\Support\ListingCategory;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -25,7 +26,7 @@ class ListingController extends Controller
     {
         $query = Listing::active()
             ->with('owner')
-            ->when($request->category, fn ($q, $v) => $q->where('category', $v))
+            ->when(ListingCategory::normalize($request->category), fn ($q, $v) => $q->where('category', $v))
             ->when($request->type, fn ($q, $v) => $q->where('type', $v))
             ->when($request->condition, fn ($q, $v) => $q->where('condition', $v))
             ->when($request->country, fn ($q, $v) => $q->where('country', $v))
@@ -102,6 +103,10 @@ class ListingController extends Controller
         $type = $request->input('type', $listing->type);
         $isChangingType = $request->has('type');
 
+        $request->merge([
+            'category' => ListingCategory::normalize($request->input('category')),
+        ]);
+
         $validated = $request->validate([
             'title' => ['sometimes', 'string', 'min:5', 'max:80'],
             'description' => ['sometimes', 'string', 'min:20', 'max:500'],
@@ -109,7 +114,7 @@ class ListingController extends Controller
             'price' => ['sometimes', 'nullable', 'integer', 'min:0'],
             'cash_complement' => ['nullable', 'integer', 'min:0'],
             'exchange_for' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'category' => ['sometimes', 'string', 'max:50'],
+            'category' => ['sometimes', 'string', Rule::in(ListingCategory::values())],
             'condition' => ['sometimes', 'string', 'in:neuf,excellent,bon,correct'],
             'delivery_mode' => ['sometimes', 'string', 'in:main_propre,livraison,les_deux'],
             'country' => ['sometimes', 'string', 'max:5'],

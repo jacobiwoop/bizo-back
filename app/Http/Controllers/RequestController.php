@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Resources\ListingRequestResource;
 use App\Jobs\CheckRequestMatches;
 use App\Models\ListingRequest;
+use App\Support\ListingCategory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Validation\Rule;
 
 class RequestController extends Controller
 {
@@ -31,10 +33,14 @@ class RequestController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        $request->merge([
+            'category' => ListingCategory::normalize($request->input('category')),
+        ]);
+
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'category' => ['required', 'string', 'max:50'],
+            'category' => ['required', 'string', Rule::in(ListingCategory::values())],
             'max_price' => ['nullable', 'integer', 'min:0'],
             'country' => ['required', 'string', 'max:5'],
             'city' => ['required', 'string', 'max:80'],

@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use App\Support\ListingCategory;
 
 class StoreListingRequest extends FormRequest
 {
@@ -20,7 +22,7 @@ class StoreListingRequest extends FormRequest
             'price' => ['required_if:type,VENTE', 'nullable', 'integer', 'min:0'],
             'cash_complement' => ['nullable', 'integer', 'min:0'],
             'exchange_for' => ['required_if:type,TROC,TROC_CASH', 'nullable', 'string', 'max:255'],
-            'category' => ['required', 'string', 'max:50'],
+            'category' => ['required', 'string', Rule::in(ListingCategory::values())],
             'condition' => ['required', 'string', 'in:neuf,excellent,bon,correct'],
             'delivery_mode' => ['required', 'string', 'in:main_propre,livraison,les_deux'],
             'country' => ['required', 'string', 'max:5'],
@@ -48,6 +50,7 @@ class StoreListingRequest extends FormRequest
             'price.integer' => 'Le prix doit être un nombre entier.',
             'exchange_for.required_if' => 'Vous devez préciser ce que vous cherchez en échange.',
             'category.required' => 'La catégorie est requise.',
+            'category.in' => 'La catégorie est invalide.',
             'condition.required' => 'L\'état est requis.',
             'condition.in' => 'L\'état doit être neuf, excellent, bon ou correct.',
             'delivery_mode.required' => 'Le mode de livraison est requis.',
@@ -61,5 +64,12 @@ class StoreListingRequest extends FormRequest
             'photos.*.mimes' => 'Formats acceptés : jpg, jpeg, png, webp.',
             'photos.*.max' => 'Chaque photo ne doit pas dépasser 15 Mo.',
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'category' => ListingCategory::normalize($this->input('category')),
+        ]);
     }
 }
