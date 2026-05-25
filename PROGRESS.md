@@ -7,7 +7,7 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 - Statut global: `phase 8 terminee`
 - Phase en cours: `Aucune`
 - Prochaine tache prioritaire: `Stabilisation, revue finale ou nouvelles fonctionnalites`
-- Derniere mise a jour: `2026-05-24`
+- Derniere mise a jour: `2026-05-26`
 
 ## Decisions verrouillees
 
@@ -132,6 +132,23 @@ Ce fichier sert de feuille de route operative pour suivre l'evolution du backend
 - [x] Ajouter documentation API
 
 ## Journal
+
+### 2026-05-26
+
+- Diagnostic temps reel mobile effectue en conditions reelles avec ADB Wi-Fi et logs applicatifs.
+- Cause principale confirmee cote serveur frontal : le vhost nginx public `bizo.aiko.qzz.io` avait perdu le proxy WebSocket pour Reverb.
+- Symptome confirme :
+  - les messages REST `POST /api/v1/conversations/{id}/messages` fonctionnaient
+  - mais les connexions `GET /app/{REVERB_APP_KEY}?...` retournaient `500`
+  - donc aucun evenement temps reel mobile n'etait recu
+- Correctif applique directement sur le serveur :
+  - restauration des locations nginx `^~ /app` et `^~ /apps`
+  - activation des headers `Upgrade` / `Connection "upgrade"`
+  - ajout de timeouts longs et `proxy_buffering off`
+- Verification faite apres correction :
+  - l'endpoint public WebSocket renvoie bien `pusher:connection_established`
+  - le realtime mobile refonctionne ensuite sans reinstallation de l'APK
+- Documentation `MOBILE_INTEGRATION.md` mise a jour pour verrouiller cette dependance infra entre mobile, nginx et Reverb.
 
 ### 2026-05-24
 

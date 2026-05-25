@@ -962,6 +962,58 @@ Reponse :
 
 Le backend diffuse maintenant aussi les evenements de messagerie en WebSocket via Laravel Reverb.
 
+Important en production :
+
+- le domaine public `bizo.aiko.qzz.io` doit laisser passer les upgrades WebSocket vers Reverb
+- le proxy HTTP frontal doit conserver des locations dediees pour :
+  - `/app*`
+  - `/apps*`
+- ces routes ne doivent pas etre traitees comme de simples requetes HTTP API
+- en cas de perte de cette regle proxy, l'app mobile continue d'envoyer les messages en REST mais tout le temps reel casse
+
+Symptome observe quand le proxy est casse :
+
+- les `POST /api/v1/conversations/{id}/messages` reussissent
+- mais les connexions `GET /app/{REVERB_APP_KEY}?client=java-client&protocol=5&version=2.4.4` echouent
+- cote serveur frontal, cela apparait en `500` sur `/app/...`
+- cote mobile :
+  - pas de nouveaux messages instantanes
+  - pas de mise a jour temps reel de l'onglet Messages
+  - pas d'evenements `conversation.message.created`
+  - pas d'evenements `conversation.summary.updated`
+
+Exemple de configuration proxy nginx fonctionnelle devant le conteneur Bizo :
+
+```nginx
+location ^~ /app {
+    proxy_pass http://127.0.0.1:8080;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_read_timeout 600s;
+    proxy_send_timeout 600s;
+    proxy_buffering off;
+}
+
+location ^~ /apps {
+    proxy_pass http://127.0.0.1:8080;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_read_timeout 600s;
+    proxy_send_timeout 600s;
+    proxy_buffering off;
+}
+```
+
 Configuration backend attendue :
 
 - `BROADCAST_CONNECTION=reverb`
