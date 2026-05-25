@@ -1044,6 +1044,8 @@ Notes :
 - `listing_photo` et `photo_url` peuvent etre relatifs ou absolus
 - le mobile doit ecouter `conversation.message.created` sur le canal de thread actif
 - le mobile doit ecouter `conversation.summary.updated` pour mettre a jour l'onglet Messages sans polling
+- en production Bizo, Reverb est proxifie sous le meme domaine que l'API
+- le client mobile doit utiliser l'hote public `bizo.aiko.qzz.io` avec TLS (`443`)
 
 ## 11. Favoris
 

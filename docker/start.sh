@@ -8,6 +8,7 @@ APP_PORT="${PORT:-10000}"
 RUN_MIGRATIONS="${RUN_MIGRATIONS:-true}"
 RUN_QUEUE="${RUN_QUEUE:-true}"
 RUN_SCHEDULER="${RUN_SCHEDULER:-true}"
+RUN_REVERB="${RUN_REVERB:-true}"
 WAIT_FOR_DB="${WAIT_FOR_DB:-true}"
 
 if [ -z "$APP_KEY" ]; then
@@ -56,6 +57,16 @@ fi
 if [ "$RUN_SCHEDULER" = "true" ]; then
   echo "==> Demarrage scheduler..."
   while true; do php artisan schedule:run --no-interaction; sleep 60; done &
+fi
+
+if [ "$RUN_REVERB" = "true" ]; then
+  echo "==> Demarrage Reverb..."
+  php artisan reverb:start \
+    --host="${REVERB_SERVER_HOST:-0.0.0.0}" \
+    --port="${REVERB_SERVER_PORT:-8080}" \
+    --hostname="${REVERB_HOST:-localhost}" \
+    --path="${REVERB_SERVER_PATH:-}" \
+    --no-interaction &
 fi
 
 echo "==> Demarrage FrankenPHP sur le port ${APP_PORT}..."
