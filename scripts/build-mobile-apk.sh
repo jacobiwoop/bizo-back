@@ -39,7 +39,6 @@ $DOCKER_BIN build -f "$APP_DIR/Dockerfile.android" -t "$IMAGE_NAME" "$APP_DIR"
 echo "==> Build APK debug..."
 $DOCKER_BIN create \
   --name "$BUILD_CONTAINER" \
-  -u "$(id -u):$(id -g)" \
   -w /workspace \
   "$IMAGE_NAME" \
   bash -lc "mkdir -p /workspace/.kotlin/sessions && gradle --no-daemon -Dorg.gradle.jvmargs='-Xmx2g -XX:MaxMetaspaceSize=512m -Dfile.encoding=UTF-8' assembleDebug" >/dev/null
