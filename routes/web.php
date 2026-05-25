@@ -24,3 +24,4 @@ Route::post('/downloads/android/authorize', [WebApkController::class, 'authorize
 Route::post('/downloads/android/build', [WebApkController::class, 'triggerBuild'])->name('downloads.android.build');
 Route::post('/downloads/android/logout', [WebApkController::class, 'logoutBuild'])->name('downloads.android.logout');
 Route::get('/downloads/android/latest.apk', [WebApkController::class, 'downloadLatest'])->name('downloads.android.latest');
+Route::get('/downloads/android/releases/{archive}', [WebApkController::class, 'downloadArchive'])->name('downloads.android.archive');

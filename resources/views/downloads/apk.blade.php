@@ -231,10 +231,19 @@
                         <span class="label">Build</span>
                         <span class="value">{{ $build['built_at']->setTimezone(config('app.timezone'))->format('d/m/Y H:i') }}</span>
                     </div>
+                    <div class="meta-item">
+                        <span class="label">Archive</span>
+                        <span class="value" style="font-size:0.9rem; word-break: break-all;">{{ $build['archive_name'] ?? 'n/a' }}</span>
+                    </div>
                 </div>
 
                 <div class="actions">
                     <a class="btn" href="{{ route('downloads.android.latest') }}">Telecharger le dernier APK</a>
+                    @if(!empty($build['archive_name']))
+                        <a class="btn btn-secondary" href="{{ route('downloads.android.archive', ['archive' => $build['archive_name']]) }}">
+                            Telecharger cette build exacte
+                        </a>
+                    @endif
                     <a class="btn btn-secondary" href="{{ route('downloads.android') }}">Rafraichir la page</a>
                 </div>
             </div>

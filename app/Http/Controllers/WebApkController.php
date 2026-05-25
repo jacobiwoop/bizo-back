@@ -39,6 +39,21 @@ class WebApkController extends Controller
         );
     }
 
+    public function downloadArchive(string $archive): BinaryFileResponse
+    {
+        $build = $this->latestBuild();
+
+        abort_unless($build !== null, 404, 'Aucun APK disponible.');
+        abort_unless($archive === $build['archive_name'], 404, 'Archive APK introuvable.');
+        abort_unless(isset($build['archive_path']) && File::exists($build['archive_path']), 404, 'Archive APK indisponible.');
+
+        return response()->download(
+            $build['archive_path'],
+            $build['archive_name'],
+            ['Content-Type' => 'application/vnd.android.package-archive']
+        );
+    }
+
     public function triggerBuild(Request $request): RedirectResponse
     {
         abort_unless(filled(config('mobile.build_trigger_token')), 404);
@@ -132,7 +147,9 @@ class WebApkController extends Controller
 
         return [
             'path' => $latestApk,
+            'archive_path' => isset($metadata['archive_name']) ? $basePath.'/releases/'.$metadata['archive_name'] : null,
             'download_name' => $metadata['download_name'] ?? 'bizo-app-debug.apk',
+            'archive_name' => $metadata['archive_name'] ?? null,
             'version' => $metadata['version_name'] ?? null,
             'version_code' => $metadata['version_code'] ?? null,
             'git_sha' => $metadata['git_sha'] ?? null,
