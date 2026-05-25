@@ -5,16 +5,22 @@ namespace App\Http\Controllers;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\Process\Process;
 
 class WebApkController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         $build = $this->latestBuild();
 
         return view('downloads.apk', [
             'build' => $build,
+            'buildStatus' => $this->buildStatus(),
+            'showBuildControls' => filled(config('mobile.build_trigger_token')),
+            'tokenPrefilled' => $request->query('token', ''),
         ]);
     }
 
@@ -29,6 +35,50 @@ class WebApkController extends Controller
             $build['download_name'],
             ['Content-Type' => 'application/vnd.android.package-archive']
         );
+    }
+
+    public function triggerBuild(Request $request): RedirectResponse
+    {
+        $expectedToken = (string) config('mobile.build_trigger_token');
+
+        abort_unless($expectedToken !== '', 404);
+
+        $providedToken = (string) $request->input('token', '');
+
+        if (! hash_equals($expectedToken, $providedToken)) {
+            return back()->withInput()->with('build_error', 'Token de build invalide.');
+        }
+
+        $scriptPath = (string) config('mobile.build_script_path');
+        $logPath = (string) config('mobile.build_log_path');
+
+        if ($scriptPath === '' || ! File::exists($scriptPath)) {
+            return back()->with('build_error', 'Script de build introuvable.');
+        }
+
+        File::ensureDirectoryExists(dirname($logPath));
+
+        $command = sprintf(
+            "mkdir -p %s && touch %s && nohup bash %s >> %s 2>&1 < /dev/null & echo $!",
+            escapeshellarg(dirname($logPath)),
+            escapeshellarg($logPath),
+            escapeshellarg($scriptPath),
+            escapeshellarg($logPath)
+        );
+
+        $process = Process::fromShellCommandline($command, base_path());
+        $process->setTimeout(10);
+        $process->run();
+
+        if (! $process->isSuccessful()) {
+            return back()->with('build_error', 'Impossible de lancer le build APK.');
+        }
+
+        $pid = trim($process->getOutput());
+
+        return redirect()
+            ->route('downloads.android')
+            ->with('build_success', $pid !== '' ? "Build lance en arriere-plan (PID $pid)." : 'Build lance en arriere-plan.');
     }
 
     private function latestBuild(): ?array
@@ -60,6 +110,25 @@ class WebApkController extends Controller
             'git_sha' => $metadata['git_sha'] ?? null,
             'size_mb' => round(File::size($latestApk) / 1024 / 1024, 2),
             'built_at' => $builtAt ? Carbon::parse($builtAt) : Carbon::createFromTimestamp(File::lastModified($latestApk)),
+        ];
+    }
+
+    private function buildStatus(): array
+    {
+        $logPath = (string) config('mobile.build_log_path');
+        $logTail = null;
+        $logUpdatedAt = null;
+
+        if ($logPath !== '' && File::exists($logPath)) {
+            $content = File::get($logPath);
+            $lines = preg_split("/\r\n|\n|\r/", $content) ?: [];
+            $logTail = trim(implode("\n", array_slice($lines, -40)));
+            $logUpdatedAt = Carbon::createFromTimestamp(File::lastModified($logPath));
+        }
+
+        return [
+            'log_tail' => $logTail,
+            'log_updated_at' => $logUpdatedAt,
         ];
     }
 }
