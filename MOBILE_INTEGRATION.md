@@ -165,6 +165,7 @@ Notes :
 
 - `username` peut etre `null`
 - `photo_url` peut etre `null`
+- `photo_url` peut etre soit un chemin relatif `/storage/...`, soit une URL absolue `https://bizo.aiko.qzz.io/storage/...`
 - `rating`, `review_count`, `total_sales` existent reellement et sont a afficher cote profil vendeur
 
 ## 5. Auth flows
@@ -456,7 +457,7 @@ Validation :
 
 - image requise
 - `jpg|jpeg|png|webp`
-- max `5 Mo`
+- max `15 Mo`
 
 Succes :
 
@@ -528,7 +529,7 @@ Format reel du `ListingResource` :
   "title": "iPhone 13",
   "description": "Description",
   "type": "VENTE",
-  "price": "180000",
+  "price": 180000,
   "cash_complement": null,
   "exchange_for": null,
   "category": "electronique",
@@ -558,8 +559,20 @@ Format reel du `ListingResource` :
 Notes :
 
 - `photos` est toujours un tableau
+- chaque element de `photos` peut etre soit un chemin relatif `/storage/...`, soit une URL absolue `https://bizo.aiko.qzz.io/storage/...`
 - les images sont stockees en WebP pour les annonces
 - `owner` est embarque sur plusieurs endpoints publics
+- `price` doit etre traite comme numerique cote mobile
+- categories canoniques a utiliser cote client :
+  - `electronique`
+  - `vetements`
+  - `vehicules`
+  - `maison`
+  - `services`
+- le backend normalise plusieurs alias utilisateur vers ces categories canoniques, par exemple :
+  - `Électronique` -> `electronique`
+  - `Vêtements` -> `vetements`
+  - `automobile` -> `vehicules`
 
 ## 9. Feed, recherche, annonces
 
@@ -656,12 +669,18 @@ Regles metier :
 - `type = VENTE` => `price` requis
 - `type = TROC|TROC_CASH` => `exchange_for` requis
 - `photos[]` min `1`, max `10`
-- chaque photo max `5 Mo`
+- chaque photo max `15 Mo`
+- la requete HTTP totale doit rester sous environ `80 Mo`
 
 Succes :
 
 - `201`
 - retourne `data` avec `ListingResource`
+- la reponse immediate de creation est maintenant relue depuis la base avant retour, donc les champs par defaut sont fiables des `POST /listings` :
+  - `view_count = 0`
+  - `favorite_count = 0`
+  - `status = active`
+  - `is_boosted = false`
 
 ### 9.5 Mettre a jour une annonce
 
@@ -772,6 +791,10 @@ Format reel :
 }
 ```
 
+Note :
+
+- `listing_photo` peut etre relative ou absolue, meme strategie de resolution que pour `photos`
+
 ### 10.2 Lister les conversations
 
 Route :
@@ -859,6 +882,10 @@ Cas `troc_proposal` :
   }
 }
 ```
+
+Note :
+
+- `offered_listing_photo` peut etre relative ou absolue
 
 ### 10.6 Lister les messages
 
@@ -950,6 +977,11 @@ Reponse :
   }
 }
 ```
+
+Notes :
+
+- `listing_photo` peut etre relative ou absolue
+- `listing_price` peut etre numerique ou stringify selon le serializer/client, ne pas supposer un formatage UI deja pret
 
 ### 11.2 Lister les favoris
 
@@ -1361,6 +1393,7 @@ Conseille :
 
 - compresser cote app avant upload
 - limiter la resolution
+- accepter cote affichage les chemins relatifs et les URLs absolues pour les photos / avatars / listing_photo
 - afficher placeholder si `photo_url` ou `photos` vide
 
 ## 20. MVP endpoints a integrer en premier
