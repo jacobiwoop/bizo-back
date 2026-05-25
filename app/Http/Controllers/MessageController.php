@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ConversationMessageCreated;
+use App\Events\ConversationSummaryUpdated;
 use App\Http\Resources\MessageResource;
 use App\Jobs\SendPushNotification;
 use App\Models\Conversation;
 use App\Models\Listing;
 use App\Models\Message;
+use App\Models\User;
 use App\Services\ConversationService;
 use App\Services\StorageService;
 use Illuminate\Http\JsonResponse;
@@ -108,8 +111,14 @@ class MessageController extends Controller
             );
         }
 
+        $conversation = $conversation->fresh()->load(['participant1', 'participant2']);
+        $message = $message->fresh();
+
+        event(new ConversationMessageCreated($message));
+        $this->broadcastConversationSummary($conversation, [$user, $recipient]);
+
         return response()->json([
-            'data' => new MessageResource($message->fresh()),
+            'data' => new MessageResource($message),
         ], 201);
     }
 
@@ -128,5 +137,16 @@ class MessageController extends Controller
         $this->conversationService->markAsRead($conversation, $request->user()->id);
 
         return response()->json(['message' => 'Messages marques comme lus.']);
+    }
+
+    private function broadcastConversationSummary(Conversation $conversation, array $users): void
+    {
+        foreach ($users as $user) {
+            if (! $user instanceof User) {
+                continue;
+            }
+
+            event(new ConversationSummaryUpdated($conversation, $user));
+        }
     }
 }

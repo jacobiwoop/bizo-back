@@ -958,6 +958,93 @@ Reponse :
 }
 ```
 
+### 10.9 Temps reel WebSocket
+
+Le backend diffuse maintenant aussi les evenements de messagerie en WebSocket via Laravel Reverb.
+
+Configuration backend attendue :
+
+- `BROADCAST_CONNECTION=reverb`
+- `REVERB_APP_ID`
+- `REVERB_APP_KEY`
+- `REVERB_APP_SECRET`
+- `REVERB_HOST`
+- `REVERB_PORT`
+- `REVERB_SCHEME`
+- `REVERB_SERVER_HOST`
+- `REVERB_SERVER_PORT`
+
+Route d'auth WebSocket :
+
+```txt
+POST /broadcasting/auth
+```
+
+Auth :
+
+- Bearer token requis
+- middleware `auth:sanctum`
+
+Canaux prives :
+
+- `conversation.{conversationId}`
+- `users.{userId}.conversations`
+
+Evenement message :
+
+- event name : `conversation.message.created`
+- channel : `conversation.{conversationId}`
+- payload :
+
+```json
+{
+  "message": {
+    "id": "uuid",
+    "conv_id": "conv-id",
+    "sender_id": "uuid",
+    "type": "text",
+    "text": "Bonjour",
+    "image_url": null,
+    "proposal": null,
+    "is_read": false,
+    "created_at": "2026-05-25T14:15:30.000000Z"
+  }
+}
+```
+
+Evenement resume conversation :
+
+- event name : `conversation.summary.updated`
+- channel : `users.{userId}.conversations`
+- payload :
+
+```json
+{
+  "conversation": {
+    "id": "conv-id",
+    "listing_id": "uuid",
+    "listing_title": "Titre",
+    "listing_photo": "/storage/photos/xxx.webp",
+    "last_message": "Bonjour",
+    "last_message_at": "2026-05-25T14:15:30.000000Z",
+    "unread_count": 1,
+    "other_user": {
+      "id": "uuid",
+      "display_name": "Autre utilisateur",
+      "photo_url": null,
+      "last_seen_at": "2026-05-25T14:15:00.000000Z"
+    },
+    "created_at": "2026-05-25T14:10:00.000000Z"
+  }
+}
+```
+
+Notes :
+
+- `listing_photo` et `photo_url` peuvent etre relatifs ou absolus
+- le mobile doit ecouter `conversation.message.created` sur le canal de thread actif
+- le mobile doit ecouter `conversation.summary.updated` pour mettre a jour l'onglet Messages sans polling
+
 ## 11. Favoris
 
 ### 11.1 Favorite object

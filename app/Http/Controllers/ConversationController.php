@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ConversationMessageCreated;
+use App\Events\ConversationSummaryUpdated;
 use App\Http\Resources\ConversationResource;
 use App\Http\Resources\MessageResource;
 use App\Jobs\SendPushNotification;
 use App\Models\Conversation;
 use App\Models\Listing;
 use App\Models\Message;
+use App\Models\User;
 use App\Services\ConversationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -91,9 +94,26 @@ class ConversationController extends Controller
             );
         }
 
+        $conversation = $conversation->fresh()->load(['participant1', 'participant2']);
+        $message = $message->fresh();
+
+        event(new ConversationMessageCreated($message));
+        $this->broadcastConversationSummary($conversation, [$buyer, $listing->owner]);
+
         return response()->json([
-            'data' => new ConversationResource($conversation->fresh()->load(['participant1', 'participant2'])),
-            'message' => new MessageResource($message->fresh()),
+            'data' => new ConversationResource($conversation),
+            'message' => new MessageResource($message),
         ], 201);
+    }
+
+    private function broadcastConversationSummary(Conversation $conversation, array $users): void
+    {
+        foreach ($users as $user) {
+            if (! $user instanceof User) {
+                continue;
+            }
+
+            event(new ConversationSummaryUpdated($conversation, $user));
+        }
     }
 }

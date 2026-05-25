@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Events\ConversationMessageCreated;
+use App\Events\ConversationSummaryUpdated;
 use App\Models\Conversation;
 use App\Models\Favorite;
 use App\Models\Listing;
@@ -9,6 +11,9 @@ use App\Models\Message;
 use App\Models\Review;
 use App\Models\Transaction;
 use App\Models\User;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -33,6 +38,11 @@ class SocialTest extends TestCase
             'status' => 'active',
             'photos' => ['https://example.com/listing.webp'],
         ]);
+
+        Config::set('broadcasting.default', 'reverb');
+        Config::set('broadcasting.connections.reverb.key', 'test-key');
+        Config::set('broadcasting.connections.reverb.secret', 'test-secret');
+        Config::set('broadcasting.connections.reverb.app_id', 'test-app');
     }
 
     private function conversationId(): string
@@ -45,6 +55,11 @@ class SocialTest extends TestCase
 
     public function test_can_create_conversation_with_first_message(): void
     {
+        Event::fake([
+            ConversationMessageCreated::class,
+            ConversationSummaryUpdated::class,
+        ]);
+
         $response = $this->actingAs($this->buyer)
             ->postJson('/api/v1/conversations', [
                 'listing_id' => $this->listing->id,
@@ -66,6 +81,9 @@ class SocialTest extends TestCase
             'sender_id' => $this->buyer->id,
             'text' => 'Bonsoir, est-ce disponible ?',
         ]);
+
+        Event::assertDispatched(ConversationMessageCreated::class, 1);
+        Event::assertDispatched(ConversationSummaryUpdated::class, 2);
     }
 
     public function test_cannot_create_conversation_on_own_listing(): void
@@ -121,6 +139,11 @@ class SocialTest extends TestCase
 
     public function test_can_send_text_message_to_conversation(): void
     {
+        Event::fake([
+            ConversationMessageCreated::class,
+            ConversationSummaryUpdated::class,
+        ]);
+
         $conversation = Conversation::create([
             'id' => $this->conversationId(),
             'listing_id' => $this->listing->id,
@@ -144,6 +167,9 @@ class SocialTest extends TestCase
             'sender_id' => $this->buyer->id,
             'text' => 'Toujours disponible ?',
         ]);
+
+        Event::assertDispatched(ConversationMessageCreated::class, 1);
+        Event::assertDispatched(ConversationSummaryUpdated::class, 2);
     }
 
     public function test_can_mark_conversation_messages_as_read(): void
@@ -177,6 +203,53 @@ class SocialTest extends TestCase
             'sender_id' => $this->seller->id,
             'is_read' => true,
         ]);
+    }
+
+    public function test_message_created_event_targets_private_conversation_channel(): void
+    {
+        $conversation = Conversation::create([
+            'id' => $this->conversationId(),
+            'listing_id' => $this->listing->id,
+            'listing_title' => $this->listing->title,
+            'listing_photo' => $this->listing->photos[0],
+            'participant_1' => min($this->seller->id, $this->buyer->id),
+            'participant_2' => max($this->seller->id, $this->buyer->id),
+        ]);
+
+        $message = Message::create([
+            'conv_id' => $conversation->id,
+            'sender_id' => $this->buyer->id,
+            'type' => 'text',
+            'text' => 'Salut realtime',
+        ]);
+
+        $event = new ConversationMessageCreated($message->fresh());
+        $channels = $event->broadcastOn();
+
+        $this->assertCount(1, $channels);
+        $this->assertInstanceOf(PrivateChannel::class, $channels[0]);
+        $this->assertSame('private-conversation.'.$conversation->id, $channels[0]->name);
+    }
+
+    public function test_conversation_summary_event_targets_user_inbox_channel(): void
+    {
+        $conversation = Conversation::create([
+            'id' => $this->conversationId(),
+            'listing_id' => $this->listing->id,
+            'listing_title' => $this->listing->title,
+            'listing_photo' => $this->listing->photos[0],
+            'participant_1' => min($this->seller->id, $this->buyer->id),
+            'participant_2' => max($this->seller->id, $this->buyer->id),
+            'last_message' => 'Salut realtime',
+            'last_message_at' => now(),
+        ])->load(['participant1', 'participant2']);
+
+        $event = new ConversationSummaryUpdated($conversation, $this->buyer);
+        $channels = $event->broadcastOn();
+
+        $this->assertCount(1, $channels);
+        $this->assertInstanceOf(PrivateChannel::class, $channels[0]);
+        $this->assertSame('private-users.'.$this->buyer->id.'.conversations', $channels[0]->name);
     }
 
     public function test_seller_can_create_transaction_and_listing_becomes_sold(): void
