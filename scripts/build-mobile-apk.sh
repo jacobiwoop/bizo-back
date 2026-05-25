@@ -9,6 +9,17 @@ APK_SOURCE_REL="app/build/outputs/apk/debug/app-debug.apk"
 APP_REPO_URL="${APP_REPO_URL:-https://github.com/jacobiwoop/bizo-test.git}"
 APP_REF="${APP_REF:-main}"
 APP_CLONE_DIR="${APP_CLONE_DIR:-/tmp/bizo-app-build-src}"
+BUILD_CONTAINER="bizo-android-build-$$-$(date +%s)"
+TMP_APK_DIR="$(mktemp -d)"
+
+cleanup() {
+  if [[ -n "${DOCKER_BIN:-}" ]]; then
+    $DOCKER_BIN rm -f "$BUILD_CONTAINER" >/dev/null 2>&1 || true
+  fi
+  rm -rf "$TMP_APK_DIR"
+}
+
+trap cleanup EXIT
 
 if docker info >/dev/null 2>&1; then
   DOCKER_BIN="${DOCKER_BIN:-docker}"
@@ -27,19 +38,18 @@ echo "==> Build image Android..."
 $DOCKER_BIN build -f "$APP_DIR/Dockerfile.android" -t "$IMAGE_NAME" "$APP_DIR"
 
 echo "==> Build APK debug..."
-$DOCKER_BIN run --rm \
+$DOCKER_BIN create \
+  --name "$BUILD_CONTAINER" \
   -u "$(id -u):$(id -g)" \
-  -v "$APP_DIR:/workspace" \
   -w /workspace \
   "$IMAGE_NAME" \
-  bash -lc "gradle --no-daemon -Dorg.gradle.jvmargs='-Xmx2g -XX:MaxMetaspaceSize=512m -Dfile.encoding=UTF-8' assembleDebug"
+  bash -lc "gradle --no-daemon -Dorg.gradle.jvmargs='-Xmx2g -XX:MaxMetaspaceSize=512m -Dfile.encoding=UTF-8' assembleDebug" >/dev/null
 
-APK_SOURCE="$APP_DIR/$APK_SOURCE_REL"
+$DOCKER_BIN cp "$APP_DIR/." "$BUILD_CONTAINER:/workspace"
+$DOCKER_BIN start -a "$BUILD_CONTAINER"
+$DOCKER_BIN cp "$BUILD_CONTAINER:/workspace/$APK_SOURCE_REL" "$TMP_APK_DIR/app-debug.apk"
 
-if [[ ! -f "$APK_SOURCE" ]]; then
-  echo "ERREUR: APK non genere: $APK_SOURCE" >&2
-  exit 1
-fi
+APK_SOURCE="$TMP_APK_DIR/app-debug.apk"
 
 mkdir -p "$OUTPUT_DIR/releases" "$OUTPUT_DIR/latest"
 
