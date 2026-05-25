@@ -1315,7 +1315,105 @@ App Links Android :
 - `/.well-known/assetlinks.json`
 - a completer avec les vraies infos Android en phase mobile native
 
-## 18. User flows mobile recommandes
+## 18. Debug logs app
+
+Ces routes servent a envoyer au backend les logs collectes dans l'ecran `Securite -> Debug Logs`.
+
+### 18.1 Envoyer un dump de logs
+
+Route :
+
+```txt
+POST /debug-logs
+```
+
+Auth :
+
+- Bearer token requis
+
+Body JSON recommande :
+
+```json
+{
+  "app": {
+    "version": "1.0.0-debug",
+    "build": 42
+  },
+  "device": {
+    "model": "Pixel 9",
+    "android": "16"
+  },
+  "context": {
+    "screen": "conversation_thread"
+  },
+  "logs": [
+    {
+      "timestamp": "2026-05-25T12:00:00Z",
+      "level": "INFO",
+      "category": "MESSAGE",
+      "title": "Send message request",
+      "details": "Posting first message from detail screen."
+    }
+  ]
+}
+```
+
+Contraintes :
+
+- `logs` requis
+- `logs` doit contenir au moins 1 entree
+- `app`, `device`, `context` optionnels
+
+Succes :
+
+- code `201`
+- retourne une reference a 5 chiffres pour identifier l'envoi
+
+Exemple :
+
+```json
+{
+  "message": "Logs envoyes avec succes.",
+  "reference": "48217",
+  "received_at": "2026-05-25T12:00:01+00:00"
+}
+```
+
+### 18.2 Historique des envois
+
+Route :
+
+```txt
+GET /debug-logs/history
+```
+
+Succes :
+
+- code `200`
+- retourne les 50 derniers envois du user courant
+
+Exemple :
+
+```json
+{
+  "data": [
+    {
+      "reference": "54321",
+      "received_at": "2026-05-25T11:11:11Z",
+      "log_count": 1,
+      "file": "20260525_111111_54321.json"
+    },
+    {
+      "reference": "12345",
+      "received_at": "2026-05-25T10:10:10Z",
+      "log_count": 2,
+      "file": "20260525_101010_12345.json"
+    }
+  ]
+}
+```
+
+## 19. User flows mobile recommandes
 
 ### 18.1 Onboarding
 
@@ -1354,7 +1452,7 @@ App Links Android :
 5. `/auth/password/update`
 6. retour login
 
-## 19. Recommandations d'implementation mobile
+## 20. Recommandations d'implementation mobile
 
 ### 19.1 Cache local
 
@@ -1396,7 +1494,7 @@ Conseille :
 - accepter cote affichage les chemins relatifs et les URLs absolues pour les photos / avatars / listing_photo
 - afficher placeholder si `photo_url` ou `photos` vide
 
-## 20. MVP endpoints a integrer en premier
+## 21. MVP endpoints a integrer en premier
 
 ### Auth / profil
 
@@ -1434,8 +1532,10 @@ Conseille :
 - `POST /transactions`
 - `POST /reviews`
 - `GET /notifications`
+- `POST /debug-logs`
+- `GET /debug-logs/history`
 
-## 21. References
+## 22. References
 
 - doc backend generale : [API.md](./API.md)
 - scenarios de test reels : [API_TEST_SCENARIOS.md](./API_TEST_SCENARIOS.md)
