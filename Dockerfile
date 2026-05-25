@@ -3,6 +3,7 @@ FROM dunglas/frankenphp:php8.4-alpine
 RUN apk add --no-cache \
     bash \
     curl \
+    docker-cli \
     zip \
     unzip \
     git \

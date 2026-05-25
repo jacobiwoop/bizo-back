@@ -43,6 +43,7 @@ sudo docker run -d \
   -e WAIT_FOR_DB=true \
   -p "127.0.0.1:${HOST_PORT}:${APP_PORT}" \
   -v "$STORAGE_DIR:/app/storage" \
+  -v /var/run/docker.sock:/var/run/docker.sock \
   "$IMAGE_NAME"
 
 echo "==> Etat du conteneur..."

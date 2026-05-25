@@ -59,9 +59,11 @@ class WebApkController extends Controller
         File::ensureDirectoryExists(dirname($logPath));
 
         $command = sprintf(
-            "mkdir -p %s && touch %s && nohup bash %s >> %s 2>&1 < /dev/null & echo $!",
+            "mkdir -p %s %s && touch %s && nohup env OUTPUT_DIR=%s bash %s >> %s 2>&1 < /dev/null & echo $!",
             escapeshellarg(dirname($logPath)),
+            escapeshellarg((string) config('mobile.apk_storage_path')),
             escapeshellarg($logPath),
+            escapeshellarg((string) config('mobile.apk_storage_path')),
             escapeshellarg($scriptPath),
             escapeshellarg($logPath)
         );
