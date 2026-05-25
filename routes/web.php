@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\WebPasswordResetController;
+use App\Http\Controllers\WebApkController;
 use App\Http\Controllers\WebPreviewController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,3 +19,5 @@ Route::post('/reset-password', [WebPasswordResetController::class, 'store'])->na
 Route::get('/a/{listingId}', [WebPreviewController::class, 'listing'])->name('preview.listing');
 Route::get('/u/{username}', [WebPreviewController::class, 'seller'])->name('preview.seller');
 Route::get('/.well-known/assetlinks.json', [WebPreviewController::class, 'assetLinks'])->name('assetlinks');
+Route::get('/downloads/android', [WebApkController::class, 'index'])->name('downloads.android');
+Route::get('/downloads/android/latest.apk', [WebApkController::class, 'downloadLatest'])->name('downloads.android.latest');
