@@ -13,9 +13,14 @@ class DebugLogController extends Controller
 
     public function store(StoreDebugLogRequest $request): JsonResponse
     {
+        if (!$user = $request->user()) {
+            return response()->json([
+                'message' => 'Unauthenticated.',
+            ], 401);
+        }
+
         $reference = $this->generateReference();
         $receivedAt = now()->toIso8601String();
-        $user = $request->user();
         $directory = $this->userDirectory($user->id);
         $filename = sprintf('%s_%s.json', now()->format('Ymd_His'), $reference);
 
@@ -48,7 +53,13 @@ class DebugLogController extends Controller
 
     public function history(Request $request): JsonResponse
     {
-        $directory = $this->userDirectory($request->user()->id);
+        if (!$user = $request->user()) {
+            return response()->json([
+                'message' => 'Unauthenticated.',
+            ], 401);
+        }
+
+        $directory = $this->userDirectory($user->id);
         $files = collect(Storage::disk('local')->files($directory))
             ->sortDesc()
             ->take(50)
