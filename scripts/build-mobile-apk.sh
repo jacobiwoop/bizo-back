@@ -8,7 +8,7 @@ IMAGE_NAME="${IMAGE_NAME:-bizo-android-builder:latest}"
 APK_SOURCE_REL="app/build/outputs/apk/debug/app-debug.apk"
 APP_REPO_URL="${APP_REPO_URL:-https://github.com/jacobiwoop/bizo-test.git}"
 APP_REF="${APP_REF:-main}"
-APP_CLONE_DIR="${APP_CLONE_DIR:-/tmp/bizo-app-build-src}"
+APP_CLONE_DIR="${APP_CLONE_DIR:-/tmp/bizo-app-build-src-$$-$(date +%s)}"
 BUILD_CONTAINER="bizo-android-build-$$-$(date +%s)"
 TMP_APK_DIR="$(mktemp -d)"
 
@@ -29,7 +29,6 @@ fi
 
 if [[ ! -d "$APP_DIR" ]]; then
   echo "==> Repo mobile introuvable localement, clonage..."
-  rm -rf "$APP_CLONE_DIR"
   git clone --depth 1 --branch "$APP_REF" "$APP_REPO_URL" "$APP_CLONE_DIR"
   APP_DIR="$APP_CLONE_DIR"
 fi
