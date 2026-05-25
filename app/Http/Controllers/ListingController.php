@@ -70,7 +70,7 @@ class ListingController extends Controller
             'expires_at' => now()->addDays(30),
         ]);
 
-        $listing->load('owner');
+        $listing = $listing->fresh()->load('owner');
 
         return response()->json([
             'data' => new ListingResource($listing),
