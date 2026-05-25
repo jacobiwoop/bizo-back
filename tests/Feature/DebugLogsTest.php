@@ -77,6 +77,15 @@ class DebugLogsTest extends TestCase
             ->assertUnauthorized();
     }
 
+    public function test_debug_logs_history_requires_authentication_without_json_accept_header(): void
+    {
+        $this->get('/api/v1/debug-logs/history')
+            ->assertUnauthorized()
+            ->assertJson([
+                'message' => 'Unauthenticated.',
+            ]);
+    }
+
     public function test_authenticated_user_can_list_debug_log_history(): void
     {
         Storage::fake('local');
