@@ -42,7 +42,7 @@ $DOCKER_BIN create \
   -u "$(id -u):$(id -g)" \
   -w /workspace \
   "$IMAGE_NAME" \
-  bash -lc "gradle --no-daemon -Dorg.gradle.jvmargs='-Xmx2g -XX:MaxMetaspaceSize=512m -Dfile.encoding=UTF-8' assembleDebug" >/dev/null
+  bash -lc "mkdir -p /workspace/.kotlin/sessions && gradle --no-daemon -Dorg.gradle.jvmargs='-Xmx2g -XX:MaxMetaspaceSize=512m -Dfile.encoding=UTF-8' assembleDebug" >/dev/null
 
 $DOCKER_BIN cp "$APP_DIR/." "$BUILD_CONTAINER:/workspace"
 $DOCKER_BIN start -a "$BUILD_CONTAINER"
