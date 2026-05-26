@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_DIR="${APP_DIR:-$ROOT_DIR/bizo-mobile-rn}"
 OUTPUT_DIR="${OUTPUT_DIR:-/home/admin/bizo-storage/mobile-builds}"
 IMAGE_NAME="${IMAGE_NAME:-bizo-expo-android-builder:latest}"
+FORCE_REBUILD_IMAGE="${FORCE_REBUILD_IMAGE:-0}"
 APK_SOURCE_REL="android/app/build/outputs/apk/debug/app-debug.apk"
 BUILD_CONTAINER="bizo-expo-android-build-$$-$(date +%s)"
 TMP_APK_DIR="$(mktemp -d)"
@@ -29,8 +30,15 @@ if [[ ! -d "$APP_DIR" ]]; then
   exit 1
 fi
 
-echo "==> Build image Android Expo..."
-$DOCKER_BIN build -f "$APP_DIR/Dockerfile.android" -t "$IMAGE_NAME" "$APP_DIR"
+if [[ "$FORCE_REBUILD_IMAGE" == "1" ]]; then
+  echo "==> Reconstruction forcee de l'image Android Expo..."
+  $DOCKER_BIN build -f "$APP_DIR/Dockerfile.android" -t "$IMAGE_NAME" "$APP_DIR"
+elif $DOCKER_BIN image inspect "$IMAGE_NAME" >/dev/null 2>&1; then
+  echo "==> Image Android Expo deja presente, reutilisation de $IMAGE_NAME"
+else
+  echo "==> Image Android Expo absente, construction de $IMAGE_NAME..."
+  $DOCKER_BIN build -f "$APP_DIR/Dockerfile.android" -t "$IMAGE_NAME" "$APP_DIR"
+fi
 
 echo "==> Build APK debug Expo..."
 $DOCKER_BIN create \
