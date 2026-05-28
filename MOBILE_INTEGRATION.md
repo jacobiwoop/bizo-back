@@ -347,7 +347,78 @@ Effet metier :
 - change le mot de passe
 - revoque les tokens Sanctum existants de l'utilisateur
 
-### 5.6 Save FCM token
+### 5.6 Mobile OTP forgot password
+
+Ce flux est prevu pour l'app mobile. Il ne remplace pas le reset password par lien web.
+
+Route :
+
+```txt
+POST /auth/password/otp/send
+```
+
+Body :
+
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+Succes :
+
+- code `200`
+- message generique, meme si l'email n'existe pas
+- si le compte existe, le serveur envoie un code OTP de 6 chiffres par email
+- le code expire apres 10 minutes
+
+Reponse :
+
+```json
+{
+  "message": "Si ce compte existe, un code de réinitialisation a été envoyé par email."
+}
+```
+
+### 5.7 Mobile OTP reset password
+
+Route :
+
+```txt
+POST /auth/password/otp/reset
+```
+
+Body :
+
+```json
+{
+  "email": "user@example.com",
+  "otp": "123456",
+  "password": "NewPassword123",
+  "password_confirmation": "NewPassword123"
+}
+```
+
+Succes :
+
+```json
+{
+  "message": "Mot de passe mis à jour."
+}
+```
+
+Erreurs utiles :
+
+- `400` si le code OTP est invalide, expire ou bloque apres trop d'essais
+- `422` si email, OTP ou password sont invalides
+
+Effet metier :
+
+- change le mot de passe
+- revoque les tokens Sanctum existants de l'utilisateur
+- marque les OTP actifs de cet email comme utilises
+
+### 5.8 Save FCM token
 
 Route :
 
@@ -1586,12 +1657,22 @@ Exemple :
 
 ### 18.4 Reset password flow
 
+Flux web par lien :
+
 1. app demande email
 2. `/auth/password/reset`
 3. l'utilisateur ouvre le lien recu
 4. ecran reset password
 5. `/auth/password/update`
 6. retour login
+
+Flux mobile par OTP :
+
+1. app demande email
+2. `/auth/password/otp/send`
+3. app affiche un ecran de saisie OTP + nouveau mot de passe
+4. `/auth/password/otp/reset`
+5. retour login
 
 ## 20. Recommandations d'implementation mobile
 

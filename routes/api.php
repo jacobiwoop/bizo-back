@@ -30,6 +30,8 @@ Route::prefix('v1')->group(function () {
         Route::post('/auth/login', 'login');
         Route::post('/auth/password/reset', 'forgotPassword');
         Route::post('/auth/password/update', 'resetPassword');
+        Route::post('/auth/password/otp/send', 'sendPasswordOtp')->middleware('throttle:5,1');
+        Route::post('/auth/password/otp/reset', 'resetPasswordWithOtp')->middleware('throttle:10,1');
     });
 
     // ─── Annonces publiques ───────────────────────────────

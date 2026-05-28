@@ -2,9 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Models\PasswordResetOtp;
 use App\Models\User;
+use App\Notifications\PasswordResetOtpNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
 use Tests\TestCase;
 
@@ -252,6 +255,110 @@ class AuthTest extends TestCase
             ->assertJson([
                 'message' => 'Si ce compte existe, un lien de réinitialisation a été envoyé par email.',
             ]);
+    }
+
+    public function test_password_otp_send_creates_hashed_code_and_sends_notification(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->create(['email' => 'test@bizo.ci']);
+
+        $response = $this->postJson('/api/v1/auth/password/otp/send', [
+            'email' => 'test@bizo.ci',
+        ]);
+
+        $response->assertOk()
+            ->assertJson([
+                'message' => 'Si ce compte existe, un code de réinitialisation a été envoyé par email.',
+            ]);
+
+        $otp = PasswordResetOtp::where('email', 'test@bizo.ci')->first();
+
+        $this->assertNotNull($otp);
+        $this->assertFalse(Hash::check('000000', $otp->otp_hash));
+        $this->assertTrue($otp->expires_at->greaterThan(now()));
+
+        Notification::assertSentTo($user, PasswordResetOtpNotification::class, function ($notification) {
+            return preg_match('/^\d{6}$/', $notification->otp) === 1;
+        });
+    }
+
+    public function test_password_otp_send_is_neutral_for_unknown_email(): void
+    {
+        Notification::fake();
+
+        $response = $this->postJson('/api/v1/auth/password/otp/send', [
+            'email' => 'unknown@bizo.ci',
+        ]);
+
+        $response->assertOk()
+            ->assertJson([
+                'message' => 'Si ce compte existe, un code de réinitialisation a été envoyé par email.',
+            ]);
+
+        $this->assertDatabaseCount('password_reset_otps', 0);
+        Notification::assertNothingSent();
+    }
+
+    public function test_password_otp_reset_updates_password_and_revokes_tokens(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'test@bizo.ci',
+            'password' => bcrypt('oldpassword123'),
+        ]);
+        $user->createToken('auth-token');
+
+        PasswordResetOtp::create([
+            'email' => 'test@bizo.ci',
+            'otp_hash' => Hash::make('123456'),
+            'expires_at' => now()->addMinutes(10),
+        ]);
+
+        $response = $this->postJson('/api/v1/auth/password/otp/reset', [
+            'email' => 'test@bizo.ci',
+            'otp' => '123456',
+            'password' => 'newpassword123',
+            'password_confirmation' => 'newpassword123',
+        ]);
+
+        $response->assertOk()
+            ->assertJson([
+                'message' => 'Mot de passe mis à jour.',
+            ]);
+
+        $user->refresh();
+
+        $this->assertTrue(Hash::check('newpassword123', $user->password));
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+        $this->assertNotNull(PasswordResetOtp::where('email', 'test@bizo.ci')->first()->used_at);
+    }
+
+    public function test_password_otp_reset_rejects_invalid_code(): void
+    {
+        User::factory()->create([
+            'email' => 'test@bizo.ci',
+            'password' => bcrypt('oldpassword123'),
+        ]);
+
+        $otp = PasswordResetOtp::create([
+            'email' => 'test@bizo.ci',
+            'otp_hash' => Hash::make('123456'),
+            'expires_at' => now()->addMinutes(10),
+        ]);
+
+        $response = $this->postJson('/api/v1/auth/password/otp/reset', [
+            'email' => 'test@bizo.ci',
+            'otp' => '654321',
+            'password' => 'newpassword123',
+            'password_confirmation' => 'newpassword123',
+        ]);
+
+        $response->assertStatus(400)
+            ->assertJson([
+                'message' => 'Code OTP invalide ou expiré.',
+            ]);
+
+        $this->assertSame(1, $otp->fresh()->attempts);
     }
 
     public function test_web_reset_password_page_renders_html_form(): void

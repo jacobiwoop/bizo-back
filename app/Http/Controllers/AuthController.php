@@ -5,12 +5,17 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\ResetPasswordWithOtpRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
+use App\Http\Requests\Auth\SendPasswordOtpRequest;
 use App\Http\Resources\UserResource;
+use App\Models\PasswordResetOtp;
 use App\Models\User;
+use App\Notifications\PasswordResetOtpNotification;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 
@@ -95,6 +100,79 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Si ce compte existe, un lien de réinitialisation a été envoyé par email.',
+        ]);
+    }
+
+    public function sendPasswordOtp(SendPasswordOtpRequest $request): JsonResponse
+    {
+        $email = strtolower((string) $request->input('email'));
+        $user = User::where('email', $email)->first();
+
+        if ($user) {
+            $otp = (string) random_int(100000, 999999);
+            $expiresInMinutes = 10;
+
+            PasswordResetOtp::where('email', $email)
+                ->whereNull('used_at')
+                ->delete();
+
+            PasswordResetOtp::create([
+                'email' => $email,
+                'otp_hash' => Hash::make($otp),
+                'expires_at' => now()->addMinutes($expiresInMinutes),
+            ]);
+
+            $user->notify(new PasswordResetOtpNotification($otp, $expiresInMinutes));
+        }
+
+        return response()->json([
+            'message' => 'Si ce compte existe, un code de réinitialisation a été envoyé par email.',
+        ]);
+    }
+
+    public function resetPasswordWithOtp(ResetPasswordWithOtpRequest $request): JsonResponse
+    {
+        $email = strtolower((string) $request->input('email'));
+        $otp = (string) $request->input('otp');
+        $user = User::where('email', $email)->first();
+
+        $resetOtp = PasswordResetOtp::where('email', $email)
+            ->whereNull('used_at')
+            ->latest()
+            ->first();
+
+        if (!$user || !$resetOtp || $resetOtp->isExpired() || $resetOtp->isLocked()) {
+            return response()->json([
+                'message' => 'Code OTP invalide ou expiré.',
+            ], 400);
+        }
+
+        if (!Hash::check($otp, $resetOtp->otp_hash)) {
+            $resetOtp->increment('attempts');
+
+            return response()->json([
+                'message' => 'Code OTP invalide ou expiré.',
+            ], 400);
+        }
+
+        DB::transaction(function () use ($user, $resetOtp, $request, $email) {
+            $user->forceFill([
+                'password' => Hash::make((string) $request->input('password')),
+            ])->save();
+
+            $user->tokens()->delete();
+
+            PasswordResetOtp::where('email', $email)
+                ->whereNull('used_at')
+                ->update(['used_at' => now()]);
+
+            $resetOtp->forceFill(['used_at' => now()])->save();
+
+            event(new PasswordReset($user));
+        });
+
+        return response()->json([
+            'message' => 'Mot de passe mis à jour.',
         ]);
     }
 
