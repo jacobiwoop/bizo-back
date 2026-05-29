@@ -60,7 +60,7 @@ class ListingController extends Controller
             'cash_complement' => $request->cash_complement,
             'exchange_for' => $request->type !== 'VENTE' ? $request->exchange_for : null,
             'category' => $request->category,
-            'attributes' => $request->attributes ?? [],
+            'attributes' => $request->input('attributes', []),
             'condition' => $request->condition,
             'delivery_mode' => $request->delivery_mode,
             'photos' => $photos,

@@ -138,6 +138,34 @@ class ListingTest extends TestCase
         ]);
     }
 
+    public function test_can_create_listing_with_dynamic_attributes(): void
+    {
+        Storage::fake('local');
+
+        $data = $this->validListingData();
+        $data['category'] = 'telephones';
+        $data['attributes'] = [
+            'brand' => 'Apple',
+            'model' => 'iPhone Smoke',
+            'storage' => '128 Go',
+            'battery_health' => '88',
+        ];
+        $data['photos'] = [$this->fakePhoto()];
+
+        $response = $this->actingAs($this->user)
+            ->postJson('/api/v1/listings', $data);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('data.category', 'telephones')
+            ->assertJsonPath('data.attributes.brand', 'Apple')
+            ->assertJsonPath('data.attributes.model', 'iPhone Smoke');
+
+        $listing = Listing::find($response->json('data.id'));
+
+        $this->assertSame('Apple', $listing->attributes['brand']);
+        $this->assertSame('128 Go', $listing->attributes['storage']);
+    }
+
     public function test_create_listing_requires_auth(): void
     {
         $response = $this->postJson('/api/v1/listings', $this->validListingData());
