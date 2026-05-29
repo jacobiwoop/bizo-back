@@ -56,4 +56,7 @@ RUN chmod +x /start.sh
 
 EXPOSE 10000
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD curl -fsS http://127.0.0.1:10000/api/v1/ping >/dev/null || exit 1
+
 CMD ["/start.sh"]
