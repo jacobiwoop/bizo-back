@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bizo — Debug</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #f5f4ef;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: sans-serif;
+    gap: 20px;
+  }
+
+  /* ── GRILLE ── */
+  #grid-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    display: none;
+  }
+  #grid-overlay.visible { display: block; }
+  /* lignes légères tous les 50px */
+  #grid-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(to right,  rgba(0,0,200,.08) 0px, rgba(0,0,200,.08) 1px, transparent 1px, transparent 50px),
+      repeating-linear-gradient(to bottom, rgba(0,0,200,.08) 0px, rgba(0,0,200,.08) 1px, transparent 1px, transparent 50px);
+  }
+  /* croix centrale bold */
+  #grid-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right,  transparent calc(50% - 1.5px), rgba(220,40,40,.85) calc(50% - 1.5px), rgba(220,40,40,.85) calc(50% + 1.5px), transparent calc(50% + 1.5px)),
+      linear-gradient(to bottom, transparent calc(50% - 1.5px), rgba(220,40,40,.85) calc(50% - 1.5px), rgba(220,40,40,.85) calc(50% + 1.5px), transparent calc(50% + 1.5px));
+  }
+
+  #stage {
+    position: relative;
+    width: 520px;
+    height: 220px;
+    overflow: visible;
+  }
+
+  #logo-wrap {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    --offset-x: 0px;
+    --offset-y: 0px;
+    transform: translate(calc(-50% + var(--offset-x)), calc(-50% + var(--offset-y)));
+    width: 420px;
+    height: 160px;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+  }
+
+  #logo-wrap.dragging { cursor: grabbing; }
+
+  #logo-wrap svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  @keyframes tagBounce {
+    0%, 100% { transform: translateY(0px);   }
+    50%       { transform: translateY(-12px); }
+  }
+
+  /* ── CONTROLS ── */
+  #controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 10px 18px;
+    font-size: 13px;
+    color: #444;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+
+  #controls button {
+    background: #2f2e2e;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  #controls button:hover { background: #555; }
+  #controls button.active { background: #e8b521; color: #2f2e2e; }
+
+  .sep { width: 1px; height: 22px; background: #ddd; }
+
+  .speed-group { display: flex; align-items: center; gap: 8px; }
+  .speed-group label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+  .speed-group input[type=radio] { accent-color: #e8b521; }
+
+  .offset-group { display: flex; align-items: center; gap: 8px; }
+  .offset-group label { display: flex; align-items: center; gap: 4px; }
+  .offset-group input {
+    width: 66px;
+    border: 1px solid #ddd;
+    border-radius: 7px;
+    padding: 5px 6px;
+    font-size: 12px;
+  }
+
+  #left-readout {
+    font-size: 11px;
+    color: #999;
+    font-variant-numeric: tabular-nums;
+    min-width: 80px;
+  }
+</style>
+</head>
+<body>
+
+<!-- grille plein écran -->
+<div id="grid-overlay"></div>
+
+<div id="stage">
+  <div id="logo-wrap">
+    <svg id="logo-svg" viewBox="0 0 2048 1694" preserveAspectRatio="xMidYMid meet" overflow="visible">
+
+      <g id="g-b" style="opacity:0; transform:scale(0); transform-origin:390px 740px;">
+        <path fill="rgb(47,46,46)" d="M 128.099 373.447 C 172.873 371.628 223.892 373.267 269.732 372.585 C 268.446 401.1 268.838 431.144 268.821 459.793 L 268.876 577.713 C 268.963 593.235 270.213 611.009 269.883 625.789 C 270.932 624.834 271.994 623.892 273.068 622.965 C 284.772 612.801 297.861 601.713 311.462 594.27 C 406.279 542.377 534.602 560.309 607.341 641.68 C 664.17 705.251 682.537 785.721 677.29 868.908 C 672.484 945.097 642.713 1013.36 583.757 1062.71 C 533.302 1105.67 471.434 1118.52 406.483 1113.65 C 397.393 1112.19 384.258 1112.1 375.945 1108.78 C 373.873 1106.38 374.969 1104.87 377.644 1101.69 C 386.651 1090.96 396.779 1080.85 405.926 1070.23 L 489.994 973.933 C 504.002 957.922 518.67 945.36 528.804 926.227 C 541.91 901.485 537.952 874.146 535.243 847.43 C 533.259 827.861 531.815 808.49 528.891 789.017 C 525.793 767.445 526.215 741.055 519.393 720.3 C 515.686 709.341 509.404 699.431 501.075 691.402 C 479.357 670.573 452.424 674.581 424.947 674.351 C 418.627 674.298 409.925 673.914 403.708 674.413 C 360.566 677.872 308.475 665.513 269.184 686.472 C 244.09 702.309 226.411 729.588 206.473 751.087 C 178.686 781.049 153.413 812.371 125.32 842.051 C 123.144 804.647 124.314 757.441 124.327 719.415 L 124.46 506.506 C 124.449 470.211 123.855 412.79 124.626 375.457 C 124.651 374.268 126.443 374.065 128.099 373.447 z"/>
+      </g>
+
+      <g id="g-tag" style="opacity:0; transform:scale(0); transform-origin:275px 940px;">
+        <path fill="rgb(232,181,33)" d="M 308.897 706.322 C 312.38 705.888 316.634 705.694 320.132 705.706 C 362.304 705.847 404.459 705.879 446.629 705.646 C 469.19 705.428 489.42 713.609 491.534 739.2 C 495.534 787.606 504.638 836.118 507.036 884.614 C 507.096 891.934 505.86 906.429 501.787 912.632 C 486.635 935.713 465.233 957.169 446.796 977.61 L 383.13 1049.59 L 313.164 1129.09 C 301.315 1142.63 289.852 1156.4 277.444 1169.44 C 266.689 1180.73 254.887 1183.19 239.87 1183.31 C 214.05 1178.31 165.907 1126.14 144.839 1107.35 L 78.4456 1048.55 C 64.7222 1036.17 43.8637 1023.61 41.9715 1003.64 C 39.0319 972.622 72.0845 949.21 89.1825 928.007 C 125.46 883.021 165.149 841.214 203.624 798.285 L 250.306 745.563 C 269.915 723.524 277.451 711.378 308.897 706.322 z M 408.526 840.865 C 423.117 838.517 435.316 828.499 440.457 814.643 C 445.598 800.787 442.885 785.236 433.355 773.939 C 423.826 762.643 408.955 757.348 394.431 760.08 C 372.381 764.227 357.758 785.325 361.615 807.427 C 365.471 829.53 386.374 844.43 408.526 840.865 z"/>
+      </g>
+
+      <g id="g-i" style="opacity:0; transform:scale(0); transform-origin:820px 840px;">
+        <path fill="rgb(47,46,46)" d="M 750.007 576.076 C 770.737 574.684 802.11 576.265 823.758 575.756 C 837.328 575.437 878.203 574.971 889.741 576.515 C 892.157 585.669 891.315 616.216 891.29 627.238 L 891.223 698.59 L 891.18 1011.72 C 891.189 1033.78 891.823 1078.54 890.541 1101.97 C 890.47 1103.26 888.835 1103.52 887.249 1104.21 C 841.529 1104.42 795.807 1104.34 750.088 1103.98 C 748.431 1088.91 749.482 1055.42 749.517 1038.35 L 749.665 910.428 L 749.507 657.824 C 749.501 647.22 748.266 582.391 750.007 576.076 z"/>
+        <path fill="rgb(47,46,46)" d="M 814.318 348.575 C 860.885 345.157 901.47 379.993 905.149 426.541 C 908.828 473.088 874.22 513.867 827.693 517.807 C 780.797 521.778 739.623 486.834 735.914 439.916 C 732.206 392.998 767.38 352.02 814.318 348.575 z"/>
+      </g>
+
+      <g id="g-z" style="opacity:0; transform:scale(0); transform-origin:1192px 840px;">
+        <path fill="rgb(47,46,46)" d="M 974.641 575.961 C 1022.31 574.632 1076.59 575.849 1124.71 575.834 L 1409.98 575.795 C 1410.47 598.77 1410.63 650.192 1409.39 670.904 C 1408.83 680.308 1350.96 745.167 1341.84 755.991 L 1227.7 893.843 C 1204.53 921.688 1180.5 949.337 1157.72 977.456 C 1155.49 980.202 1154.6 981.292 1155 984.268 C 1161.45 985.747 1214.94 985.28 1226.25 985.301 L 1419.39 985.337 C 1417.74 1011.31 1419.73 1041.59 1419.15 1067.97 C 1418.96 1076.76 1419.97 1093.43 1418.48 1101.54 C 1416.07 1104.1 1417.28 1103.36 1413.25 1103.85 C 1383.02 1104.78 1350.71 1104.23 1320.3 1104.23 L 1157.95 1104.21 L 1039.19 1104.27 C 1016.59 1104.32 989.221 1105.08 966.96 1103.86 C 965.191 1082.77 966.266 1029.02 966.538 1009.07 C 966.657 1000.36 1028.54 931.477 1036.93 921.291 L 1226.94 693.257 C 1214.51 693.995 1196.48 693.443 1183.63 693.415 L 1102.92 693.249 L 1026.82 693.299 C 1009.37 693.359 992.248 693.91 974.82 692.894 C 974.416 653.917 974.356 614.938 974.641 575.961 z"/>
+      </g>
+
+      <g id="g-o" style="opacity:0; transform:scale(0); transform-origin:1730px 840px;">
+        <path fill="rgb(47,46,46)" d="M 1727.8 562.367 C 1881.42 561.072 2007 684.545 2008.3 838.159 C 2009.61 991.773 1886.14 1117.36 1732.53 1118.68 C 1578.9 1120 1453.3 996.516 1451.99 842.887 C 1450.69 689.258 1574.17 563.662 1727.8 562.367 z M 1737.45 989.18 C 1773 986.203 1806.73 971.553 1828.87 944.087 C 1879.4 881.43 1874.86 775.954 1814.2 721.689 C 1792.28 702.078 1752.6 688.572 1724 691.345 C 1713.6 692.73 1701.04 693.993 1690.7 697.233 C 1584.56 730.503 1566.86 882.446 1641.63 954.955 C 1666.78 979.337 1701.58 989.306 1737.45 989.18 z"/>
+      </g>
+
+    </svg>
+  </div>
+</div>
+
+<!-- CONTROLS -->
+<div id="controls">
+  <button id="btn-play">▶ Rejouer</button>
+  <button id="btn-pause">⏸ Pause</button>
+  <div class="sep"></div>
+  <div class="speed-group">
+    <span>Vitesse :</span>
+    <label><input type="radio" name="speed" value="0.25"> 0.25×</label>
+    <label><input type="radio" name="speed" value="0.5">  0.5×</label>
+    <label><input type="radio" name="speed" value="1" checked> 1×</label>
+    <label><input type="radio" name="speed" value="2">  2×</label>
+  </div>
+  <div class="sep"></div>
+  <button id="btn-grid">⊞ Grille</button>
+  <div class="sep"></div>
+  <div class="offset-group">
+    <span>Offset :</span>
+    <label>X <input id="offset-x" type="number" value="0" step="1"></label>
+    <label>Y <input id="offset-y" type="number" value="0" step="1"></label>
+    <span>ou glisser le logo</span>
+  </div>
+  <div class="sep"></div>
+  <span id="left-readout">left: 76.0%</span>
+</div>
+
+<script>
+  // ── état global ──
+  let paused = false;
+  let speedMult = 1;
+  let animRunning = false;
+  let rafIds = [];          // tous les rAF en cours
+  let timeoutIds = [];      // tous les setTimeout en cours
+  const START_PCT = 70;
+  const END_PCT = 50;
+
+  // ── helpers ──
+  function easeOutBack(t) {
+    const c1 = 1.70158, c3 = c1 + 1;
+    return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+  }
+  function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+  // rAF pausable
+  function praf(fn) {
+    let id;
+    function tick(now) {
+      if (!paused) fn(now);
+      id = requestAnimationFrame(tick);
+      rafIds.push(id);
+    }
+    id = requestAnimationFrame(tick);
+    rafIds.push(id);
+    return () => cancelAnimationFrame(id);
+  }
+
+  function animEl(el, baseDuration) {
+    const duration = baseDuration / speedMult;
+    return new Promise(resolve => {
+      el.style.opacity = '0';
+      let startTime = null;
+      let pausedAt = null;
+      let elapsed = 0;
+
+      function frame(now) {
+        if (paused) {
+          pausedAt = now;
+          requestAnimationFrame(frame);
+          return;
+        }
+        if (pausedAt !== null) {
+          startTime += (now - pausedAt);
+          pausedAt = null;
+        }
+        if (startTime === null) startTime = now;
+        const t = Math.min((now - startTime) / duration, 1);
+        const e = easeOutBack(t);
+        el.style.opacity = String(Math.min(t * 2, 1));
+        el.style.transform = `scale(${e})`;
+        if (t < 1) requestAnimationFrame(frame);
+        else { el.style.opacity = '1'; el.style.transform = 'scale(1)'; resolve(); }
+      }
+      requestAnimationFrame(frame);
+    });
+  }
+
+  const wrap = document.getElementById('logo-wrap');
+  const readout = document.getElementById('left-readout');
+  const offsetXInput = document.getElementById('offset-x');
+  const offsetYInput = document.getElementById('offset-y');
+
+  function applyOffset() {
+    wrap.style.setProperty('--offset-x', `${Number(offsetXInput.value || 0)}px`);
+    wrap.style.setProperty('--offset-y', `${Number(offsetYInput.value || 0)}px`);
+  }
+
+  let dragState = null;
+
+  function setOffset(x, y) {
+    offsetXInput.value = String(Math.round(x));
+    offsetYInput.value = String(Math.round(y));
+    applyOffset();
+  }
+
+  wrap.addEventListener('pointerdown', event => {
+    event.preventDefault();
+    wrap.setPointerCapture(event.pointerId);
+    wrap.classList.add('dragging');
+    dragState = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      originX: Number(offsetXInput.value || 0),
+      originY: Number(offsetYInput.value || 0),
+    };
+  });
+
+  wrap.addEventListener('pointermove', event => {
+    if (!dragState || dragState.pointerId !== event.pointerId) return;
+    setOffset(
+      dragState.originX + event.clientX - dragState.startX,
+      dragState.originY + event.clientY - dragState.startY
+    );
+  });
+
+  function endDrag(event) {
+    if (!dragState || dragState.pointerId !== event.pointerId) return;
+    wrap.classList.remove('dragging');
+    dragState = null;
+  }
+
+  wrap.addEventListener('pointerup', endDrag);
+  wrap.addEventListener('pointercancel', endDrag);
+
+  function slideWrap(startPct, endPct, baseDuration) {
+    const duration = baseDuration / speedMult;
+    let startTime = null;
+    let pausedAt = null;
+
+    return new Promise(resolve => {
+      function frame(now) {
+        if (paused) {
+          pausedAt = now;
+          requestAnimationFrame(frame);
+          return;
+        }
+        if (pausedAt !== null) {
+          startTime += (now - pausedAt);
+          pausedAt = null;
+        }
+        if (startTime === null) startTime = now;
+        const t = Math.min((now - startTime) / duration, 1);
+        const e = easeOut(t);
+        const pct = startPct + (endPct - startPct) * e;
+        wrap.style.left = pct + '%';
+        readout.textContent = `left: ${pct.toFixed(1)}%`;
+        if (t < 1) requestAnimationFrame(frame);
+        else { wrap.style.left = endPct + '%'; readout.textContent = `left: ${endPct.toFixed(1)}%`; resolve(); }
+      }
+      requestAnimationFrame(frame);
+    });
+  }
+
+  function delay(ms) {
+    return new Promise(resolve => {
+      const id = setTimeout(resolve, ms / speedMult);
+      timeoutIds.push(id);
+    });
+  }
+
+  function cancelAll() {
+    timeoutIds.forEach(clearTimeout);
+    timeoutIds = [];
+  }
+
+  async function runAnim() {
+    if (animRunning) cancelAll();
+    animRunning = true;
+    paused = false;
+    document.getElementById('btn-pause').textContent = '⏸ Pause';
+    document.getElementById('btn-pause').classList.remove('active');
+
+    const ids = ['g-b','g-tag','g-i','g-z','g-o'];
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      el.style.opacity = '0';
+      el.style.transform = 'scale(0)';
+      el.style.animation = 'none';
+    });
+    wrap.style.left = `${START_PCT}%`;
+    readout.textContent = `left: ${START_PCT.toFixed(1)}%`;
+
+    await delay(300);
+
+    await animEl(document.getElementById('g-b'), 500);
+    await delay(200);
+
+    await animEl(document.getElementById('g-tag'), 400);
+    await delay(300);
+
+    const slidePromise = slideWrap(START_PCT, END_PCT, 700);
+    setTimeout(() => animEl(document.getElementById('g-i'), 380), 150  / speedMult);
+    setTimeout(() => animEl(document.getElementById('g-z'), 380), 340  / speedMult);
+    setTimeout(() => animEl(document.getElementById('g-o'), 380), 530  / speedMult);
+    await slidePromise;
+
+    await delay(300);
+
+    const tag = document.getElementById('g-tag');
+    tag.style.animation = 'tagBounce 1.1s ease-in-out infinite';
+    animRunning = false;
+  }
+
+  // ── boutons ──
+  document.getElementById('btn-play').addEventListener('click', runAnim);
+
+  document.getElementById('btn-pause').addEventListener('click', () => {
+    paused = !paused;
+    const btn = document.getElementById('btn-pause');
+    btn.textContent = paused ? '▶ Reprendre' : '⏸ Pause';
+    btn.classList.toggle('active', paused);
+  });
+
+  document.querySelectorAll('input[name=speed]').forEach(r => {
+    r.addEventListener('change', e => { speedMult = parseFloat(e.target.value); });
+  });
+
+  document.getElementById('btn-grid').addEventListener('click', () => {
+    document.getElementById('grid-overlay').classList.toggle('visible');
+  });
+
+  offsetXInput.addEventListener('input', applyOffset);
+  offsetYInput.addEventListener('input', applyOffset);
+  applyOffset();
+
+  runAnim();
+</script>
+</body>
+</html>

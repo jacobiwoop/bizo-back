@@ -1,9 +1,9 @@
+import LottieView from "lottie-react-native";
 import { useEffect, useRef } from "react";
-import { Image } from "expo-image";
 import { Animated, Easing, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const bizoBrandLogo = require("../../../design/bizo/bizo_brand_logo/brand.png");
+const bizoLogoIntro = require("../../../assets/animations/bizo-logo-intro-vector.json");
 
 function LoadingDot({ delay }: { delay: number }) {
   const opacity = useRef(new Animated.Value(0.25)).current;
@@ -63,10 +63,11 @@ export function StartupLoadingScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top", "bottom"]}>
       <View className="flex-1 items-center justify-center px-8">
-        <Image
-          source={bizoBrandLogo}
-          style={{ width: 176, height: 146 }}
-          contentFit="contain"
+        <LottieView
+          autoPlay
+          loop
+          source={bizoLogoIntro}
+          style={{ height: 260, width: 260 }}
         />
         <Text className="mt-5 text-center text-[14px] text-[#7E7E7E]">
           Loading your marketplace

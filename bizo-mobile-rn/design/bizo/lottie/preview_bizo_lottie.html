@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bizo Lottie Preview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    background: #f5f4ef;
+    font-family: sans-serif;
+  }
+  #preview {
+    width: min(86vw, 520px);
+    aspect-ratio: 1;
+  }
+  #controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+  button {
+    border: 0;
+    border-radius: 9px;
+    padding: 8px 14px;
+    background: #2f2e2e;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  button.secondary {
+    background: #e8b521;
+    color: #2f2e2e;
+  }
+  label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #444;
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+  <div id="preview"></div>
+  <div id="controls">
+    <button id="play">Rejouer</button>
+    <button id="pause" class="secondary">Pause</button>
+    <label>
+      Loop
+      <input id="loop" type="checkbox" checked>
+    </label>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+  <script>
+    const animation = lottie.loadAnimation({
+      container: document.getElementById("preview"),
+      renderer: "svg",
+      loop: true,
+      autoplay: true,
+      path: "./bizo-logo-intro-vector.json",
+      rendererSettings: {
+        preserveAspectRatio: "xMidYMid meet"
+      }
+    });
+
+    document.getElementById("play").addEventListener("click", () => {
+      animation.goToAndPlay(0, true);
+    });
+
+    document.getElementById("pause").addEventListener("click", (event) => {
+      if (animation.isPaused) {
+        animation.play();
+        event.currentTarget.textContent = "Pause";
+      } else {
+        animation.pause();
+        event.currentTarget.textContent = "Reprendre";
+      }
+    });
+
+    document.getElementById("loop").addEventListener("change", (event) => {
+      animation.loop = event.currentTarget.checked;
+    });
+  </script>
+</body>
+</html>
