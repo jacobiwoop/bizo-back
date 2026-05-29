@@ -36,7 +36,7 @@ import {
   X,
 } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, type DimensionValue, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, type DimensionValue, Text, TextInput, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type PublishMode = "sale" | "trade" | "trade-cash";
@@ -110,9 +110,20 @@ function parseAmount(value: string): number | null {
   return normalized ? Number(normalized) : null;
 }
 
+function formatAmountInput(value: string) {
+  return value.replace(/[^\d]/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
 function formatPrice(value: string) {
   const amount = parseAmount(value);
-  return amount === null ? "Prix à renseigner" : `${amount.toLocaleString("fr-FR")} FCFA`;
+  return amount === null ? "Prix à renseigner" : `${formatAmountInput(String(amount))} FCFA`;
+}
+
+function getAmountFontSize(value: string) {
+  const length = formatAmountInput(value).length;
+  if (length > 14) return 30;
+  if (length > 10) return 36;
+  return 46;
 }
 
 function isFilled(value: PublishAttributeValue | undefined) {
@@ -142,11 +153,9 @@ const mapImage =
 
 function Header({
   step,
-  onBack,
   onClose,
 }: {
   step: PublishStep;
-  onBack: () => void;
   onClose: () => void;
 }) {
   const progress = `${(step / 7) * 100}%` as DimensionValue;
@@ -155,7 +164,7 @@ function Header({
     <SafeAreaView edges={["top"]} className="bg-[#F8F9FA]">
       <View className="px-5 pb-3 pt-2">
         <View className="h-11 flex-row items-center justify-between">
-          <Pressable className="h-10 w-10 items-center justify-center" onPress={step === 1 ? onClose : onBack}>
+          <Pressable className="h-10 w-10 items-center justify-center" onPress={onClose}>
             {step === 1 ? <X color={colors.text} size={25} /> : <ChevronLeft color={colors.text} size={27} strokeWidth={2.2} />}
           </Pressable>
           <Text className="text-[15px] font-bold text-[#191C1D]">Publier une annonce</Text>
@@ -536,11 +545,22 @@ function StepFiveSale({
     <StepShell>
       <InlineMessage message={errorMessage} />
       <Text className="text-[32px] font-black text-[#191C1D]">Quel est votre prix ?</Text>
-      <View className="mt-8 items-center">
-        <View className="flex-row items-end">
-          <TextInput className="w-40 text-center text-[48px] font-black text-[#191C1D]" keyboardType="number-pad" onChangeText={(price) => setForm({ price })} placeholder="0" value={form.price} />
-          <Text className="mb-3 text-[20px] font-bold text-[#5F5E5E]">FCFA</Text>
+      <View className="mt-8 rounded-3xl border border-[#F5C518] bg-white px-5 py-5 shadow-soft">
+        <Text className="text-center text-[12px] font-bold uppercase tracking-[1px] text-[#745B00]">Prix de vente</Text>
+        <View className="mt-2 flex-row items-end">
+          <TextInput
+            className="min-w-0 flex-1 text-center font-black text-[#191C1D]"
+            keyboardType="number-pad"
+            onChangeText={(price) => setForm({ price: price.replace(/[^\d]/g, "") })}
+            placeholder="0"
+            placeholderTextColor="#B4B4B4"
+            selectionColor="#F5C518"
+            style={{ fontSize: getAmountFontSize(form.price), lineHeight: getAmountFontSize(form.price) + 8 }}
+            value={formatAmountInput(form.price)}
+          />
+          <Text className="mb-2 ml-2 text-[18px] font-black text-[#745B00]">FCFA</Text>
         </View>
+        <Text className="mt-2 text-center text-[12px] text-[#5F5E5E]">Exemple : 150 000 FCFA</Text>
       </View>
       <View className="mt-8 gap-3">
         {[
@@ -645,9 +665,20 @@ function StepFiveTradeCash({
       </View>
       <View className="mt-8 items-center">
         <Text className="text-[13px] font-bold uppercase tracking-[1px] text-[#5F5E5E]">Complément cash</Text>
-        <View className="mt-3 flex-row items-end">
-          <TextInput className="w-32 border-b-2 border-[#E1E3E4] text-center text-[48px] font-black text-[#191C1D]" keyboardType="number-pad" onChangeText={(cashComplement) => setForm({ cashComplement })} placeholder="0" value={form.cashComplement} />
-          <Text className="mb-3 text-[20px] font-bold text-[#5F5E5E]">FCFA</Text>
+        <View className="mt-3 w-full rounded-3xl border border-[#F5C518] bg-white px-5 py-4 shadow-soft">
+          <View className="flex-row items-end">
+            <TextInput
+              className="min-w-0 flex-1 text-center font-black text-[#191C1D]"
+              keyboardType="number-pad"
+              onChangeText={(cashComplement) => setForm({ cashComplement: cashComplement.replace(/[^\d]/g, "") })}
+              placeholder="0"
+              placeholderTextColor="#B4B4B4"
+              selectionColor="#F5C518"
+              style={{ fontSize: getAmountFontSize(form.cashComplement), lineHeight: getAmountFontSize(form.cashComplement) + 8 }}
+              value={formatAmountInput(form.cashComplement)}
+            />
+            <Text className="mb-2 ml-2 text-[18px] font-black text-[#745B00]">FCFA</Text>
+          </View>
         </View>
       </View>
       <View className="mt-8 flex-row gap-3">
@@ -716,15 +747,15 @@ function StepSix({
   );
 }
 
-function SummaryRow({ label, value }: { label: string; value: string }) {
+function SummaryRow({ label, onPress, value }: { label: string; onPress: () => void; value: string }) {
   return (
-    <View className="flex-row items-center justify-between border-b border-[#EDEEEF] py-4">
+    <Pressable className="flex-row items-center justify-between border-b border-[#EDEEEF] py-4" onPress={onPress}>
       <View>
         <Text className="text-[12px] font-bold uppercase tracking-[1px] text-[#5F5E5E]">{label}</Text>
         <Text className="mt-1 text-[15px] font-semibold text-[#191C1D]">{value}</Text>
       </View>
       <Edit3 color="#5F5E5E" size={18} />
-    </View>
+    </Pressable>
   );
 }
 
@@ -733,17 +764,21 @@ function StepSeven({
   errorMessage,
   form,
   mode,
+  onEditStep,
   photos,
 }: {
   category: ListingCategoryDefinition;
   errorMessage: string | null;
   form: PublishForm;
   mode: PublishMode;
+  onEditStep: (step: PublishStep) => void;
   photos: PublishPhoto[];
 }) {
   const modeLabel = mode === "sale" ? "Vente" : mode === "trade" ? "Troc" : "Troc + Cash";
   const conditionLabel = conditionOptions.find((option) => option.value === form.condition)?.label ?? "Très bon état";
-  const heroImage = photos[0]?.uri ?? samplePhotos[0];
+  const carouselImages = photos.length > 0 ? photos.map((photo) => photo.uri) : [samplePhotos[0]];
+  const { width } = useWindowDimensions();
+  const carouselWidth = width - 40;
   const title = form.title.trim() || "Titre à renseigner";
   const location = [form.neighborhood, form.city].filter(Boolean).join(", ") || "Localisation à renseigner";
 
@@ -758,7 +793,18 @@ function StepSeven({
         <Text className="mt-2 text-center text-[14px] leading-5 text-[#5F5E5E]">Dernière étape avant publication.</Text>
       </View>
       <View className="mt-6 overflow-hidden rounded-3xl bg-white shadow-soft">
-        <Image source={heroImage} style={{ width: "100%", height: 190 }} contentFit="cover" />
+        <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false}>
+          {carouselImages.map((imageUri, index) => (
+            <Image key={`${imageUri}-${index}`} source={imageUri} style={{ width: carouselWidth, height: 190 }} contentFit="cover" />
+          ))}
+        </ScrollView>
+        {carouselImages.length > 1 ? (
+          <View className="absolute bottom-[86px] left-0 right-0 flex-row justify-center gap-1">
+            {carouselImages.map((imageUri, index) => (
+              <View key={`${imageUri}-dot-${index}`} className={`h-1.5 rounded-full ${index === 0 ? "w-5 bg-white" : "w-1.5 bg-white/60"}`} />
+            ))}
+          </View>
+        ) : null}
         <View className="p-4">
           <View className="flex-row items-start justify-between">
             <Text className="max-w-[70%] text-[20px] font-black leading-6 text-[#191C1D]">{title}</Text>
@@ -773,11 +819,12 @@ function StepSeven({
         </View>
       </View>
       <View className="mt-6 rounded-2xl bg-white px-4 shadow-soft">
-        <SummaryRow label="Mode" value={modeLabel} />
-        <SummaryRow label="Catégorie" value={category.label} />
-        <SummaryRow label="État" value={conditionLabel} />
-        <SummaryRow label="Localisation" value={location} />
-        <SummaryRow label="Photos" value={`${photos.length} photo${photos.length > 1 ? "s" : ""} ajoutée${photos.length > 1 ? "s" : ""}`} />
+        <SummaryRow label="Mode" onPress={() => onEditStep(1)} value={modeLabel} />
+        <SummaryRow label="Catégorie" onPress={() => onEditStep(2)} value={category.label} />
+        <SummaryRow label="Photos" onPress={() => onEditStep(3)} value={`${photos.length} photo${photos.length > 1 ? "s" : ""} ajoutée${photos.length > 1 ? "s" : ""}`} />
+        <SummaryRow label="Description" onPress={() => onEditStep(4)} value={`${title} • ${conditionLabel}`} />
+        <SummaryRow label={mode === "sale" ? "Prix" : "Échange"} onPress={() => onEditStep(5)} value={mode === "sale" ? formatPrice(form.price) : form.exchangeFor.trim() || modeLabel} />
+        <SummaryRow label="Localisation" onPress={() => onEditStep(6)} value={location} />
       </View>
     </StepShell>
   );
@@ -918,6 +965,11 @@ export function PublishFlowScreen() {
     }
   };
 
+  const goToStep = (targetStep: PublishStep) => {
+    setFormError(null);
+    setStep(targetStep);
+  };
+
   const content = useMemo(() => {
     if (step === 1) return <StepOne mode={mode} setMode={setMode} />;
     if (step === 2) return <StepTwo selectedCategory={selectedCategory} setSelectedCategory={selectCategory} />;
@@ -927,7 +979,7 @@ export function PublishFlowScreen() {
     if (step === 5 && mode === "trade") return <StepFiveTrade errorMessage={formError} form={form} setForm={setForm} />;
     if (step === 5) return <StepFiveTradeCash errorMessage={formError} form={form} setForm={setForm} />;
     if (step === 6) return <StepSix errorMessage={formError} form={form} setForm={setForm} />;
-    return <StepSeven category={selectedCategory} errorMessage={formError} form={form} mode={mode} photos={pickedPhotos} />;
+    return <StepSeven category={selectedCategory} errorMessage={formError} form={form} mode={mode} onEditStep={goToStep} photos={pickedPhotos} />;
   }, [attributes, form, formError, mode, pickedPhotos, selectedCategory, step]);
 
   const next = async () => {
@@ -951,12 +1003,12 @@ export function PublishFlowScreen() {
     setFormError(null);
     setStep((current) => (Math.max(current - 1, 1) as PublishStep));
   };
-  const close = () => router.back();
+  const close = () => router.replace("/(tabs)/home");
   const footerLabel = createListingMutation.isPending ? "Publication..." : step === 7 ? "Publier maintenant" : "Continuer";
 
   return (
     <View className="flex-1 bg-[#F8F9FA]">
-      <Header step={step} onBack={back} onClose={close} />
+      <Header step={step} onClose={close} />
       {content}
       <Footer
         disabled={createListingMutation.isPending}
