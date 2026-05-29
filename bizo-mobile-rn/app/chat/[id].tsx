@@ -1,10 +1,9 @@
-import { PlaceholderScreen } from "@/src/components/ui/placeholder-screen";
+import { useRouter } from "expo-router";
+
+import { DirectContactChatScreen } from "@/src/features/chat/screens/direct-contact-chat-screen";
 
 export default function ChatThreadRoute() {
-  return (
-    <PlaceholderScreen
-      title="Conversation"
-      subtitle="La conversation RN sera rebatie ensuite avec le chat temps reel branche sur le backend Laravel/Reverb."
-    />
-  );
+  const router = useRouter();
+
+  return <DirectContactChatScreen onBack={() => router.back()} />;
 }

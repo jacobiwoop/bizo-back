@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700;800;900&amp;family=Inter:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary": "#5f5e5e",
+                    "on-tertiary": "#ffffff",
+                    "surface": "#f8f9fa",
+                    "on-secondary": "#ffffff",
+                    "primary-fixed": "#ffe08b",
+                    "surface-container-highest": "#e1e3e4",
+                    "tertiary-fixed-dim": "#42d7fb",
+                    "surface-variant": "#e1e3e4",
+                    "inverse-surface": "#2e3132",
+                    "on-primary-fixed-variant": "#584400",
+                    "surface-container-low": "#f3f4f5",
+                    "tertiary-fixed": "#b0ecff",
+                    "primary-container": "#f5c518",
+                    "background": "#f8f9fa",
+                    "primary": "#745b00",
+                    "on-primary": "#ffffff",
+                    "surface-container-high": "#e7e8e9",
+                    "outline-variant": "#d1c5ac",
+                    "on-surface-variant": "#4e4633",
+                    "surface-dim": "#d9dadb",
+                    "on-primary-fixed": "#241a00",
+                    "surface-container-lowest": "#ffffff",
+                    "on-surface": "#191c1d",
+                    "outline": "#807660",
+                    "on-tertiary-container": "#005e70",
+                    "secondary-container": "#e2dfde",
+                    "on-secondary-container": "#636262",
+                    "tertiary": "#00687c",
+                    "tertiary-container": "#49dbff",
+                    "on-tertiary-fixed": "#001f27",
+                    "inverse-primary": "#f0c110",
+                    "on-tertiary-fixed-variant": "#004e5e",
+                    "on-error-container": "#93000a",
+                    "primary-fixed-dim": "#f0c110",
+                    "surface-container": "#edeeef",
+                    "surface-bright": "#f8f9fa",
+                    "secondary-fixed-dim": "#c8c6c5",
+                    "on-secondary-fixed": "#1c1b1b",
+                    "on-primary-container": "#695200",
+                    "on-secondary-fixed-variant": "#474746",
+                    "on-background": "#191c1d",
+                    "surface-tint": "#745b00",
+                    "secondary-fixed": "#e5e2e1",
+                    "error": "#ba1a1a",
+                    "error-container": "#ffdad6",
+                    "on-error": "#ffffff",
+                    "inverse-on-surface": "#f0f1f2"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "16px",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "32px",
+                    "base": "8px",
+                    "gutter": "12px",
+                    "container-margin": "20px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "headline-md": ["Archivo Narrow"],
+                    "display": ["Archivo Narrow"],
+                    "label-bold": ["Inter"],
+                    "headline-lg": ["Archivo Narrow"],
+                    "body-sm": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-lg-mobile": ["Archivo Narrow"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "300"}],
+                    "headline-md": ["20px", {"lineHeight": "1.3", "fontWeight": "800"}],
+                    "display": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "900"}],
+                    "label-bold": ["12px", {"lineHeight": "1", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "900"}],
+                    "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "300"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "900"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { background-color: #f8f9fa; }
+        .glass-nav { backdrop-filter: blur(15px); }
+        .shadow-level-1 { shadow: 0 4px 20px rgba(0,0,0,0.04); }
+        .shadow-level-2 { shadow: 0 8px 24px rgba(0,0,0,0.08); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .active-tab-indicator { height: 3px; border-radius: 99px; }
+        .header-gradient { background: linear-gradient(135deg, #EFF6FF 0%, #E0E7FF 100%); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface">
+<!-- Top App Bar -->
+<header class="bg-surface sticky top-0 z-50 shadow-sm flex justify-between items-center w-full px-container-margin py-base h-16">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary cursor-pointer" data-icon="menu">menu</span>
+<h1 class="font-display text-headline-md font-black text-primary tracking-tight">Mon Profil</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant/50 transition-all active:scale-95">
+<span class="material-symbols-outlined text-primary" data-icon="settings">settings</span>
+</button>
+</header>
+<main class="pb-24">
+<!-- Profile Header -->
+<section class="header-gradient px-container-margin py-8 flex flex-col items-center">
+<div class="relative mb-4">
+<div class="w-20 h-20 rounded-full border-4 border-primary-container overflow-hidden shadow-lg">
+<img alt="Julien Dupont" class="w-full h-full object-cover" data-alt="A professional headshot of a smiling man with a groomed beard and short hair. He is wearing a modern blue shirt against a neutral background. The lighting is soft and flattering, emphasizing a trustworthy and friendly persona for a premium marketplace user profile." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMjsB0pgDrsfBdARgXmxTsqpTdsJ7Ikxoza6-mZxENAAptew77FJL9yt_2x-ZVKWyjMcCrq2GVy8SX-syUyyiDB37H1jmroNDY_dQ7bujBbECg_8MKJMxlNvUSofrjWnPDG7GIQSfFYHtpSygu-jOMA4Pl-E_oQMKkRwQ9JbpgWnpYjYWoOHwrfd2L9QcN6b3L6w8aSxOWtzFSLQuS_jU4uz1fWTtd7EVvf8jlwKnNqinjio0Er6mvHfn6DjReqEdSwnmtJ3DJ764"/>
+</div>
+<div class="absolute bottom-0 right-0 bg-primary-container p-1 rounded-full border-2 border-white flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container text-[14px]" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-1">Julien Dupont</h2>
+<button class="px-6 py-2 rounded-full border border-outline/30 font-label-bold text-label-bold text-secondary uppercase tracking-wider hover:bg-white/40 transition-all active:scale-95 mb-6">
+                Modifier le profil
+            </button>
+<!-- Quick Stats Row -->
+<div class="w-full grid grid-cols-4 gap-2 text-center">
+<div>
+<p class="font-headline-md text-primary">47</p>
+<p class="font-label-bold text-[10px] uppercase text-secondary">Annonces</p>
+</div>
+<div>
+<p class="font-headline-md text-primary">4.8</p>
+<p class="font-label-bold text-[10px] uppercase text-secondary">Note</p>
+</div>
+<div>
+<p class="font-headline-md text-primary">312</p>
+<p class="font-label-bold text-[10px] uppercase text-secondary">Followers</p>
+</div>
+<div>
+<p class="font-headline-md text-primary">5</p>
+<p class="font-label-bold text-[10px] uppercase text-secondary">Messages</p>
+</div>
+</div>
+</section>
+<!-- Private Stats Banner -->
+<section class="px-container-margin -mt-6 mb-section-gap">
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-md border-l-4 border-primary-container flex justify-between items-center">
+<div class="flex flex-col">
+<p class="font-label-bold text-secondary text-label-bold uppercase">Vues cette semaine</p>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg-mobile text-headline-lg-mobile">1 243</span>
+<span class="text-green-600 font-label-bold text-label-bold flex items-center">
+<span class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span>
+                            +12%
+                        </span>
+</div>
+</div>
+<div class="w-12 h-12 bg-primary-container/10 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="visibility">visibility</span>
+</div>
+</div>
+</section>
+<!-- Tabs Bar -->
+<nav class="sticky top-16 z-40 bg-surface flex w-full overflow-x-auto border-b border-surface-container-highest no-scrollbar">
+<div class="flex-1 text-center py-4 px-2">
+<span class="font-label-bold text-secondary">Actives</span>
+</div>
+<div class="flex-1 text-center py-4 px-2 relative">
+<span class="font-label-bold text-primary">Vendues</span>
+<div class="absolute bottom-0 left-1/4 right-1/4 bg-primary-container active-tab-indicator"></div>
+</div>
+<div class="flex-1 text-center py-4 px-2">
+<span class="font-label-bold text-secondary">Brouillons</span>
+</div>
+<div class="flex-1 text-center py-4 px-2">
+<span class="font-label-bold text-secondary">Favoris</span>
+</div>
+</nav>
+<!-- Summary Banner -->
+<div class="px-container-margin py-4">
+<div class="bg-tertiary-container/20 rounded-xl p-4 flex items-center gap-4">
+<div class="w-10 h-10 bg-tertiary text-on-tertiary rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="shopping_bag">shopping_bag</span>
+</div>
+<div>
+<h3 class="font-label-bold text-on-surface">38 transactions réussies</h3>
+<p class="text-body-sm text-secondary">Continuez comme ça!</p>
+</div>
+</div>
+</div>
+<!-- Vendues Content Grid -->
+<section class="px-container-margin grid grid-cols-2 gap-gutter py-4">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm flex flex-col">
+<div class="relative aspect-square">
+<img alt="MacBook Pro" class="w-full h-full object-cover grayscale" data-alt="A high-end metallic laptop sits on a minimal wooden desk in a bright, sunlit home office environment. The image is intentionally desaturated to convey a sold or inactive status. The lighting is soft and airy, matching the modern lifestyle marketplace aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgZP5ImJbLQio5b_qYNsW-Uq5DZzYNYSVvaKlT_UyRIGLgoIUQocsLoUs7_qLFqr16zj0W_jiiIjkCOgSZYht2xKLwExrvcToZwX0YAuaALIqxuJMURgAEjmGOtf5yIkcGJ4z5KkHktn0LPBELzSiUQUlHwjp8xISLjACPdUU2QuomsBDahvAwC23fwoD6863pbQGfbPVmUQm6i0uLjNjnD-Br3tW9ltreMUT-hNRaiUWsLgPUc18i2zbFhBDedPXsWpuD30oLa5o"/>
+<div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center">
+<span class="material-symbols-outlined text-white text-[32px] mb-1" data-icon="check_circle">check_circle</span>
+<span class="font-label-bold text-white tracking-[2px] text-label-bold">VENDU</span>
+</div>
+</div>
+<div class="p-3 flex flex-col flex-1">
+<h4 class="font-label-bold text-on-surface line-clamp-1 mb-1">MacBook Pro M2</h4>
+<span class="text-body-sm text-secondary line-through">1 200 €</span>
+<span class="text-body-sm text-green-600 font-bold mb-2">Vendu le 12 Mai 2026</span>
+<div class="text-[11px] text-secondary mb-3 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="person">person</span>
+                        À: Martin D.
+                    </div>
+<div class="mt-auto flex justify-between pt-2 border-t border-surface-container">
+<span class="material-symbols-outlined text-secondary text-[20px]" data-icon="visibility">visibility</span>
+<span class="material-symbols-outlined text-secondary text-[20px]" data-icon="refresh">refresh</span>
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm flex flex-col">
+<div class="relative aspect-square">
+<img alt="Veste en cuir" class="w-full h-full object-cover grayscale" data-alt="A stylish black leather jacket hanging against a clean, off-white gallery wall. The image features dramatic but soft side-lighting that highlights the texture of the leather. The shot is desaturated to indicate it is a sold item in a professional fashion marketplace." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBIPQ_mxQ1PWSIDdt4ZtvDsYHYXqRz59SvzFPSAGqBMR_3a9Kho60ork4N7EIHge-sopq-JSRo7HsmiCfjlWyCfin33Yl7aJCq6Lv8GkWWLhx9Pqo1K1431DNUR50AuIatssq3ODypCo2rvVhIID_HiFGWg1iceJfByiChfPOs5m7P9cIZB3ifXFaqTWgMurh1i2gUO-PUICnZ2CaitKVSlL1FYqcKym1HByyr7oFH_QKyEb3P0MoKP0usEOcFPB4CL4w-9-1IbdE"/>
+<div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center">
+<span class="material-symbols-outlined text-white text-[32px] mb-1" data-icon="check_circle">check_circle</span>
+<span class="font-label-bold text-white tracking-[2px] text-label-bold">VENDU</span>
+</div>
+</div>
+<div class="p-3 flex flex-col flex-1">
+<h4 class="font-label-bold text-on-surface line-clamp-1 mb-1">Veste Cuir Zara</h4>
+<span class="text-body-sm text-secondary line-through">85 €</span>
+<span class="text-body-sm text-green-600 font-bold mb-2">Vendu le 08 Mai 2026</span>
+<div class="text-[11px] text-secondary mb-3 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="person">person</span>
+                        À: Sarah L.
+                    </div>
+<div class="mt-auto flex justify-between pt-2 border-t border-surface-container">
+<span class="material-symbols-outlined text-secondary text-[20px]" data-icon="visibility">visibility</span>
+<span class="material-symbols-outlined text-secondary text-[20px]" data-icon="refresh">refresh</span>
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm flex flex-col">
+<div class="relative aspect-square">
+<img alt="Baskets" class="w-full h-full object-cover grayscale" data-alt="Modern bright red sneakers shown in a dynamic profile angle against a minimalist studio background. Sharp lighting creates crisp shadows, emphasizing the aerodynamic design. Desaturated for a sold status display on a premium e-commerce platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwV-HDjahelxsJJ5Nst1v1qld0XxWoXoldn7kZYRIQQyvODXd3Q2Z3Sh0sjp8dffZT1LTmU6Kb1IyIILOSjg1hEaV9vr3-9Tl-5jhZDNG_48eAg3jyDIyOJTRh_ZaJ-W2UYakn59BaC_MH33BSfa1WW8a5aY0G49qSsOZGzXA5FM3s4Zs2guxbJ3McGv0KvaoAJ4NklZsXy6CrzZkVqpbDJtS-j1-e15nVUOp1KE4vk-SV16Hg1p3rLPAzvQ_Is2eYhxsO6lTSHIw"/>
+<div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center">
+<span class="material-symbols-outlined text-white text-[32px] mb-1" data-icon="check_circle">check_circle</span>
+<span class="font-label-bold text-white tracking-[2px] text-label-bold">VENDU</span>
+</div>
+</div>
+<div class="p-3 flex flex-col flex-1">
+<h4 class="font-label-bold text-on-surface line-clamp-1 mb-1">Nike Air Max</h4>
+<span class="text-body-sm text-secondary line-through">140 €</span>
+<span class="text-body-sm text-green-600 font-bold mb-2">Vendu le 02 Mai 2026</span>
+<div class="text-[11px] text-secondary mb-3 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="person">person</span>
+                        À: Thomas K.
+                    </div>
+<div class="mt-auto flex justify-between pt-2 border-t border-surface-container">
+<span class="material-symbols-outlined text-secondary text-[20px]" data-icon="visibility">visibility</span>
+<span class="material-symbols-outlined text-secondary text-[20px]" data-icon="refresh">refresh</span>
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm flex flex-col">
+<div class="relative aspect-square">
+<img alt="Enceinte" class="w-full h-full object-cover grayscale" data-alt="A contemporary portable bluetooth speaker with a textured fabric finish, positioned on a sleek glass table. The morning light streams in, creating a warm and inviting atmosphere. The image is rendered in grayscale to indicate the item has been sold." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuOtGGFGj1SfrGA1Vv71MrniH_53lyz36B5qdy-tciYvvm19FX7Xo0MPnlv3EVrYnUB6IWQdMq2zBPGNvRP_LCPebURU7mKMFmbFt3oHhGTQ3Wn1Hi5Yzg1PXh00mH3yxRXHtDG-Zav7TgbfOKJ8jlmDMtTXyeDY_mQ6cT5FaorNKMuuUi0pMg_d3vHAShvjCGFF-lOggRsbAETnBoO9281zUb1k8hqqyvFAckRewVa1oRv730OU8AzJ2fKo8u5pOt3NvVtDBYTRc"/>
+<div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center">
+<span class="material-symbols-outlined text-white text-[32px] mb-1" data-icon="check_circle">check_circle</span>
+<span class="font-label-bold text-white tracking-[2px] text-label-bold">VENDU</span>
+</div>
+</div>
+<div class="p-3 flex flex-col flex-1">
+<h4 class="font-label-bold text-on-surface line-clamp-1 mb-1">Bose Soundlink</h4>
+<span class="text-body-sm text-secondary line-through">190 €</span>
+<span class="text-body-sm text-green-600 font-bold mb-2">Vendu le 28 Avril 2026</span>
+<div class="text-[11px] text-secondary mb-3 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="person">person</span>
+                        À: Claire M.
+                    </div>
+<div class="mt-auto flex justify-between pt-2 border-t border-surface-container">
+<span class="material-symbols-outlined text-secondary text-[20px]" data-icon="visibility">visibility</span>
+<span class="material-symbols-outlined text-secondary text-[20px]" data-icon="refresh">refresh</span>
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 w-full flex justify-around items-center px-4 py-3 pb-6 bg-surface/80 backdrop-blur-lg rounded-t-xl shadow-[0_-4px_20px_rgba(0,0,0,0.04)] z-50">
+<a class="flex flex-col items-center justify-center text-secondary hover:text-primary-container transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-bold text-[10px]">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary hover:text-primary-container transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="font-label-bold text-[10px]">Search</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary hover:text-primary-container transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined text-[32px] text-primary" data-icon="add_circle" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+<span class="font-label-bold text-[10px]">Post</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary hover:text-primary-container transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-label-bold text-[10px]">Messages</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary transition-colors active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="person" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label-bold text-[10px]">Profile</span>
+</a>
+</nav>
+<script>
+        // Micro-interactions and subtle effects
+        document.querySelectorAll('.active\\:scale-95').forEach(el => {
+            el.addEventListener('click', () => {
+                el.style.opacity = '0.7';
+                setTimeout(() => el.style.opacity = '1', 150);
+            });
+        });
+    </script>
+</body></html>

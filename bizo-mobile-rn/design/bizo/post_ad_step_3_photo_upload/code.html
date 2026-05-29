@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>Publier une annonce - Photos</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700;800;900&amp;family=Inter:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#00687c",
+                    "surface-bright": "#f8f9fa",
+                    "outline-variant": "#d1c5ac",
+                    "on-tertiary-container": "#005e70",
+                    "on-secondary-fixed-variant": "#474746",
+                    "primary-fixed-dim": "#f0c110",
+                    "on-background": "#191c1d",
+                    "tertiary-fixed": "#b0ecff",
+                    "surface-container-highest": "#e1e3e4",
+                    "on-secondary-fixed": "#1c1b1b",
+                    "surface-container-lowest": "#ffffff",
+                    "on-surface": "#191c1d",
+                    "on-primary-fixed-variant": "#584400",
+                    "surface-container-high": "#e7e8e9",
+                    "on-surface-variant": "#4e4633",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#004e5e",
+                    "on-primary-fixed": "#241a00",
+                    "on-error-container": "#93000a",
+                    "inverse-surface": "#2e3132",
+                    "background": "#f8f9fa",
+                    "tertiary-container": "#49dbff",
+                    "primary-container": "#f5c518",
+                    "primary": "#745b00",
+                    "surface-container": "#edeeef",
+                    "on-primary-container": "#695200",
+                    "secondary-fixed": "#e5e2e1",
+                    "on-tertiary": "#ffffff",
+                    "inverse-on-surface": "#f0f1f2",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed-dim": "#42d7fb",
+                    "primary-fixed": "#ffe08b",
+                    "on-tertiary-fixed": "#001f27",
+                    "on-secondary-container": "#636262",
+                    "on-error": "#ffffff",
+                    "inverse-primary": "#f0c110",
+                    "surface": "#f8f9fa",
+                    "secondary": "#5f5e5e",
+                    "on-secondary": "#ffffff",
+                    "surface-tint": "#745b00",
+                    "surface-container-low": "#f3f4f5",
+                    "error-container": "#ffdad6",
+                    "secondary-container": "#e2dfde",
+                    "surface-variant": "#e1e3e4",
+                    "secondary-fixed-dim": "#c8c6c5",
+                    "outline": "#807660",
+                    "surface-dim": "#d9dadb"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "32px",
+                    "container-margin": "20px",
+                    "base": "8px",
+                    "gutter": "12px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Archivo Narrow"],
+                    "headline-lg": ["Archivo Narrow"],
+                    "body-lg": ["Inter"],
+                    "display": ["Archivo Narrow"],
+                    "body-md": ["Inter"],
+                    "label-bold": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "headline-md": ["Archivo Narrow"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "900"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "900"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "300"}],
+                    "display": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "900"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "300"}],
+                    "label-bold": ["12px", {"lineHeight": "1", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                    "headline-md": ["20px", {"lineHeight": "1.3", "fontWeight": "800"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #f8f9fa;
+            color: #191c1d;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .photo-card {
+            box-shadow: 0 4px 20px 0 rgba(0,0,0,0.04);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .photo-card:active {
+            transform: scale(0.96);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md min-h-screen flex flex-col">
+<!-- Top Navigation [1] -->
+<header class="w-full top-0 sticky z-50 glass-nav">
+<div class="flex justify-between items-center px-container-margin py-4 w-full max-w-[1200px] mx-auto">
+<button aria-label="Close" class="p-2 -ml-2 hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined text-primary">close</span>
+</button>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight">Publier une annonce</h1>
+<a class="text-[14px] font-bold text-[#5B5BD6] hover:underline" href="#">Brouillon</a>
+</div>
+<!-- Progress Bar -->
+<div class="w-full h-1 bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-primary-container w-[42%] transition-all duration-500 ease-out"></div>
+</div>
+</header>
+<main class="flex-grow w-full max-w-[600px] mx-auto px-container-margin py-base flex flex-col gap-6">
+<!-- Heading [2] -->
+<section class="mt-4">
+<h2 class="font-headline-md text-headline-md text-on-surface">Ajoutez vos photos</h2>
+<p class="font-body-sm text-body-sm text-secondary mt-1">La première photo sera la photo principale. 10 photos max.</p>
+</section>
+<!-- Photo Grid [3] -->
+<section class="grid grid-cols-3 gap-3">
+<!-- Cell 1: Add Button -->
+<button class="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-outline-variant rounded-xl bg-surface-container-lowest hover:bg-surface-container-low transition-colors group">
+<span class="material-symbols-outlined text-outline group-hover:scale-110 transition-transform mb-1">add_a_photo</span>
+<span class="font-label-bold text-label-bold text-outline">Ajouter</span>
+</button>
+<!-- Cell 2: Main Photo (Vintage Camera) -->
+<div class="aspect-square relative photo-card rounded-xl overflow-hidden border-2 border-primary-container">
+<img alt="Vintage Camera" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/ADBb0uh87IkLFidw7GYFSqWQWd1E3mP2pJ0uTVj2ZF-WThGORhMIw_Pqf2GfCxK-sA9BRkei2b_rNTxhpG4iAt1u1RwC6Puu8w-f4wL7oLzn6Q9g88N4RWAKA9DGz_GM_SLdUHi8D1PjV1ovLjNeUWg8Tibix_rewC0YavAHvD6so9sjMZZKUquHp6nACfOfBGOURCg0qFJdM8KT4RRmCnDtW1LvYOycmvQ_OJrh0cPfB9gPF15q_cq_pzKhMw"/>
+<div class="absolute bottom-1 left-1/2 -translate-x-1/2 bg-on-background text-on-primary font-label-bold text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    Principale
+                </div>
+</div>
+<!-- Cell 3: Laptop Photo placeholder -->
+<div class="aspect-square relative photo-card rounded-xl overflow-hidden bg-surface-container-high">
+<img class="w-full h-full object-cover" data-alt="A high-end modern silver laptop resting on a clean white minimalist desk with soft morning sunlight streaming in from the side. The image follows a contemporary marketplace aesthetic with bright, airy tones and shallow depth of field. The professional product shot highlights the sleek metallic texture of the device against a neutral background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfelK77Nmuqc5_8eRqRia3m9NuJnAzKfOWZYQbbwGxNZjxMQSFQgmhjnmaB-gS3cbzpDAU_HWPt6J-Gnh6u4lJC6Tf-U7rQiAqQdcPLlfgcP7ISw585oN9oGK9FKPUzQUtcSMzrdzdugVzbPEHoIp-ef_Y0M7XQzTujDFNqvP1fWq1qfErDjejeg5fI0q5brLxgpHF94cG9LHcrTIvcWuLomj0vLCRUdWGc8abm3sS7PByr4SZXSGEZX2FSbcXgNqDmNFZKmQpZWQ"/>
+<button class="absolute top-1 right-1 bg-on-background/60 text-white p-1 rounded-full backdrop-blur-sm">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<!-- Cell 4: Headphones Photo placeholder -->
+<div class="aspect-square relative photo-card rounded-xl overflow-hidden bg-surface-container-high">
+<img class="w-full h-full object-cover" data-alt="Premium wireless noise-canceling headphones in matte black displayed on a minimalist wooden stand. The lighting is soft and cinematic, creating a luxurious and clean studio atmosphere consistent with high-end product photography. The composition is centered with a soft-focus background that enhances the focus on the product's sleek design and texture." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCl1J2JkQt14uMliAZXeORX3LaqTCyRglI7z5Rm4ZmwY4FECZYPHWl700sZO6pIBpAuQqg7rHqWh9LPhs5MllTleaK2raso3bQt0DI8X4OkZOBqa2loDk6t0Lq2QSHVBZzThM53G1VSQWBsPvMZmxpOJdYIMYjC3Ki7tYdT1y3cPknmyYX1yb9NJ4rbTPFkn4U0dyHgH0XS12M_Wte-X_B_LFiSrjUZNv4oCGhLNClNkjldTLfRj5mRxH6xQ4c4MUq_FYFVqJIZWyk"/>
+<button class="absolute top-1 right-1 bg-on-background/60 text-white p-1 rounded-full backdrop-blur-sm">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<!-- Cell 5: Empty placeholder -->
+<div class="aspect-square border-2 border-dashed border-outline-variant/50 rounded-xl bg-surface-container-lowest flex items-center justify-center">
+<span class="material-symbols-outlined text-outline-variant">add</span>
+</div>
+<!-- Cell 6: Empty placeholder -->
+<div class="aspect-square border-2 border-dashed border-outline-variant/50 rounded-xl bg-surface-container-lowest flex items-center justify-center">
+<span class="material-symbols-outlined text-outline-variant">add</span>
+</div>
+</section>
+<!-- Photo Count & Reorder Hint [5] [6] -->
+<div class="flex flex-col gap-2 mt-2">
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-bold text-label-bold text-on-surface">3 / 10 photos</span>
+<div class="flex items-center gap-1 text-secondary italic">
+<span class="material-symbols-outlined text-[14px]">drag_indicator</span>
+<span class="text-[12px]">Maintenez pour réorganiser les photos</span>
+</div>
+</div>
+<div class="w-full h-1 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[30%]"></div>
+</div>
+</div>
+<!-- Tips Card [4] -->
+<section class="bg-[#EFF6FF] rounded-xl p-4 flex gap-3 items-start border border-[#5B5BD6]/10 shadow-sm">
+<span class="material-symbols-outlined text-[#5B5BD6] text-[20px] fill-icon">info</span>
+<div class="flex flex-col">
+<p class="font-body-sm text-body-sm text-secondary leading-snug">
+<strong class="text-on-surface">Conseils :</strong> bon éclairage, fond neutre, montrez les éventuels défauts pour gagner en confiance.
+                </p>
+</div>
+</section>
+</main>
+<!-- Bottom Sticky Navigation [7] -->
+<footer class="w-full bg-white/80 backdrop-blur-md pb-safe-area-inset-bottom mt-auto">
+<div class="max-w-[600px] mx-auto px-container-margin py-6 flex flex-col gap-2">
+<button class="w-full h-14 bg-on-background rounded-full flex items-center justify-center gap-2 group hover:opacity-90 transition-opacity">
+<span class="font-label-bold text-[16px] text-white">Continuer</span>
+<span class="material-symbols-outlined text-white text-[20px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<button class="w-full h-12 bg-transparent rounded-full flex items-center justify-center">
+<span class="font-body-md text-body-md text-secondary hover:text-on-surface transition-colors">Passer cette étape</span>
+</button>
+</div>
+</footer>
+<script>
+        // Micro-interactions for photo cards
+        document.querySelectorAll('.photo-card').forEach(card => {
+            card.addEventListener('touchstart', () => {
+                card.style.opacity = '0.9';
+            });
+            card.addEventListener('touchend', () => {
+                card.style.opacity = '1';
+            });
+        });
+    </script>
+</body></html>

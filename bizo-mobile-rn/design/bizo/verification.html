@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Verification – Bizo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f0eeeb;
+      --text-dark: #1a1a1a;
+      --text-mid: #888;
+      --text-light: #aaa;
+      --accent: #2d54e8;
+      --accent-hover: #1e3fc2;
+      --radius: 16px;
+      --otp-size: 52px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .phone {
+      width: 100%;
+      max-width: 400px;
+      min-height: 100dvh;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      padding: 0 0 40px;
+      position: relative;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: center;
+      padding: 18px 20px 10px;
+      position: relative;
+    }
+    .back-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      color: var(--text-dark);
+    }
+    .back-btn svg { width: 22px; height: 22px; }
+    .header-title {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 17px;
+      color: var(--text-dark);
+      letter-spacing: 0.01em;
+    }
+
+    /* ── Content ── */
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 28px 32px;
+      text-align: center;
+    }
+
+    .main-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text-dark);
+      line-height: 1.2;
+      margin-bottom: 24px;
+      letter-spacing: -0.01em;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: var(--text-mid);
+      font-weight: 300;
+      line-height: 1.6;
+      margin-bottom: 6px;
+      font-style: italic;
+      font-family: 'Playfair Display', serif;
+    }
+    .email {
+      font-size: 15px;
+      color: var(--text-dark);
+      font-weight: 500;
+      margin-bottom: 36px;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+    }
+
+    .hint {
+      font-size: 13px;
+      color: var(--text-light);
+      font-weight: 300;
+      margin-bottom: 20px;
+      font-style: italic;
+      font-family: 'Playfair Display', serif;
+    }
+
+    /* ── OTP inputs ── */
+    .otp-wrapper {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+
+    .otp-input {
+      width: var(--otp-size);
+      height: var(--otp-size);
+      border-radius: 12px;
+      border: 1.5px solid #d4d0cb;
+      background: #ffffff;
+      text-align: center;
+      font-size: 22px;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text-dark);
+      caret-color: var(--accent);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+      -webkit-appearance: none;
+    }
+    .otp-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(45, 84, 232, 0.12);
+      transform: translateY(-2px);
+    }
+    .otp-input.filled {
+      border-color: var(--accent);
+      background: #eef1fd;
+    }
+
+    /* ── Verify button ── */
+    .verify-btn {
+      width: 100%;
+      max-width: 340px;
+      padding: 18px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 40px;
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 600;
+      font-style: italic;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      margin-bottom: 28px;
+      letter-spacing: 0.02em;
+      box-shadow: 0 4px 20px rgba(45, 84, 232, 0.3);
+    }
+    .verify-btn:hover   { background: var(--accent-hover); box-shadow: 0 6px 24px rgba(45,84,232,0.4); }
+    .verify-btn:active  { transform: scale(0.98); }
+    .verify-btn:disabled { background: #b0bbf0; box-shadow: none; cursor: not-allowed; }
+
+    /* ── Resend ── */
+    .resend-row {
+      font-size: 14px;
+      color: var(--text-light);
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+    }
+    .resend-row a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .resend-row a:hover { text-decoration: underline; }
+
+
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 96px;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: #1a1a1a;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 24px;
+      font-size: 13px;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 200;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<div class="phone">
+
+  <!-- Header -->
+  <div class="header">
+    <button class="back-btn" onclick="history.back()" aria-label="Retour">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </button>
+    <span class="header-title">Verification</span>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <h1 class="main-title">Verification Code</h1>
+
+    <p class="subtitle">We have sent the verification code to</p>
+    <p class="email">jacobiwoop@gmail.com</p>
+
+    <p class="hint">Touchez les cases et saisissez le code reçu par email</p>
+
+    <!-- OTP inputs -->
+    <div class="otp-wrapper" id="otpWrapper">
+      <input class="otp-input" type="text" inputmode="numeric" maxlength="1" pattern="[0-9]" autocomplete="one-time-code" aria-label="Chiffre 1" />
+      <input class="otp-input" type="text" inputmode="numeric" maxlength="1" pattern="[0-9]" aria-label="Chiffre 2" />
+      <input class="otp-input" type="text" inputmode="numeric" maxlength="1" pattern="[0-9]" aria-label="Chiffre 3" />
+      <input class="otp-input" type="text" inputmode="numeric" maxlength="1" pattern="[0-9]" aria-label="Chiffre 4" />
+      <input class="otp-input" type="text" inputmode="numeric" maxlength="1" pattern="[0-9]" aria-label="Chiffre 5" />
+      <input class="otp-input" type="text" inputmode="numeric" maxlength="1" pattern="[0-9]" aria-label="Chiffre 6" />
+    </div>
+
+    <!-- Verify -->
+    <button class="verify-btn" id="verifyBtn" disabled onclick="handleVerify()">Verify</button>
+
+    <!-- Resend -->
+    <p class="resend-row">Didn't received the code? <a onclick="handleResend()">Resend</a></p>
+  </div>
+</div>
+
+
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const inputs  = document.querySelectorAll('.otp-input');
+  const btn     = document.getElementById('verifyBtn');
+  const toast   = document.getElementById('toast');
+
+  /* Auto-focus first */
+  inputs[0].focus();
+
+  inputs.forEach((inp, i) => {
+    inp.addEventListener('input', e => {
+      const val = e.target.value.replace(/\D/g, '');
+      inp.value = val ? val[0] : '';
+      inp.classList.toggle('filled', !!inp.value);
+
+      if (inp.value && i < inputs.length - 1) inputs[i + 1].focus();
+
+      checkComplete();
+    });
+
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !inp.value && i > 0) {
+        inputs[i - 1].value = '';
+        inputs[i - 1].classList.remove('filled');
+        inputs[i - 1].focus();
+        checkComplete();
+      }
+      /* Allow paste on first input */
+    });
+
+    inp.addEventListener('paste', e => {
+      if (i !== 0) return;
+      const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+      if (!pasted) return;
+      e.preventDefault();
+      [...pasted].forEach((ch, idx) => {
+        if (inputs[idx]) { inputs[idx].value = ch; inputs[idx].classList.add('filled'); }
+      });
+      const next = inputs[Math.min(pasted.length, 5)];
+      if (next) next.focus();
+      checkComplete();
+    });
+  });
+
+  function checkComplete() {
+    const complete = [...inputs].every(inp => inp.value);
+    btn.disabled = !complete;
+  }
+
+  function handleVerify() {
+    const code = [...inputs].map(i => i.value).join('');
+    showToast(`Code « ${code} » envoyé ✓`);
+  }
+
+  function handleResend() {
+    inputs.forEach(inp => { inp.value = ''; inp.classList.remove('filled'); });
+    btn.disabled = true;
+    inputs[0].focus();
+    showToast('Code renvoyé à jacobiwoop@gmail.com');
+  }
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+</script>
+</body>
+</html>

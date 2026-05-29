@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700;800;900&amp;family=Inter:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-fixed": "#241a00",
+                    "surface-container-low": "#f3f4f5",
+                    "surface": "#f8f9fa",
+                    "on-secondary": "#ffffff",
+                    "tertiary-container": "#49dbff",
+                    "surface-variant": "#e1e3e4",
+                    "on-primary-container": "#695200",
+                    "surface-dim": "#d9dadb",
+                    "surface-container": "#edeeef",
+                    "on-primary-fixed-variant": "#584400",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed": "#e5e2e1",
+                    "error-container": "#ffdad6",
+                    "primary-fixed-dim": "#f0c110",
+                    "surface-container-lowest": "#ffffff",
+                    "on-surface": "#191c1d",
+                    "on-error-container": "#93000a",
+                    "outline": "#807660",
+                    "primary-container": "#f5c518",
+                    "on-tertiary-container": "#005e70",
+                    "on-secondary-fixed": "#1c1b1b",
+                    "on-error": "#ffffff",
+                    "on-secondary-fixed-variant": "#474746",
+                    "on-secondary-container": "#636262",
+                    "tertiary-fixed": "#b0ecff",
+                    "secondary-fixed-dim": "#c8c6c5",
+                    "on-tertiary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "tertiary": "#00687c",
+                    "surface-bright": "#f8f9fa",
+                    "on-tertiary-fixed": "#001f27",
+                    "surface-tint": "#745b00",
+                    "tertiary-fixed-dim": "#42d7fb",
+                    "on-tertiary-fixed-variant": "#004e5e",
+                    "on-surface-variant": "#4e4633",
+                    "secondary-container": "#e2dfde",
+                    "on-background": "#191c1d",
+                    "background": "#f8f9fa",
+                    "surface-container-high": "#e7e8e9",
+                    "outline-variant": "#d1c5ac",
+                    "secondary": "#5f5e5e",
+                    "primary": "#745b00",
+                    "inverse-on-surface": "#f0f1f2",
+                    "surface-container-highest": "#e1e3e4",
+                    "primary-fixed": "#ffe08b",
+                    "inverse-surface": "#2e3132",
+                    "inverse-primary": "#f0c110"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "12px",
+                    "section-gap": "32px",
+                    "base": "8px",
+                    "container-margin": "20px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Archivo Narrow"],
+                    "headline-md": ["Archivo Narrow"],
+                    "body-lg": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "display": ["Archivo Narrow"],
+                    "body-md": ["Inter"],
+                    "label-bold": ["Inter"],
+                    "headline-lg-mobile": ["Archivo Narrow"]
+            },
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "900"}],
+                    "headline-md": ["20px", {"lineHeight": "1.3", "fontWeight": "800"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "300"}],
+                    "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                    "display": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "900"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "300"}],
+                    "label-bold": ["12px", {"lineHeight": "1", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "900"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .custom-shadow-l1 {
+            box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.04);
+        }
+        .custom-shadow-l2 {
+            box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.08);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col">
+<!-- [1] TOP NAV -->
+<header class="sticky top-0 z-50 bg-surface/90 backdrop-blur-md">
+<div class="flex justify-between items-center px-container-margin py-4 w-full">
+<div class="flex items-center gap-3">
+<button class="transition-opacity duration-200 hover:opacity-80">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<button class="transition-opacity duration-200 hover:opacity-80">
+<span class="material-symbols-outlined text-[24px]">close</span>
+</button>
+</div>
+<h1 class="font-label-bold text-[15px] font-bold text-on-surface">Publier une annonce</h1>
+<button class="text-[#5B5BD6] font-label-bold text-[14px] font-bold transition-opacity duration-200 hover:opacity-70">
+                Brouillon
+            </button>
+</div>
+<!-- [2] PROGRESS BAR -->
+<div class="w-full h-[3px] bg-surface-container-high">
+<div class="h-full bg-primary-container transition-all duration-500 ease-out" style="width: 28.5%;"></div>
+</div>
+<div class="px-container-margin py-2 flex justify-end">
+<span class="text-secondary text-label-bold">Étape 2 sur 7</span>
+</div>
+</header>
+<main class="flex-1 flex flex-col pb-24">
+<!-- [3] BREADCRUMB TRAIL -->
+<nav class="px-container-margin py-3 flex items-center gap-1.5 flex-wrap">
+<a class="text-[#5B5BD6] underline text-[12px] font-body-sm" href="#">Catégorie</a>
+<span class="material-symbols-outlined text-secondary text-[12px]">chevron_right</span>
+<a class="text-[#5B5BD6] underline text-[12px] font-body-sm" href="#">Électronique</a>
+<span class="material-symbols-outlined text-secondary text-[12px]">chevron_right</span>
+<span class="text-on-surface font-bold text-[12px] font-label-bold">Smartphones</span>
+</nav>
+<!-- [4] SEARCH BAR -->
+<div class="px-container-margin py-4">
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-secondary text-[20px]">search</span>
+<input class="w-full h-11 pl-12 pr-4 bg-surface-container-low border-none rounded-full text-body-md placeholder:text-secondary focus:ring-2 focus:ring-primary-container transition-all custom-shadow-l2" placeholder="Rechercher une catégorie..." type="text"/>
+</div>
+</div>
+<!-- [5] CATEGORY LIST -->
+<div class="flex-1 overflow-y-auto pt-2">
+<div class="flex flex-col">
+<!-- Category Item: Véhicules -->
+<button class="w-full flex items-center px-container-margin py-5 bg-surface-container-lowest transition-colors active:bg-surface-variant">
+<span class="material-symbols-outlined text-secondary text-[24px]">directions_car</span>
+<span class="ml-4 flex-1 text-left font-label-bold text-[15px] text-on-surface">Véhicules</span>
+<span class="material-symbols-outlined text-secondary/40 text-[20px]">chevron_right</span>
+</button>
+<div class="h-[1px] mx-container-margin bg-surface-container-low"></div>
+<!-- Category Item: Immobilier -->
+<button class="w-full flex items-center px-container-margin py-5 bg-surface-container-lowest transition-colors active:bg-surface-variant">
+<span class="material-symbols-outlined text-secondary text-[24px]">home</span>
+<span class="ml-4 flex-1 text-left font-label-bold text-[15px] text-on-surface">Immobilier</span>
+<span class="material-symbols-outlined text-secondary/40 text-[20px]">chevron_right</span>
+</button>
+<div class="h-[1px] mx-container-margin bg-surface-container-low"></div>
+<!-- [6] SELECTED STATE: Électronique (Active Parent) -->
+<!-- Note: The user specified Step 2 is Category Selection, so we show 'Smartphones' as the drill-down target -->
+<button class="w-full flex items-center px-container-margin py-5 bg-[#FFFBEB] border-l-[3px] border-primary-container transition-colors">
+<span class="material-symbols-outlined text-on-surface text-[24px]">devices</span>
+<span class="ml-4 flex-1 text-left font-label-bold text-[15px] text-on-surface font-bold">Électronique</span>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface text-[20px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</button>
+<div class="h-[1px] mx-container-margin bg-surface-container-low"></div>
+<!-- Category Item: Mode -->
+<button class="w-full flex items-center px-container-margin py-5 bg-surface-container-lowest transition-colors active:bg-surface-variant">
+<span class="material-symbols-outlined text-secondary text-[24px]">apparel</span>
+<span class="ml-4 flex-1 text-left font-label-bold text-[15px] text-on-surface">Mode</span>
+<span class="material-symbols-outlined text-secondary/40 text-[20px]">chevron_right</span>
+</button>
+<div class="h-[1px] mx-container-margin bg-surface-container-low"></div>
+<!-- Category Item: Maison -->
+<button class="w-full flex items-center px-container-margin py-5 bg-surface-container-lowest transition-colors active:bg-surface-variant">
+<span class="material-symbols-outlined text-secondary text-[24px]">chair</span>
+<span class="ml-4 flex-1 text-left font-label-bold text-[15px] text-on-surface">Maison</span>
+<span class="material-symbols-outlined text-secondary/40 text-[20px]">chevron_right</span>
+</button>
+<div class="h-[1px] mx-container-margin bg-surface-container-low"></div>
+<!-- Category Item: Loisirs -->
+<button class="w-full flex items-center px-container-margin py-5 bg-surface-container-lowest transition-colors active:bg-surface-variant">
+<span class="material-symbols-outlined text-secondary text-[24px]">sports_soccer</span>
+<span class="ml-4 flex-1 text-left font-label-bold text-[15px] text-on-surface">Loisirs</span>
+<span class="material-symbols-outlined text-secondary/40 text-[20px]">chevron_right</span>
+</button>
+<!-- Added visual buffer for bento-style aesthetic depth -->
+<div class="px-container-margin py-6">
+<div class="bg-surface-container rounded-xl p-4 flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">lightbulb</span>
+</div>
+<div>
+<p class="font-label-bold text-on-surface">Besoin d'aide ?</p>
+<p class="text-[12px] text-secondary">Choisissez la catégorie la plus précise pour vendre plus vite.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- [7] BOTTOM STICKY -->
+<div class="fixed bottom-0 left-0 w-full p-container-margin bg-surface/80 backdrop-blur-xl">
+<button class="w-full h-12 bg-on-surface text-surface rounded-full flex items-center justify-center gap-2 font-label-bold text-[16px] transition-transform active:scale-[0.98] custom-shadow-l2">
+            Continuer
+            <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+<div class="h-safe pb-2"></div> <!-- iOS Home Indicator spacing -->
+</div>
+<script>
+        // Simple click interaction for the list items to show selection feedback
+        document.querySelectorAll('button.w-full').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (this.querySelector('.check_circle')) return; // already active in this demo
+                
+                // Demo behavior: brief scale effect
+                this.classList.add('scale-[0.99]');
+                setTimeout(() => this.classList.remove('scale-[0.99]'), 100);
+            });
+        });
+    </script>
+</body></html>

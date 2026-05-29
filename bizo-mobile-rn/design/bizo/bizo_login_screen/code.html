@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bizo - Connexion</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700;800;900&amp;family=Inter:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-lowest": "#ffffff",
+                    "secondary-fixed-dim": "#c8c6c5",
+                    "primary-container": "#f5c518",
+                    "on-primary": "#ffffff",
+                    "on-background": "#191c1d",
+                    "surface-tint": "#745b00",
+                    "tertiary-fixed": "#b0ecff",
+                    "surface-bright": "#f8f9fa",
+                    "surface-container": "#edeeef",
+                    "on-secondary-container": "#636262",
+                    "tertiary": "#00687c",
+                    "secondary": "#5f5e5e",
+                    "inverse-on-surface": "#f0f1f2",
+                    "inverse-surface": "#2e3132",
+                    "surface-container-highest": "#e1e3e4",
+                    "on-error": "#ffffff",
+                    "outline": "#807660",
+                    "surface-container-high": "#e7e8e9",
+                    "surface-variant": "#e1e3e4",
+                    "on-surface": "#191c1d",
+                    "on-tertiary-fixed": "#001f27",
+                    "on-surface-variant": "#4e4633",
+                    "primary-fixed": "#ffe08b",
+                    "on-error-container": "#93000a",
+                    "inverse-primary": "#f0c110",
+                    "outline-variant": "#d1c5ac",
+                    "surface-dim": "#d9dadb",
+                    "on-primary-fixed": "#241a00",
+                    "primary-fixed-dim": "#f0c110",
+                    "on-secondary-fixed-variant": "#474746",
+                    "tertiary-container": "#49dbff",
+                    "on-secondary": "#ffffff",
+                    "surface": "#f8f9fa",
+                    "secondary-container": "#e2dfde",
+                    "on-tertiary-container": "#005e70",
+                    "on-tertiary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "on-tertiary-fixed-variant": "#004e5e",
+                    "tertiary-fixed-dim": "#42d7fb",
+                    "on-primary-fixed-variant": "#584400",
+                    "on-primary-container": "#695200",
+                    "on-secondary-fixed": "#1c1b1b",
+                    "primary": "#745b00",
+                    "surface-container-low": "#f3f4f5",
+                    "secondary-fixed": "#e5e2e1",
+                    "background": "#f8f9fa",
+                    "error-container": "#ffdad6",
+                    "brand-blue": "#5B5BD6"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "2xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "32px",
+                    "gutter": "12px",
+                    "base": "8px",
+                    "container-margin": "20px"
+            },
+            "fontFamily": {
+                    "body-sm": ["Inter"],
+                    "headline-lg": ["Archivo Narrow"],
+                    "display": ["Archivo Narrow"],
+                    "label-bold": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-md": ["Archivo Narrow"],
+                    "headline-lg-mobile": ["Archivo Narrow"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "900"}],
+                    "display": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "900"}],
+                    "label-bold": ["12px", {"lineHeight": "1", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "300"}],
+                    "headline-md": ["20px", {"lineHeight": "1.3", "fontWeight": "800"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "900"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "300"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .active-border:focus-within {
+            border-color: #5B5BD6 !important;
+            border-width: 2px !important;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col font-body-md text-body-md">
+<!-- Top Area -->
+<header class="h-[180px] w-full flex items-center justify-center relative overflow-hidden" style="background: linear-gradient(180deg, #EFF6FF 0%, #FFFFFF 100%);">
+<div class="z-10 w-[120px]">
+<img alt="Bizo Logo" class="w-full h-auto object-contain" src="https://lh3.googleusercontent.com/aida/ADBb0uh0L8yQdCTYktiMc9IURrWOwunhsorZKsFsTRe25ZxCxU6BEMjlSy9VVwvg8mcKNIOG4Zm4y9HIhyDR2Zk_omReJeN4K8k_8STwVh4k6X4obHvMkkY180M7poMi-p_HH7RaTLHWYhTOUE36Q4B93l3X2yr_8d1hy3jqrTJrLygFPqyM6qVb127lHBXH1RHtmA1Df6Vkf46glUI8FPazG9RGO_wQB9A6UqVLy19hE2lj_zKiJkkxgOcrvA"/>
+</div>
+<!-- Decorative Atmosphere -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-primary-container/20 rounded-full blur-3xl"></div>
+</header>
+<!-- Content Card -->
+<main class="flex-grow w-full bg-surface-container-lowest rounded-t-[24px] px-6 pt-10 pb-12 shadow-[0_-8px_30px_rgba(0,0,0,0.05)] relative z-20 -mt-6">
+<div class="max-w-[400px] mx-auto">
+<!-- Heading -->
+<div class="mb-8">
+<h1 class="font-headline-lg-mobile text-[26px] font-extrabold text-on-surface mb-2">
+                    Bon retour 👋
+                </h1>
+<p class="font-body-sm text-body-sm text-secondary">
+                    Connectez-vous à votre compte Bizo.
+                </p>
+</div>
+<!-- Login Form -->
+<form class="space-y-6" onsubmit="return false;">
+<!-- Email Field -->
+<div class="space-y-2">
+<label class="block font-label-bold text-[13px] text-on-surface">Email</label>
+<div class="relative active-border flex items-center h-[52px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest transition-all group">
+<span class="material-symbols-outlined text-[18px] text-secondary mr-3 group-focus-within:text-brand-blue" data-icon="mail">mail</span>
+<input class="w-full bg-transparent border-none focus:ring-0 p-0 font-body-md text-body-md placeholder:text-secondary-fixed-dim" placeholder="votre@email.com" type="email"/>
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-2">
+<label class="block font-label-bold text-[13px] text-on-surface">Mot de passe</label>
+<div class="relative active-border flex items-center h-[52px] px-4 rounded-xl border border-outline-variant bg-surface-container-lowest transition-all group">
+<span class="material-symbols-outlined text-[18px] text-secondary mr-3 group-focus-within:text-brand-blue" data-icon="lock">lock</span>
+<input class="w-full bg-transparent border-none focus:ring-0 p-0 font-body-md text-body-md placeholder:text-secondary-fixed-dim" placeholder="••••••••" type="password"/>
+<button class="ml-2 flex items-center justify-center text-secondary hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="visibility_off">visibility_off</span>
+</button>
+</div>
+<div class="flex justify-end">
+<a class="text-[13px] font-label-bold text-brand-blue hover:opacity-80 transition-opacity" href="#">Mot de passe oublié ?</a>
+</div>
+</div>
+<!-- Login Button -->
+<button class="w-full h-[52px] bg-on-surface text-surface-container-lowest rounded-full flex items-center justify-center gap-2 font-headline-md text-headline-md active:scale-[0.98] transition-transform shadow-lg">
+<span>Se connecter</span>
+<span class="material-symbols-outlined text-white" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<!-- Divider -->
+<div class="relative flex items-center py-2">
+<div class="flex-grow border-t border-outline-variant"></div>
+<span class="flex-shrink mx-4 text-body-sm text-secondary text-[13px]">ou</span>
+<div class="flex-grow border-t border-outline-variant"></div>
+</div>
+<!-- Google Button -->
+<button class="w-full h-[52px] bg-transparent border border-outline-variant rounded-full flex items-center justify-center gap-3 active:bg-surface-container-low transition-colors">
+<svg height="20" viewbox="0 0 24 24" width="20">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"></path>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z" fill="#EA4335"></path>
+</svg>
+<span class="font-label-bold text-body-md text-on-surface">Continuer avec Google</span>
+</button>
+</form>
+<!-- Register Link -->
+<div class="mt-10 text-center">
+<p class="font-body-sm text-body-sm text-secondary">
+                    Pas encore de compte ? 
+                    <a class="text-brand-blue font-bold ml-1 hover:underline" href="#">S'inscrire</a>
+</p>
+</div>
+</div>
+</main>
+<!-- Support Message for Premium Utility feel -->
+<footer class="mt-auto pb-6 text-center">
+<p class="text-[11px] font-label-bold text-secondary-fixed-dim tracking-widest uppercase opacity-60">
+            Powered by Bizo Infrastructure
+        </p>
+</footer>
+<!-- No active navigation as per suppression rule for transactional pages -->
+<script>
+        // Micro-interactions
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('shadow-sm');
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.classList.remove('shadow-sm');
+            });
+        });
+
+        // Toggle Password visibility logic
+        const togglePassBtn = document.querySelector('button[type="button"]');
+        const passInput = togglePassBtn?.previousElementSibling;
+        const passIcon = togglePassBtn?.querySelector('span');
+
+        togglePassBtn?.addEventListener('click', () => {
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                passIcon.textContent = 'visibility';
+            } else {
+                passInput.type = 'password';
+                passIcon.textContent = 'visibility_off';
+            }
+        });
+    </script>
+</body></html>

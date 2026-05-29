@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&amp;family=Archivo+Narrow:wght@800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary": "#5f5e5e",
+                    "surface-bright": "#f8f9fa",
+                    "outline-variant": "#d1c5ac",
+                    "surface-tint": "#745b00",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#e5e2e1",
+                    "secondary-fixed-dim": "#c8c6c5",
+                    "on-primary-fixed-variant": "#584400",
+                    "tertiary-fixed-dim": "#42d7fb",
+                    "primary": "#745b00",
+                    "surface-container": "#edeeef",
+                    "secondary-container": "#e2dfde",
+                    "primary-fixed": "#ffe08b",
+                    "surface-variant": "#e1e3e4",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-surface": "#2e3132",
+                    "on-secondary-fixed": "#1c1b1b",
+                    "background": "#f8f9fa",
+                    "primary-container": "#f5c518",
+                    "on-tertiary-container": "#005e70",
+                    "inverse-primary": "#f0c110",
+                    "tertiary-fixed": "#b0ecff",
+                    "surface-container-highest": "#e1e3e4",
+                    "tertiary": "#00687c",
+                    "surface": "#f8f9fa",
+                    "primary-fixed-dim": "#f0c110",
+                    "inverse-on-surface": "#f0f1f2",
+                    "on-surface-variant": "#4e4633",
+                    "surface-container-low": "#f3f4f5",
+                    "on-tertiary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "on-secondary-container": "#636262",
+                    "on-tertiary-fixed-variant": "#004e5e",
+                    "on-background": "#191c1d",
+                    "on-surface": "#191c1d",
+                    "on-secondary-fixed-variant": "#474746",
+                    "surface-dim": "#d9dadb",
+                    "surface-container-high": "#e7e8e9",
+                    "on-error-container": "#93000a",
+                    "on-secondary": "#ffffff",
+                    "outline": "#807660",
+                    "on-tertiary-fixed": "#001f27",
+                    "on-primary-container": "#695200",
+                    "error": "#ba1a1a",
+                    "on-primary": "#ffffff",
+                    "tertiary-container": "#49dbff",
+                    "on-primary-fixed": "#241a00",
+                    "brand-accent": "#5B5BD6"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "12px",
+                    "base": "8px",
+                    "section-gap": "32px",
+                    "container-margin": "20px"
+            },
+            "fontFamily": {
+                    "label-bold": ["Inter"],
+                    "headline-lg-mobile": ["Archivo Narrow"],
+                    "body-sm": ["Inter"],
+                    "body-md": ["Inter"],
+                    "display": ["Archivo Narrow"],
+                    "body-lg": ["Inter"],
+                    "headline-lg": ["Archivo Narrow"],
+                    "headline-md": ["Archivo Narrow"]
+            },
+            "fontSize": {
+                    "label-bold": ["12px", {"lineHeight": "1", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "900"}],
+                    "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "300"}],
+                    "display": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "900"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "300"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "900"}],
+                    "headline-md": ["20px", {"lineHeight": "1.3", "fontWeight": "800"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md min-h-screen pb-24 overflow-x-hidden">
+<!-- Top Navigation Bar -->
+<header class="w-full top-0 sticky z-40 bg-surface/80 backdrop-blur-md">
+<div class="flex justify-between items-center px-container-margin py-4 w-full">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary">Mon Profil</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-secondary-container/50 transition-opacity duration-200">
+<span class="material-symbols-outlined text-secondary">settings</span>
+</button>
+</div>
+</header>
+<main class="flex flex-col gap-6 px-container-margin mt-4">
+<!-- Profile Header -->
+<section class="flex items-center gap-4">
+<div class="relative">
+<img alt="Julien Dupont profile photo" class="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md" src="https://lh3.googleusercontent.com/aida/ADBb0uiKx5lxO6EmhqIu9BRVYIlcW2tkqf9mM27B1XReh7dPAWch4i-7FIzYqQPB_GsSDPxunY0Sc-KQio1L06hiGj_nNZb535vDypNEvpeyqHctP3VeRNOTQvX2_R3Os7lpL-V-HlcgIokbDJ9dpxQ3zgwW8G-YZpAV2xOnyjt-TMoVf2G2xWfBn4QWQIMtAF-uZJqUAE9gjNMZNfHwlT-oUuOZauUMGbrV3peJZAYZBiimn64S7oeGtT5Tpg"/>
+<div class="absolute -bottom-1 -right-1 bg-primary-container p-1 rounded-full border-2 border-white">
+<span class="material-symbols-outlined text-[16px] text-on-primary-container" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<h2 class="font-headline-md text-headline-md text-on-surface">Julien Dupont</h2>
+<div class="flex gap-2">
+<span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full font-label-bold text-[10px] uppercase tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">workspace_premium</span>
+                        Super Vendeur
+                    </span>
+</div>
+</div>
+</section>
+<!-- Stats Banner -->
+<section class="bg-surface-container-lowest rounded-xl p-4 shadow-[0_4px_20px_0_rgba(0,0,0,0.04)] border border-surface-container flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">trending_up</span>
+</div>
+<div>
+<p class="text-on-surface font-label-bold">1 243 vues cette semaine</p>
+<p class="text-body-sm font-body-sm text-secondary">Votre profil est très actif</p>
+</div>
+</div>
+<div class="text-green-600 font-label-bold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-sm">north_east</span>
+                +12%
+            </div>
+</section>
+<!-- Quick Stats Row -->
+<section class="grid grid-cols-4 gap-2 bg-white rounded-xl py-4 shadow-[0_4px_20px_0_rgba(0,0,0,0.04)]">
+<div class="flex flex-col items-center justify-center border-r border-surface-container last:border-0">
+<span class="font-headline-md text-headline-md text-on-surface">47</span>
+<span class="font-label-bold text-label-bold text-secondary uppercase text-[9px] mt-1">Annonces</span>
+</div>
+<div class="flex flex-col items-center justify-center border-r border-surface-container last:border-0">
+<span class="font-headline-md text-headline-md text-on-surface flex items-center gap-0.5">4.8<span class="material-symbols-outlined text-[14px] text-primary-container" style="font-variation-settings: 'FILL' 1;">star</span></span>
+<span class="font-label-bold text-label-bold text-secondary uppercase text-[9px] mt-1">Note</span>
+</div>
+<div class="flex flex-col items-center justify-center border-r border-surface-container last:border-0">
+<span class="font-headline-md text-headline-md text-on-surface">312</span>
+<span class="font-label-bold text-label-bold text-secondary uppercase text-[9px] mt-1">Followers</span>
+</div>
+<div class="flex flex-col items-center justify-center border-r border-surface-container last:border-0">
+<span class="font-headline-md text-headline-md text-on-surface">5</span>
+<span class="font-label-bold text-label-bold text-secondary uppercase text-[9px] mt-1">Messages</span>
+</div>
+</section>
+<!-- Tab Bar -->
+<section class="w-full overflow-x-auto hide-scrollbar -mx-container-margin px-container-margin">
+<div class="flex items-center gap-6 border-b border-surface-container min-w-max">
+<button class="pb-3 text-secondary font-label-bold">Actives</button>
+<button class="pb-3 text-secondary font-label-bold">Vendues</button>
+<button class="pb-3 text-on-surface font-label-bold border-b-2 border-primary-container">Brouillons</button>
+<button class="pb-3 text-secondary font-label-bold">Favoris</button>
+</div>
+</section>
+<!-- Drafts Grid -->
+<section class="grid grid-cols-2 gap-4">
+<!-- Card 1 -->
+<div class="flex flex-col bg-white rounded-xl border-2 border-dashed border-[#D1D5DB] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<div class="relative aspect-square w-full bg-surface-container">
+<img class="w-full h-full object-cover opacity-60" data-alt="A cinematic, high-quality product photo of a vintage medium format camera resting on a rustic wooden table. The lighting is soft and directional, highlighting the metallic textures of the device. The background is a blurred, warm-toned atelier setting, creating a professional marketplace aesthetic with golden accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyV--A43e3iRFqbvnZHClg32tCYZJe4ScqwH6ZVSfJLAtyLMiqfYN1hd6QomPVgQU4gLYvy7MWDhra7B-Aurs07-VfcqceQi_W2VHO-9FZoJc-Ftr7iVU2LTPTeRjgsWLIO2PJMb0zsefMJHl4ZYts7BlmhCAQJpvAYmqIXC1TfhmbyFwCb3KfdECmnxsJCFazPyOhO18wo6qonH-e4lAQ-I9JxGkkuGJEx0218Br4SVPZIY2bFmHq_KojDjnHt58gwxlPY8dAAf8"/>
+<div class="absolute top-2 left-2 bg-secondary/80 text-white px-2 py-0.5 rounded-full text-[10px] font-label-bold">BROUILLON</div>
+<button class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">edit</span>
+</button>
+</div>
+<div class="p-3 flex flex-col gap-2">
+<h3 class="font-label-bold text-on-surface truncate">Appareil Photo Vintage</h3>
+<p class="text-primary font-headline-md text-[16px]">250,00 €</p>
+<div class="flex items-center gap-1 text-secondary text-[10px]">
+<span class="material-symbols-outlined text-[12px]">schedule</span>
+                        Sauvegardé il y a 2j
+                    </div>
+<div class="mt-1">
+<div class="flex justify-between text-[10px] font-label-bold text-brand-accent mb-1">
+<span>Complétion 60%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full">
+<div class="bg-brand-accent h-full rounded-full" style="width: 60%"></div>
+</div>
+</div>
+<div class="grid grid-cols-1 gap-1.5 mt-2">
+<button class="w-full py-2 bg-brand-accent/10 text-brand-accent rounded-lg font-label-bold text-[11px] hover:bg-brand-accent/20">Continuer</button>
+<div class="grid grid-cols-2 gap-1.5">
+<button class="py-2 bg-surface-container text-secondary rounded-lg font-label-bold text-[11px] hover:bg-secondary-container">Publier</button>
+<button class="py-2 bg-error-container/30 text-error rounded-lg font-label-bold text-[11px] hover:bg-error-container/50">Supprimer</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="flex flex-col bg-white rounded-xl border-2 border-dashed border-[#D1D5DB] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<div class="relative aspect-square w-full bg-surface-container">
+<div class="w-full h-full flex items-center justify-center bg-surface-container-high">
+<span class="material-symbols-outlined text-secondary/40 text-4xl">image_not_supported</span>
+</div>
+<div class="absolute top-2 left-2 bg-secondary/80 text-white px-2 py-0.5 rounded-full text-[10px] font-label-bold">BROUILLON</div>
+<button class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">edit</span>
+</button>
+</div>
+<div class="p-3 flex flex-col gap-2">
+<h3 class="font-body-md text-secondary italic truncate">Sans titre</h3>
+<p class="text-secondary font-body-sm italic text-[14px]">Prix non défini</p>
+<div class="flex items-center gap-1 text-secondary text-[10px]">
+<span class="material-symbols-outlined text-[12px]">schedule</span>
+                        Sauvegardé il y a 5j
+                    </div>
+<div class="mt-1">
+<div class="flex justify-between text-[10px] font-label-bold text-brand-accent mb-1">
+<span>Complétion 20%</span>
+</div>
+<div class="w-full bg-surface-container h-1.5 rounded-full">
+<div class="bg-brand-accent h-full rounded-full" style="width: 20%"></div>
+</div>
+</div>
+<div class="grid grid-cols-1 gap-1.5 mt-2">
+<button class="w-full py-2 bg-brand-accent/10 text-brand-accent rounded-lg font-label-bold text-[11px] hover:bg-brand-accent/20">Continuer</button>
+<div class="grid grid-cols-2 gap-1.5">
+<button class="py-2 bg-surface-container text-secondary rounded-lg font-label-bold text-[11px] hover:bg-secondary-container">Publier</button>
+<button class="py-2 bg-error-container/30 text-error rounded-lg font-label-bold text-[11px] hover:bg-error-container/50">Supprimer</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-safe bg-surface/80 backdrop-blur-[15px] rounded-t-xl shadow-[0_-4px_20px_0_rgba(0,0,0,0.04)]">
+<a class="flex flex-col items-center justify-center text-secondary px-4 py-1 transition-transform duration-150 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-bold text-label-bold mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary px-4 py-1 transition-transform duration-150 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="font-label-bold text-label-bold mt-1">Search</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary px-4 py-1 transition-transform duration-150 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined text-brand-accent scale-125">add_circle</span>
+<span class="font-label-bold text-label-bold mt-1">Post</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary px-4 py-1 transition-transform duration-150 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined">chat_bubble</span>
+<span class="font-label-bold text-label-bold mt-1">Messages</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 transition-transform duration-150 scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label-bold text-label-bold mt-1">Profile</span>
+</a>
+</nav>
+<script>
+        // Simple micro-interaction for buttons
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('touchstart', () => {
+                button.style.transform = 'scale(0.95)';
+            });
+            button.addEventListener('touchend', () => {
+                button.style.transform = 'scale(1)';
+            });
+        });
+
+        // Atmospheric parallax effect on profile header
+        window.addEventListener('scroll', () => {
+            const scrolled = window.scrollY;
+            const profileImage = document.querySelector('img[src="https://lh3.googleusercontent.com/aida/ADBb0uiKx5lxO6EmhqIu9BRVYIlcW2tkqf9mM27B1XReh7dPAWch4i-7FIzYqQPB_GsSDPxunY0Sc-KQio1L06hiGj_nNZb535vDypNEvpeyqHctP3VeRNOTQvX2_R3Os7lpL-V-HlcgIokbDJ9dpxQ3zgwW8G-YZpAV2xOnyjt-TMoVf2G2xWfBn4QWQIMtAF-uZJqUAE9gjNMZNfHwlT-oUuOZauUMGbrV3peJZAYZBiimn64S7oeGtT5Tpg"]');
+            if(profileImage && scrolled < 200) {
+                profileImage.style.transform = `translateY(${scrolled * 0.05}px)`;
+            }
+        });
+    </script>
+</body></html>

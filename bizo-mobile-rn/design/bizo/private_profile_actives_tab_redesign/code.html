@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700;800;900&amp;family=Inter:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        .glass-nav {
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "primary-fixed": "#ffe08b",
+                        "inverse-primary": "#f0c110",
+                        "background": "#f8f9fa",
+                        "surface-tint": "#745b00",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-container": "#636262",
+                        "on-primary-container": "#695200",
+                        "tertiary-fixed-dim": "#42d7fb",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#4e4633",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "outline-variant": "#d1c5ac",
+                        "outline": "#807660",
+                        "surface-container-high": "#e7e8e9",
+                        "secondary-container": "#e2dfde",
+                        "secondary": "#5f5e5e",
+                        "primary-fixed-dim": "#f0c110",
+                        "on-tertiary-fixed-variant": "#004e5e",
+                        "secondary-fixed": "#e5e2e1",
+                        "inverse-surface": "#2e3132",
+                        "tertiary": "#00687c",
+                        "surface-dim": "#d9dadb",
+                        "on-primary-fixed": "#241a00",
+                        "surface": "#f8f9fa",
+                        "on-surface": "#191c1d",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed-variant": "#474746",
+                        "surface-container": "#edeeef",
+                        "surface-container-highest": "#e1e3e4",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-container": "#005e70",
+                        "on-secondary-fixed": "#1c1b1b",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed": "#001f27",
+                        "primary": "#745b00",
+                        "tertiary-fixed": "#b0ecff",
+                        "surface-variant": "#e1e3e4",
+                        "on-background": "#191c1d",
+                        "on-primary": "#ffffff",
+                        "inverse-on-surface": "#f0f1f2",
+                        "surface-container-low": "#f3f4f5",
+                        "surface-bright": "#f8f9fa",
+                        "primary-container": "#f5c518",
+                        "on-primary-fixed-variant": "#584400",
+                        "error": "#ba1a1a",
+                        "tertiary-container": "#49dbff",
+                        "custom-blue-violet": "#5B5BD6",
+                        "custom-green": "#22C55E"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "section-gap": "32px",
+                        "container-margin": "20px",
+                        "gutter": "12px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Archivo Narrow"],
+                        "headline-md": ["Archivo Narrow"],
+                        "headline-lg-mobile": ["Archivo Narrow"],
+                        "display": ["Archivo Narrow"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-bold": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "900"}],
+                        "headline-md": ["20px", {"lineHeight": "1.3", "fontWeight": "800"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "900"}],
+                        "display": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "900"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "300"}],
+                        "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "300"}],
+                        "label-bold": ["12px", {"lineHeight": "1", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface font-body-md text-on-surface max-w-[390px] mx-auto min-h-screen relative shadow-2xl overflow-x-hidden">
+<!-- TOP NAV -->
+<header class="bg-surface shadow-md docked full-width top-0 z-50 flex justify-between items-center w-full px-container-margin py-base sticky">
+<h1 class="font-label-bold text-[18px] text-on-secondary-fixed">Mon Profil</h1>
+<button class="active:scale-95 duration-200 p-2 hover:bg-surface-variant/50 transition-all rounded-full">
+<span class="material-symbols-outlined text-[24px]">settings</span>
+</button>
+</header>
+<!-- PROFILE HEADER -->
+<section class="bg-gradient-to-b from-[#EFF6FF] to-[#E0E7FF] p-container-margin flex flex-col items-center">
+<div class="relative mb-4">
+<div class="w-[84px] h-[84px] rounded-full border-[3px] border-primary-container overflow-hidden shadow-lg">
+<img alt="Portrait professionnel d'un jeune homme souriant" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/ADBb0uiKx5lxO6EmhqIu9BRVYIlcW2tkqf9mM27B1XReh7dPAWch4i-7FIzYqQPB_GsSDPxunY0Sc-KQio1L06hiGj_nNZb535vDypNEvpeyqHctP3VeRNOTQvX2_R3Os7lpL-V-HlcgIokbDJ9dpxQ3zgwW8G-YZpAV2xOnyjt-TMoVf2G2xWfBn4QWQIMtAF-uZJqUAE9gjNMZNfHwlT-oUuOZauUMGbrV3peJZAYZBiimn64S7oeGtT5Tpg"/>
+</div>
+<div class="absolute bottom-0 right-0 w-[26px] h-[26px] bg-white rounded-full flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-[16px] text-custom-blue-violet">photo_camera</span>
+</div>
+</div>
+<h2 class="font-headline-md text-on-surface mb-0.5">Julien Dupont</h2>
+<p class="text-secondary text-[13px] font-body-sm mb-4">julien.dupont@email.com</p>
+<div class="flex gap-2 mb-6">
+<span class="px-3 py-1 bg-primary-container text-on-primary-fixed text-[10px] font-label-bold rounded-full uppercase tracking-wider shadow-sm">Super Vendeur</span>
+<span class="px-3 py-1 bg-custom-blue-violet text-white text-[10px] font-label-bold rounded-full uppercase tracking-wider shadow-sm">Vérifié</span>
+<span class="px-3 py-1 bg-on-secondary-fixed text-white text-[10px] font-label-bold rounded-full uppercase tracking-wider shadow-sm">Top Troc</span>
+</div>
+<button class="flex items-center gap-2 px-6 py-2 border border-custom-blue-violet/30 rounded-full bg-white/50 backdrop-blur-sm active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[18px] text-custom-blue-violet">edit</span>
+<span class="text-custom-blue-violet font-label-bold text-[14px]">Modifier le profil</span>
+</button>
+</section>
+<!-- STATS BANNER -->
+<div class="px-container-margin -mt-4 relative z-10">
+<div class="bg-white rounded-[16px] shadow-[0_4px_20px_rgba(0,0,0,0.04)] border-l-4 border-primary-container p-4 flex items-center justify-between">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary-container text-[20px] fill-icon">visibility</span>
+<span class="text-on-surface text-[13px] font-body-sm">Vos annonces ont été vues</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-[28px] font-headline-lg-mobile text-on-surface leading-none">1 243</span>
+<span class="text-secondary text-[13px] font-body-sm">fois cette semaine</span>
+</div>
+</div>
+<div class="flex items-center gap-1 bg-custom-green/10 px-2 py-1 rounded-lg">
+<span class="material-symbols-outlined text-custom-green text-[18px]">trending_up</span>
+<span class="text-custom-green font-label-bold text-[13px]">+12%</span>
+</div>
+</div>
+</div>
+<!-- QUICK STATS -->
+<div class="mt-6 bg-white border-y border-outline-variant grid grid-cols-4 divide-x divide-outline-variant py-4">
+<div class="flex flex-col items-center">
+<span class="text-on-surface font-headline-md text-[16px]">47</span>
+<span class="text-secondary text-[10px] font-body-sm uppercase tracking-tighter">Annonces</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="flex items-center gap-0.5">
+<span class="text-on-surface font-headline-md text-[16px]">4.8</span>
+<span class="material-symbols-outlined text-primary-container text-[14px] fill-icon">star</span>
+</div>
+<span class="text-secondary text-[10px] font-body-sm uppercase tracking-tighter">Note</span>
+</div>
+<div class="flex flex-col items-center">
+<span class="text-on-surface font-headline-md text-[16px]">312</span>
+<span class="text-secondary text-[10px] font-body-sm uppercase tracking-tighter">Followers</span>
+</div>
+<div class="flex flex-col items-center relative">
+<span class="text-custom-blue-violet font-headline-md text-[16px]">5</span>
+<span class="text-secondary text-[10px] font-body-sm uppercase tracking-tighter">Messages</span>
+<div class="absolute top-0 right-4 w-2 h-2 bg-error rounded-full"></div>
+</div>
+</div>
+<!-- TABS BAR -->
+<nav class="flex px-container-margin mt-6 border-b border-outline-variant overflow-x-auto scrollbar-hide">
+<button class="relative pb-3 px-2 flex-shrink-0">
+<span class="font-label-bold text-on-surface text-[14px]">Actives</span>
+<div class="absolute bottom-0 left-0 w-full h-[3px] bg-primary-container rounded-t-full"></div>
+</button>
+<button class="pb-3 px-4 flex-shrink-0">
+<span class="font-body-sm text-secondary text-[14px]">Vendues</span>
+</button>
+<button class="pb-3 px-4 flex-shrink-0">
+<span class="font-body-sm text-secondary text-[14px]">Brouillons</span>
+</button>
+<button class="pb-3 px-4 flex-shrink-0">
+<span class="font-body-sm text-secondary text-[14px]">Favoris</span>
+</button>
+</nav>
+<!-- ACTIVES CONTENT -->
+<main class="p-container-margin grid grid-cols-2 gap-gutter pb-32">
+<!-- Card 1 -->
+<article class="bg-white rounded-[16px] shadow-[0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col">
+<div class="relative h-[120px]">
+<img class="w-full h-full object-cover" data-alt="Close up of high-end studio headphones on a minimalist white surface with soft dramatic side lighting and a premium modern aesthetic. The color palette includes deep blacks and golden yellow accents, reflecting a high-quality electronic product listing in a clean marketplace environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMHYQ-VEEg97wEHAskELTelyikQg8DZLCX8REUfkN-vKuDhVmTy20vYRcTNJouVCD6XyznSjsnvBHG6e-PjSxFsTb48NHkYkYqf9XG3q5rWxqKn0W3qpCScpMEFZZp4qmTCn3J3scJb3mGojM5iMkdBaw--uZPvBoPWO5i7L4ppW6gdP7TpABT4MAHQ-PL3rnWlDko-fZEwykA-bRIxLrBs1w1cp3yfTMlsTexvqK_p-tUjaPsjyW0xspjSudDqx3Nx0jGsDbFAxE"/>
+<span class="absolute top-2 left-2 px-2 py-0.5 bg-on-secondary-fixed text-white text-[9px] font-label-bold rounded-full">VENTE</span>
+<div class="absolute top-2 right-2 flex items-center gap-0.5 bg-black/40 backdrop-blur-md px-1.5 py-0.5 rounded-full text-white">
+<span class="material-symbols-outlined text-[10px]">visibility</span>
+<span class="text-[10px] font-label-bold">243</span>
+</div>
+</div>
+<div class="p-3 flex-1 flex flex-col">
+<h3 class="font-label-bold text-on-surface text-[13px] leading-snug line-clamp-2 mb-1">Casque Audio Studio High-Fi Noir</h3>
+<p class="text-primary-container font-headline-md text-[15px] mb-2">120 €</p>
+<div class="flex items-center gap-1 text-secondary text-[11px] mt-auto">
+<span class="material-symbols-outlined text-[12px]">location_on</span>
+<span>Paris • 2j</span>
+</div>
+</div>
+<div class="border-t border-outline-variant grid grid-cols-3 divide-x divide-outline-variant py-2">
+<button class="flex justify-center items-center py-1 hover:bg-surface-variant/20"><span class="material-symbols-outlined text-[18px] text-secondary">edit</span></button>
+<button class="flex justify-center items-center py-1 hover:bg-surface-variant/20"><span class="material-symbols-outlined text-[18px] text-secondary">check_circle</span></button>
+<button class="flex justify-center items-center py-1 hover:bg-surface-variant/20"><span class="material-symbols-outlined text-[18px] text-error">delete</span></button>
+</div>
+</article>
+<!-- Card 2 -->
+<article class="bg-white rounded-[16px] shadow-[0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col">
+<div class="relative h-[120px]">
+<img class="w-full h-full object-cover" data-alt="A sleek modern laptop displayed on a clean wooden desk with a minimalist plant in the background. The lighting is warm and natural, creating a premium professional workspace atmosphere. The composition emphasizes the high-tech features and elegant design of the device, using a palette of silver, deep blacks, and soft neutrals." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQPzxgF_Mq_Za0wBCd8SOKCIRbnx-CEIWPKEWycbidWH2SgBvO4vso9WkXVQ_5t8qMOPC3rpxE7JMKRMpuPTaWD-MPUmGjiU_j_CK-zV_ahbVb5jq6zlBd4ofjZlooQrub8EpmGF31JDXOWh-ouT69atlJcJFR2hx_fO3BdI5mIOSe0umYdFcp7j9LYT5YMjVCrTkUN25sXbbYNrJz1VBAKZwp1-N0jJ5uXdMDVSdBpmcVwt1fNNdvorF4O79D36OzVk5HnEJglbU"/>
+<span class="absolute top-2 left-2 px-2 py-0.5 bg-custom-blue-violet text-white text-[9px] font-label-bold rounded-full">TROC</span>
+<div class="absolute top-2 right-2 flex items-center gap-0.5 bg-black/40 backdrop-blur-md px-1.5 py-0.5 rounded-full text-white">
+<span class="material-symbols-outlined text-[10px]">visibility</span>
+<span class="text-[10px] font-label-bold">89</span>
+</div>
+</div>
+<div class="p-3 flex-1 flex flex-col">
+<h3 class="font-label-bold text-on-surface text-[13px] leading-snug line-clamp-2 mb-1">MacBook Pro 13" M1 Excellent État</h3>
+<p class="text-primary-container font-headline-md text-[15px] mb-2">À Troquer</p>
+<div class="flex items-center gap-1 text-secondary text-[11px] mt-auto">
+<span class="material-symbols-outlined text-[12px]">location_on</span>
+<span>Lyon • 5j</span>
+</div>
+</div>
+<div class="border-t border-outline-variant grid grid-cols-3 divide-x divide-outline-variant py-2">
+<button class="flex justify-center items-center py-1 hover:bg-surface-variant/20"><span class="material-symbols-outlined text-[18px] text-secondary">edit</span></button>
+<button class="flex justify-center items-center py-1 hover:bg-surface-variant/20"><span class="material-symbols-outlined text-[18px] text-secondary">check_circle</span></button>
+<button class="flex justify-center items-center py-1 hover:bg-surface-variant/20"><span class="material-symbols-outlined text-[18px] text-error">delete</span></button>
+</div>
+</article>
+<!-- Card 3 -->
+<article class="bg-white rounded-[16px] shadow-[0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col">
+<div class="relative h-[120px]">
+<img class="w-full h-full object-cover" data-alt="A pair of vibrant red performance running shoes captured mid-action against a clean studio backdrop. High-key lighting highlights the technical mesh texture and sleek silhouette. The visual style is energetic and modern, utilizing a bold color palette of intense reds and deep blacks to convey speed and premium quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtYqwdoPpxEoWfy1Qp6LV9tbPb30P804hGH2OlbpaIz996gQ5FI6sL82BnOAhjUpzPXm0FF07tajJU-oe6-lYIPN6C23UKk70iAPI3yvzH_YMqUrVguWijw3XGpUVqJqk_ylJceSQxy2p0BVmLqQogU9Zn-so_minNDwx0auwIgFNOW6xeL1yQ2opcvH3A8apJCDPHiXidFQED32ihq5-sYyvfsubYFRuk_SV-D_1E8wu-X2VY3diEEM3SW5py0sR4l11q_R-t6xo"/>
+<span class="absolute top-2 left-2 px-2 py-0.5 bg-primary-container text-on-primary-fixed text-[9px] font-label-bold rounded-full">TROC + CASH</span>
+<div class="absolute top-2 right-2 flex items-center gap-0.5 bg-black/40 backdrop-blur-md px-1.5 py-0.5 rounded-full text-white">
+<span class="material-symbols-outlined text-[10px]">visibility</span>
+<span class="text-[10px] font-label-bold">156</span>
+</div>
+</div>
+<div class="p-3 flex-1 flex flex-col">
+<h3 class="font-label-bold text-on-surface text-[13px] leading-snug line-clamp-2 mb-1">Baskets Running Pro Performance Red</h3>
+<p class="text-primary-container font-headline-md text-[15px] mb-2">45 € + Troc</p>
+<div class="flex items-center gap-1 text-secondary text-[11px] mt-auto">
+<span class="material-symbols-outlined text-[12px]">location_on</span>
+<span>Bordeaux • 12h</span>
+</div>
+</div>
+<div class="border-t border-outline-variant grid grid-cols-3 divide-x divide-outline-variant py-2">
+<button class="flex justify-center items-center py-1 hover:bg-surface-variant/20"><span class="material-symbols-outlined text-[18px] text-secondary">edit</span></button>
+<button class="flex justify-center items-center py-1 hover:bg-surface-variant/20"><span class="material-symbols-outlined text-[18px] text-secondary">check_circle</span></button>
+<button class="flex justify-center items-center py-1 hover:bg-surface-variant/20"><span class="material-symbols-outlined text-[18px] text-error">delete</span></button>
+</div>
+</article>
+<!-- Card 4 -->
+<article class="bg-white rounded-[16px] shadow-[0_4px_20px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col opacity-80">
+<div class="relative h-[120px]">
+<img class="w-full h-full object-cover" data-alt="A premium tablet device with a vibrant digital display sitting on a minimalist white desk with architectural lighting. The environment is clean and professional, using a sophisticated color scheme of whites and deep grays with soft shadows to highlight the sleek hardware and advanced technology of the electronic device." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAW16eE4-vPXZDTa6oN-_fPmHSfE_l_dOamHsI4KRAAQfdxYKykXSGLh4WMHiLXPvFqKH0tUDWo8ON6djl2Zh7xdw99n-1HiNvtlrXD4xozWhtGdRgD2Y5-6PRZ4z9FNXKdrEAV12C_LyO6ajvD3RwYJGn7_s1VH6x1TNPQEnPB5m-2dgatKptpdA9SfeVCVJrbLnUYLUIyf4BMRuRRQ7G1IGD68Yc_8S-LPVSiWdzWaY1TrtaFd_NsUkE3QgT5Z7CtGNk-Yr7TH0"/>
+<span class="absolute top-2 left-2 px-2 py-0.5 bg-on-secondary-fixed text-white text-[9px] font-label-bold rounded-full">VENTE</span>
+<div class="absolute top-2 right-2 flex items-center gap-0.5 bg-black/40 backdrop-blur-md px-1.5 py-0.5 rounded-full text-white">
+<span class="material-symbols-outlined text-[10px]">visibility</span>
+<span class="text-[10px] font-label-bold">512</span>
+</div>
+</div>
+<div class="p-3 flex-1 flex flex-col">
+<h3 class="font-label-bold text-on-surface text-[13px] leading-snug line-clamp-2 mb-1">iPad Air 4 64Go Gris Sidéral</h3>
+<p class="text-primary-container font-headline-md text-[15px] mb-2">380 €</p>
+<div class="flex items-center gap-1 text-secondary text-[11px] mt-auto">
+<span class="material-symbols-outlined text-[12px]">location_on</span>
+<span>Nice • 1sem</span>
+</div>
+</div>
+<div class="border-t border-outline-variant grid grid-cols-3 divide-x divide-outline-variant py-2">
+<button class="flex justify-center items-center py-1 hover:bg-surface-variant/20"><span class="material-symbols-outlined text-[18px] text-secondary">edit</span></button>
+<button class="flex justify-center items-center py-1 hover:bg-surface-variant/20"><span class="material-symbols-outlined text-[18px] text-secondary">check_circle</span></button>
+<button class="flex justify-center items-center py-1 hover:bg-surface-variant/20"><span class="material-symbols-outlined text-[18px] text-error">delete</span></button>
+</div>
+</article>
+</main>
+<!-- BOTTOM NAV -->
+<nav class="fixed bottom-0 w-full flex justify-around items-center px-4 py-3 pb-6 bg-surface/80 dark:bg-surface-container/80 backdrop-blur-lg shadow-[0_-4px_20px_rgba(0,0,0,0.04)] z-50 rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-secondary font-label-bold active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary font-label-bold active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="text-[10px] mt-1">Search</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary-container active:scale-90 duration-200 transform scale-110" href="#">
+<span class="material-symbols-outlined text-[32px] fill-icon">add_circle</span>
+<span class="text-[10px] mt-0 font-label-bold text-on-surface">Post</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary font-label-bold active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">chat_bubble</span>
+<span class="text-[10px] mt-1">Messages</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary font-label-bold active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined fill-icon">person</span>
+<span class="text-[10px] mt-1">Profile</span>
+</a>
+</nav>
+<script>
+        // Simple micro-interaction for tabs
+        document.querySelectorAll('nav button').forEach(button => {
+            button.addEventListener('click', function() {
+                // This is a UI mockup, so we just simulate state change
+                console.log('Tab changed to: ' + this.textContent.trim());
+            });
+        });
+    </script>
+</body></html>

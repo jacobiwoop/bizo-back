@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700;800;900&amp;family=Inter:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        body {
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Inter', sans-serif;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .glass-nav {
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#b0ecff",
+                        "surface-container": "#edeeef",
+                        "background": "#f8f9fa",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-tertiary-fixed-variant": "#004e5e",
+                        "surface-tint": "#745b00",
+                        "inverse-on-surface": "#f0f1f2",
+                        "on-secondary-fixed": "#1c1b1b",
+                        "outline-variant": "#d1c5ac",
+                        "tertiary-fixed-dim": "#42d7fb",
+                        "secondary-container": "#e2dfde",
+                        "on-background": "#191c1d",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "outline": "#807660",
+                        "on-primary-fixed": "#241a00",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#4e4633",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#e5e2e1",
+                        "on-primary-fixed-variant": "#584400",
+                        "on-secondary-container": "#636262",
+                        "primary-fixed-dim": "#f0c110",
+                        "surface-bright": "#f8f9fa",
+                        "on-tertiary-container": "#005e70",
+                        "inverse-primary": "#f0c110",
+                        "surface": "#f8f9fa",
+                        "primary-fixed": "#ffe08b",
+                        "on-tertiary-fixed": "#001f27",
+                        "surface-variant": "#e1e3e4",
+                        "primary-container": "#f5c518",
+                        "surface-container-low": "#f3f4f5",
+                        "on-secondary": "#ffffff",
+                        "tertiary-container": "#49dbff",
+                        "secondary": "#5f5e5e",
+                        "on-surface": "#191c1d",
+                        "on-error": "#ffffff",
+                        "on-primary-container": "#695200",
+                        "tertiary": "#00687c",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#d9dadb",
+                        "primary": "#745b00",
+                        "inverse-surface": "#2e3132",
+                        "surface-container-high": "#e7e8e9",
+                        "on-primary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed-variant": "#474746"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-margin": "20px",
+                        "gutter": "12px",
+                        "base": "8px",
+                        "section-gap": "32px"
+                    },
+                    "fontFamily": {
+                        "display": ["Archivo Narrow"],
+                        "label-bold": ["Inter"],
+                        "headline-lg-mobile": ["Archivo Narrow"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Archivo Narrow"],
+                        "headline-lg": ["Archivo Narrow"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "900"}],
+                        "label-bold": ["12px", {"lineHeight": "1", "fontWeight": "700"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "900"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "300"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "300"}],
+                        "headline-md": ["20px", {"lineHeight": "1.3", "fontWeight": "800"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "900"}],
+                        "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-24">
+<!-- TOP NAV -->
+<header class="w-full top-0 sticky z-50 bg-surface shadow-[0_4px_20px_0_rgba(0,0,0,0.04)]">
+<div class="flex justify-between items-center px-container-margin py-4 w-full max-w-[1200px] mx-auto">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-background">Mon Profil</h1>
+<button class="transition-opacity duration-200 hover:opacity-80">
+<span class="material-symbols-outlined text-[24px] text-on-background">settings</span>
+</button>
+</div>
+</header>
+<!-- PROFILE HEADER -->
+<section class="bg-gradient-to-br from-[#EFF6FF] to-[#E0E7FF] px-container-margin py-6">
+<div class="flex items-center gap-4">
+<div class="relative">
+<img alt="Julien Dupont" class="w-16 h-16 rounded-full border-2 border-primary-container object-cover" data-alt="A professional close-up portrait of a friendly man with short dark hair in a modern studio setting. The lighting is soft and flattering, emphasizing a trustworthy and professional persona. The color palette is clean and modern, consistent with a high-end marketplace app aesthetic. High-quality digital photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgfYeswQzrUNSoShP1AQMIrsIIpVDeebuic34JfJGkIr16HrUKvm97Z__wSsiVvZftqZAfdCUoHoOJXZ4FnjVhd7TQc2T49ujTbfdOW8Dt77q5kL4IF_x0GCIU2RIaIIpfpl0B1eFTrW23QikTRCIHUIp4GZ0jMuITQp6eZtSBzOFUE92BAlEkSSibja0YCCWuxphOBv7sruvHIeazizkWCDB_hIKDUE8CGeMG3BONiPnMFv9P-dH2ohGsrwlXR-ZbGc_LEUfML88"/>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-md text-headline-md text-on-background">Julien Dupont</h2>
+<button class="bg-surface/80 px-3 py-1.5 rounded-full shadow-sm hover:bg-surface transition-colors">
+<span class="font-label-bold text-[12px] text-secondary">Modifier le profil</span>
+</button>
+</div>
+<div class="flex flex-wrap gap-2 mt-2">
+<span class="bg-primary-container/20 text-on-primary-container px-2 py-0.5 rounded-full text-[10px] font-bold">SUPER VENDEUR</span>
+<span class="bg-tertiary-container/20 text-on-tertiary-container px-2 py-0.5 rounded-full text-[10px] font-bold">VÉRIFIÉ</span>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded-full text-[10px] font-bold">TOP TROC</span>
+</div>
+</div>
+</div>
+</section>
+<!-- PRIVATE STATS BANNER -->
+<div class="px-container-margin mt-[-12px]">
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_0_rgba(0,0,0,0.04)] border-l-4 border-primary-container p-4 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="bg-primary-container/10 p-2 rounded-lg text-primary">
+<span class="material-symbols-outlined">visibility</span>
+</div>
+<div>
+<p class="text-[14px] font-bold text-on-background">Vos annonces ont été vues</p>
+<div class="flex items-baseline gap-1">
+<span class="text-[20px] font-black text-on-background">1 243</span>
+<span class="text-[12px] text-secondary">fois cette semaine</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-1 text-[#22C55E]">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span class="text-[12px] font-bold">+12%</span>
+</div>
+</div>
+</div>
+<!-- QUICK STATS ROW -->
+<section class="px-container-margin py-6 grid grid-cols-4 divide-x divide-outline-variant/30">
+<div class="flex flex-col items-center">
+<span class="font-headline-md text-headline-md">47</span>
+<span class="text-[10px] text-secondary uppercase tracking-wider">Annonces</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="flex items-center gap-0.5">
+<span class="font-headline-md text-headline-md">4.8</span>
+<span class="material-symbols-outlined text-[14px] text-primary-container fill-icon" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="text-[10px] text-secondary uppercase tracking-wider">Note</span>
+</div>
+<div class="flex flex-col items-center">
+<span class="font-headline-md text-headline-md">312</span>
+<span class="text-[10px] text-secondary uppercase tracking-wider">Followers</span>
+</div>
+<div class="flex flex-col items-center relative">
+<span class="font-headline-md text-headline-md">5</span>
+<span class="text-[10px] text-secondary uppercase tracking-wider">Messages</span>
+<div class="absolute top-0 right-3 w-2 h-2 bg-error rounded-full ring-2 ring-background"></div>
+</div>
+</section>
+<!-- TABS BAR -->
+<div class="sticky top-[60px] bg-background z-40 border-b border-outline-variant/20">
+<div class="flex justify-between px-container-margin">
+<button class="px-2 py-4 text-secondary font-label-bold text-body-sm transition-colors">Actives</button>
+<button class="px-2 py-4 text-secondary font-label-bold text-body-sm transition-colors">Vendues</button>
+<button class="px-2 py-4 text-secondary font-label-bold text-body-sm transition-colors">Brouillons</button>
+<button class="px-2 py-4 text-on-background font-bold text-body-sm relative">
+                Favoris
+                <div class="absolute bottom-0 left-0 w-full h-[3px] bg-primary-container rounded-t-full"></div>
+</button>
+</div>
+</div>
+<!-- SORT ROW -->
+<div class="px-container-margin pt-4 flex justify-end items-center gap-2">
+<button class="flex items-center gap-1.5 text-secondary text-[13px] transition-opacity hover:opacity-80">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+<span>Trier : Récent</span>
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+</div>
+<!-- FAVORIS CONTENT GRID -->
+<section class="px-container-margin py-4 grid grid-cols-2 gap-4">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0_4px_20px_0_rgba(0,0,0,0.04)] group transition-transform duration-150 active:scale-95">
+<div class="relative aspect-square">
+<img class="w-full h-full object-cover" data-alt="A sleek iPhone 13 Pro in Graphite color, resting on a clean white desk next to a designer magazine. Soft daylight from a nearby window creates gentle highlights and shadows. The aesthetic is minimal and high-end, fitting for a premium marketplace listing. Professional product photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMhgOIUAdZi_8EPtbpFUVN0HltFI6xdDDKPE7bDpbBu8Wws-AtD3cyxE9VWRc2XiWEL83H3NQPaY-i6rV9AhUQzXvXGqXCHHWtVXL_kFWtqY7pH1a6ZvF35y1so4n_6YFla4Xxq8SnzS90XHPuu6weJCPlPyMt1EOMQYejkKYPZA6ZGWJ1vy8_maLzpRPQ2fk-542aSdF29xaB57ZTM4uqI0rPcUz_OGnRZ7-uXfRo1uh54bC8EFzOFk4hGs9R3ObKNM90H3D1VRw"/>
+<span class="absolute top-2 left-2 bg-primary-container text-on-primary-container px-2 py-0.5 rounded-full text-[10px] font-black uppercase">VENTE</span>
+<button class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center bg-white/80 backdrop-blur-md rounded-full shadow-sm">
+<span class="material-symbols-outlined text-primary-container fill-icon" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+<div class="p-3">
+<h3 class="font-headline-md text-[14px] truncate">iPhone 13 Pro</h3>
+<p class="text-primary-container font-black text-[16px] mt-1">750€</p>
+<div class="flex items-center gap-1 mt-2 mb-3">
+<img class="w-5 h-5 rounded-full object-cover" data-alt="Avatar of Thomas B." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRwSYOl3V8ezmxFmmqyKwzvBjKHr6MZR5UqRM_TRKajQS50St-_tkMqBHdMezoYfrnie3aUl5oisnMejTocgMhhymwB4glbpnBQSFahbTlPB0kU9XHYURz5MDhRmLbWzBhFXcHa9RgzBaN0tTzvrL-_3-yeNOsIYPEtu74zwhqNRyo2I0IiDAyq3vH5B5j7RObe58c0nJX86w6PdiZ_7YreIyEKOE58785KGyQSpwJJPZ8xpKNTipASnlWul0YKrUmBg7ivn03sXE"/>
+<span class="text-[11px] text-secondary truncate">Thomas B.</span>
+<span class="material-symbols-outlined text-[12px] text-tertiary">verified</span>
+</div>
+<div class="flex flex-col gap-2 pt-2 border-t border-outline-variant/20">
+<button class="w-full bg-on-background text-surface py-1.5 rounded-lg text-[11px] font-bold">Contacter</button>
+<div class="flex gap-2">
+<button class="flex-1 bg-surface-container-highest/50 py-1.5 rounded-lg text-[11px] font-medium text-secondary">Partager</button>
+<button class="flex-1 bg-surface-container-highest/50 py-1.5 rounded-lg text-[11px] font-medium text-error">Retirer</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0_4px_20px_0_rgba(0,0,0,0.04)] group opacity-90">
+<div class="relative aspect-square">
+<img class="w-full h-full object-cover" data-alt="A Sony PlayStation 5 console standing vertically in a modern gaming setup with ambient blue neon lighting. High-tech and clean aesthetic. The image is clear and detailed, showcasing the console's sleek design in a professional studio-style shot." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVUJRmD9E7khW-eXr--DSJCXYo4DV2JRneGJLjKhONQFBGcbG49I_ekZvs_Xj_A02Adm30yku8algz8XYMdEWeSydEMLHTImY9jR_5MnR_jEKHDgU2GENNGANedq43LG66U6peMeymrK2OCfGvBt3mJ_MRLY49X-pVeRU68YT2oaC8h21NqljdSVutgZIg-MDSsONJqUk9GXuMtIUUrKH3vc00jcUIUjtP_G4FBuWOI6BfiQb3JkSJOuT1dx9MV1DERyVdWVEOfaA"/>
+<div class="absolute inset-0 bg-on-background/60 flex items-center justify-center backdrop-blur-[1px]">
+<span class="text-surface font-black text-[18px] tracking-[4px] border-2 border-surface px-4 py-1">VENDU</span>
+</div>
+<span class="absolute top-2 left-2 bg-tertiary text-on-tertiary px-2 py-0.5 rounded-full text-[10px] font-black uppercase">TROC</span>
+<button class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center bg-white/80 backdrop-blur-md rounded-full shadow-sm">
+<span class="material-symbols-outlined text-primary-container fill-icon" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+<div class="p-3">
+<h3 class="font-headline-md text-[14px] truncate">PlayStation 5</h3>
+<p class="text-primary-container font-black text-[16px] mt-1">400€</p>
+<div class="flex items-center gap-1 mt-2 mb-3">
+<img class="w-5 h-5 rounded-full object-cover" data-alt="Avatar of Sophie L." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPq_Wy8ucQEbEfU8jjOawqeFlL9f8RwQ4NTY0Zojq8KgpR3Mc1RdF5ARUHc5O9wxjN5Xiqyng89HM3r4-K3Rm98VrjWQtApgINgaXWgQddqlfOMuOUkvsbRf9hb_U8xfd4os3FgCvDYY4KG_1-3LyOUchlcFhpRbB6KJ0Ux_PIkbq_iPi72G7uy5iMqDLrFBxiy5BDuGVO9zj5Oz9RYiQvWQu_6Qmu2-iRVu2gYkDVPx-U56pXH37po4uX0ZxQLjcxBMpuH9rzHfI"/>
+<span class="text-[11px] text-secondary truncate">Sophie L.</span>
+</div>
+<div class="flex flex-col gap-2 pt-2 border-t border-outline-variant/20">
+<button class="w-full bg-outline-variant text-on-surface py-1.5 rounded-lg text-[11px] font-bold cursor-not-allowed">Plus disponible</button>
+<button class="w-full bg-surface-container-highest/50 py-1.5 rounded-lg text-[11px] font-medium text-error">Retirer des favoris</button>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0_4px_20px_0_rgba(0,0,0,0.04)] group transition-transform duration-150 active:scale-95">
+<div class="relative aspect-square">
+<img class="w-full h-full object-cover" data-alt="Apple MacBook Air M1 in Silver resting on a wooden cafe table next to a cup of espresso. The atmosphere is warm and productive with soft focus on the background greenery. Premium technology photography with a focus on design and portability." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuO_BLCx7wEn2FLwMcF3_4tffGf_6s6NRpKLvkLR9C7ehZxA7tT2M1TIuxAO23iBZQU5VMUeIZz3HnGqQ0cT7WM6dxT5FLTTK8PHq9rE3PX4Qamb8wHQyixpEz4BEUXfnamKnxGk5FPJLyZumNlzwHxn1nmEMD0NXdB2H6rqY8fgSeUw6mX-kHLqezDhRYmQDUfNerfmQ4lcHBqPcLCII899YgzzMKZjUM81Z50cY7R4Ocss6pKynfoy2L3VZMUxhJqnoojBwh_fU"/>
+<span class="absolute top-2 left-2 bg-primary-container text-on-primary-container px-2 py-0.5 rounded-full text-[10px] font-black uppercase">VENTE</span>
+<button class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center bg-white/80 backdrop-blur-md rounded-full shadow-sm">
+<span class="material-symbols-outlined text-primary-container fill-icon" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+<div class="p-3">
+<h3 class="font-headline-md text-[14px] truncate">MacBook Air M1</h3>
+<p class="text-primary-container font-black text-[16px] mt-1">850€</p>
+<div class="flex items-center gap-1 mt-2">
+<img class="w-5 h-5 rounded-full object-cover" data-alt="Avatar of Lucas M." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFyJ6gS7KJ2WnqlT197TQ7DRdMRLTau1ySfrGOnyf9BEl4DKAUyqgvroQYymoqweR0jGTLvTaD0hW9TKDVJIWFGoPTCUaX9gGnHtKlVfv5Uc-9tybICuYURtzeckmTafq8DH8Ld7kOoVW2lKkr-0lIB-TPV3tTYlIpzcNtAVFXiuZ7NCoZGCUwhREnAC5U4MjkmHrt4MkuYsngHTKVMCSQUY7eZZycCH-GkkM1YdzGGQtP7jLnyMRijQa38M3fbDNbOf83kUElY1Q"/>
+<span class="text-[11px] text-secondary truncate">Lucas M.</span>
+<span class="material-symbols-outlined text-[12px] text-tertiary">verified</span>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0_4px_20px_0_rgba(0,0,0,0.04)] group transition-transform duration-150 active:scale-95">
+<div class="relative aspect-square">
+<img class="w-full h-full object-cover" data-alt="A pair of vibrant Nike Air Jordan sneakers on a clean urban backdrop with a soft concrete texture. The lighting is crisp, highlighting the high-quality materials and design of the footwear. Bold, modern aesthetic that appeals to streetwear enthusiasts." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzGuD6hQoW-1rYsdeQckYBMneqvUARlIKUzuCeqhRRYcBgK2yYVRlxexD7gdVIbxjbIQAFkOpCaKe2yyacfM7Bc7SYLFEa8z57Th9SmBEMB1qFkSNqkCEdo2kSlW1X_UWm0EOHoVykZQx09b6JLkdsTLpdpRGbmo6RfG0Pcm5QBaeByPhxuw3a9il-23SKqmP6YEXc6aopwtynoAOItFaFcwBLb_M3JfmZKPujLequamzMfpckHhTy8R0HekQB6Ga30rPI3NrzA0Y"/>
+<span class="absolute top-2 left-2 bg-primary-container text-on-primary-container px-2 py-0.5 rounded-full text-[10px] font-black uppercase">VENTE</span>
+<button class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center bg-white/80 backdrop-blur-md rounded-full shadow-sm">
+<span class="material-symbols-outlined text-primary-container fill-icon" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+<div class="p-3">
+<h3 class="font-headline-md text-[14px] truncate">Nike Air Jordan</h3>
+<p class="text-primary-container font-black text-[16px] mt-1">120€</p>
+<div class="flex items-center gap-1 mt-2">
+<img class="w-5 h-5 rounded-full object-cover" data-alt="Avatar of Emma R." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBM2VSsi1qLMwKennUxMO6pp7wmlM-j9X6yzXXTutSKAviQrPVB8-69VisiP3yefe2CNBkzCRVm60ZmHPUgfL635DSUabTPsMSHK7IKnx7jttTul9JiR0ZlzdD5Rt3Hn-NaT5YFCOCIGtgPriA6SexQYcRKNExceRIwsrL21onMzkV3djQIOdWLmDfjiR9q6-oTD255_GnXygvp2V3_Q9QK9u3cP6pE3inSq-k0BvymM3RR8-lDYVJfAsrL69JHWFbS4TcBcugzkWU"/>
+<span class="text-[11px] text-secondary truncate">Emma R.</span>
+</div>
+</div>
+</div>
+</section>
+<!-- BOTTOM NAV BAR -->
+<nav class="fixed bottom-0 left-0 w-full z-50 glass-nav bg-surface/80 rounded-t-xl shadow-[0_-4px_20px_0_rgba(0,0,0,0.04)] flex justify-around items-center px-4 py-3 pb-safe">
+<button class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim px-4 py-1 transition-transform duration-150 active:scale-90">
+<span class="material-symbols-outlined text-[24px]">home</span>
+<span class="font-label-bold text-[10px] mt-1">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim px-4 py-1 transition-transform duration-150 active:scale-90">
+<span class="material-symbols-outlined text-[24px]">search</span>
+<span class="font-label-bold text-[10px] mt-1">Search</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-primary font-black bg-on-background w-14 h-14 rounded-full mt-[-28px] shadow-lg transition-transform duration-150 active:scale-90 border-4 border-background">
+<span class="material-symbols-outlined text-[32px]">add</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim px-4 py-1 transition-transform duration-150 active:scale-90">
+<span class="material-symbols-outlined text-[24px]">chat_bubble</span>
+<span class="font-label-bold text-[10px] mt-1">Messages</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 transition-transform duration-150 active:scale-90">
+<span class="material-symbols-outlined text-[24px] fill-icon" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label-bold text-[10px] mt-1">Profile</span>
+</button>
+</nav>
+<script>
+        // Micro-interaction: Smooth appearance of stats row elements
+        document.addEventListener('DOMContentLoaded', () => {
+            const stats = document.querySelectorAll('.grid-cols-4 > div');
+            stats.forEach((el, index) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(10px)';
+                setTimeout(() => {
+                    el.style.transition = 'all 0.4s ease-out';
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, 100 * index);
+            });
+        });
+    </script>
+</body></html>

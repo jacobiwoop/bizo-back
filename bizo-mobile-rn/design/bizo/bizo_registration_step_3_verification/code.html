@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bizo - Vérification</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&amp;family=Archivo+Narrow:wght@800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-on-surface": "#f0f1f2",
+                    "inverse-surface": "#2e3132",
+                    "tertiary-fixed-dim": "#42d7fb",
+                    "secondary-fixed": "#e5e2e1",
+                    "error-container": "#ffdad6",
+                    "primary-container": "#f5c518",
+                    "surface-container-highest": "#e1e3e4",
+                    "primary": "#745b00",
+                    "on-primary-fixed-variant": "#584400",
+                    "on-tertiary-fixed": "#001f27",
+                    "on-secondary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "secondary-container": "#e2dfde",
+                    "surface-dim": "#d9dadb",
+                    "surface": "#f8f9fa",
+                    "on-tertiary-container": "#005e70",
+                    "on-tertiary-fixed-variant": "#004e5e",
+                    "on-error": "#ffffff",
+                    "surface-bright": "#f8f9fa",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed": "#ffe08b",
+                    "on-secondary-fixed": "#1c1b1b",
+                    "inverse-primary": "#f0c110",
+                    "background": "#f8f9fa",
+                    "on-secondary-container": "#636262",
+                    "surface-container-low": "#f3f4f5",
+                    "surface-container-high": "#e7e8e9",
+                    "on-primary-container": "#695200",
+                    "on-secondary-fixed-variant": "#474746",
+                    "on-primary-fixed": "#241a00",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "on-surface": "#191c1d",
+                    "surface-variant": "#e1e3e4",
+                    "on-error-container": "#93000a",
+                    "tertiary-container": "#49dbff",
+                    "primary-fixed-dim": "#f0c110",
+                    "surface-tint": "#745b00",
+                    "surface-container": "#edeeef",
+                    "secondary": "#5f5e5e",
+                    "tertiary": "#00687c",
+                    "on-background": "#191c1d",
+                    "tertiary-fixed": "#b0ecff",
+                    "outline": "#807660",
+                    "secondary-fixed-dim": "#c8c6c5",
+                    "outline-variant": "#d1c5ac",
+                    "on-surface-variant": "#4e4633"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "32px",
+                    "container-margin": "20px",
+                    "gutter": "12px",
+                    "base": "8px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "label-bold": ["Inter"],
+                    "headline-lg": ["Archivo Narrow"],
+                    "headline-lg-mobile": ["Archivo Narrow"],
+                    "display": ["Archivo Narrow"],
+                    "body-lg": ["Inter"],
+                    "headline-md": ["Archivo Narrow"],
+                    "body-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "300"}],
+                    "label-bold": ["12px", {"lineHeight": "1", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "900"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "900"}],
+                    "display": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "900"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "300"}],
+                    "headline-md": ["20px", {"lineHeight": "1.3", "fontWeight": "800"}],
+                    "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .otp-input:focus {
+            outline: none;
+            border-color: #5B5BD6;
+            border-bottom: 3px solid #f5c518;
+            box-shadow: none;
+        }
+        .otp-input-filled {
+            border-color: #f5c518;
+        }
+        .glass-nav {
+            background: rgba(248, 249, 250, 0.8);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen flex flex-col">
+<!-- [1] TOP NAV + PROGRESS BAR -->
+<header class="fixed top-0 w-full z-50 glass-nav">
+<div class="h-16 flex items-center justify-between px-container-margin">
+<button class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-container-high transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<span class="font-display text-headline-lg-mobile text-primary tracking-tight">Bizo</span>
+<div class="w-10"></div> <!-- Spacer for alignment -->
+</div>
+<!-- Progress Bar -->
+<div class="w-full h-1 bg-surface-container-highest relative">
+<div class="h-full bg-primary-container transition-all duration-700 ease-out flex items-center justify-end pr-2" style="width: 100%;">
+<span class="material-symbols-outlined text-[12px] text-on-primary-container font-bold" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+</header>
+<main class="flex-1 mt-20 px-container-margin pb-32 max-w-md mx-auto w-full flex flex-col">
+<!-- [2] ILLUSTRATION -->
+<div class="flex justify-center mt-6 mb-8">
+<img alt="Vérification par email" class="h-[160px] w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjWXanQtOlPRh4mRp3ZWN6R9xDrAkp5esjzRZh-SitqCNds9_c6lc-n8o3chO2MiEPgH1nmrkhOdEX__wFuGIXw5lIvXFLdskvUUZO7QawVeo30mQSTdp8VNF_GA-1B3i2-lu8Hty6Os7xUus2W5BaZNK7a89WSlS83NYI9bMEV0AzFT5NicVVtMeoCjqJ9a8pTjQvLOx_bX776YmoCkp4FbCbQUPH_SKjw9PCjakhlfrD1l2x5KVNK_eMvOBxZ9dqegz8KcTt7Is"/>
+</div>
+<!-- [3] HEADING -->
+<div class="text-center mb-8 space-y-2">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Vérifiez votre email</h1>
+<p class="text-secondary font-body-sm">Un code à 6 chiffres a été envoyé à</p>
+<div class="flex items-center justify-center gap-2 group cursor-pointer">
+<span class="font-label-bold text-body-md text-on-surface">votre@email.com</span>
+<span class="material-symbols-outlined text-[18px] text-[#5B5BD6] hover:scale-110 transition-transform">edit</span>
+</div>
+</div>
+<!-- [4] OTP INPUT -->
+<div class="flex justify-between gap-2 mb-10" id="otp-container">
+<input class="otp-input w-[52px] h-[60px] text-center text-[28px] font-bold border-[#E5E7EB] rounded-xl bg-surface-container-lowest transition-all otp-input-filled" maxlength="1" type="text" value="4"/>
+<input class="otp-input w-[52px] h-[60px] text-center text-[28px] font-bold border-[#E5E7EB] rounded-xl bg-surface-container-lowest transition-all otp-input-filled" maxlength="1" type="text" value="8"/>
+<input autofocus="" class="otp-input w-[52px] h-[60px] text-center text-[28px] font-bold border-[#E5E7EB] rounded-xl bg-surface-container-lowest transition-all" maxlength="1" type="text"/>
+<input class="otp-input w-[52px] h-[60px] text-center text-[28px] font-bold border-[#E5E7EB] rounded-xl bg-surface-container-lowest transition-all" maxlength="1" type="text"/>
+<input class="otp-input w-[52px] h-[60px] text-center text-[28px] font-bold border-[#E5E7EB] rounded-xl bg-surface-container-lowest transition-all" maxlength="1" type="text"/>
+<input class="otp-input w-[52px] h-[60px] text-center text-[28px] font-bold border-[#E5E7EB] rounded-xl bg-surface-container-lowest transition-all" maxlength="1" type="text"/>
+</div>
+<!-- [5] RESEND ROW -->
+<div class="text-center space-y-3">
+<p class="text-secondary font-body-sm">Vous n'avez pas reçu le code ?</p>
+<div class="flex items-center justify-center gap-2 text-secondary/70 font-body-sm">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>Renvoyer dans <span class="font-bold" id="timer">45</span>s</span>
+</div>
+</div>
+</main>
+<!-- [6] BOTTOM STICKY -->
+<footer class="fixed bottom-0 left-0 w-full p-container-margin bg-gradient-to-t from-background via-background/90 to-transparent">
+<div class="max-w-md mx-auto">
+<button class="w-full h-[52px] bg-on-surface text-surface flex items-center justify-center gap-3 rounded-full font-label-bold shadow-lg hover:shadow-xl active:scale-[0.98] transition-all duration-200">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                Vérifier et continuer
+            </button>
+</div>
+</footer>
+<script>
+        // Simple timer logic
+        let timeLeft = 45;
+        const timerElement = document.getElementById('timer');
+        const interval = setInterval(() => {
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                return;
+            }
+            timeLeft -= 1;
+            timerElement.textContent = timeLeft;
+        }, 1000);
+
+        // Auto-focus logic for OTP inputs
+        const inputs = document.querySelectorAll('.otp-input');
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value.length === 1 && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+                if (e.target.value.length > 0) {
+                    input.classList.add('otp-input-filled');
+                    input.classList.add('border-primary-container');
+                } else {
+                    input.classList.remove('otp-input-filled');
+                    input.classList.remove('border-primary-container');
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && e.target.value.length === 0 && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+        });
+    </script>
+</body></html>

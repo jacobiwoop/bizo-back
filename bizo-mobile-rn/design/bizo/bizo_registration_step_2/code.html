@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+
+<html lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bizo - Inscription Étape 2</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&amp;family=Archivo+Narrow:wght@800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#d1c5ac",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#edeeef",
+                        "on-primary-container": "#695200",
+                        "surface-tint": "#745b00",
+                        "tertiary-fixed": "#b0ecff",
+                        "background": "#f8f9fa",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#e2dfde",
+                        "on-tertiary-fixed": "#001f27",
+                        "tertiary": "#00687c",
+                        "on-primary-fixed": "#241a00",
+                        "surface-dim": "#d9dadb",
+                        "tertiary-fixed-dim": "#42d7fb",
+                        "on-background": "#191c1d",
+                        "primary-fixed-dim": "#f0c110",
+                        "surface-bright": "#f8f9fa",
+                        "inverse-surface": "#2e3132",
+                        "surface-variant": "#e1e3e4",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#f5c518",
+                        "inverse-on-surface": "#f0f1f2",
+                        "on-tertiary-fixed-variant": "#004e5e",
+                        "primary": "#745b00",
+                        "on-surface": "#191c1d",
+                        "surface-container-high": "#e7e8e9",
+                        "inverse-primary": "#f0c110",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "on-secondary-fixed": "#1c1b1b",
+                        "secondary-fixed": "#e5e2e1",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed-variant": "#584400",
+                        "secondary": "#5f5e5e",
+                        "on-secondary-fixed-variant": "#474746",
+                        "on-error-container": "#93000a",
+                        "on-secondary-container": "#636262",
+                        "surface": "#f8f9fa",
+                        "on-tertiary-container": "#005e70",
+                        "surface-container-low": "#f3f4f5",
+                        "tertiary-container": "#49dbff",
+                        "surface-container-highest": "#e1e3e4",
+                        "primary-fixed": "#ffe08b",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-surface-variant": "#4e4633",
+                        "outline": "#807660",
+                        "custom-strength": "#5B5BD6",
+                        "custom-success": "#22C55E"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-margin": "20px",
+                        "section-gap": "32px",
+                        "gutter": "12px",
+                        "base": "8px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "headline-md": ["Archivo Narrow"],
+                        "body-sm": ["Inter"],
+                        "label-bold": ["Inter"],
+                        "headline-lg-mobile": ["Archivo Narrow"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Archivo Narrow"],
+                        "display": ["Archivo Narrow"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "300"}],
+                        "headline-md": ["20px", {"lineHeight": "1.3", "fontWeight": "800"}],
+                        "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                        "label-bold": ["12px", {"lineHeight": "1", "fontWeight": "700"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "900"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "300"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "900"}],
+                        "display": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "900"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ios-container {
+            width: 390px;
+            height: 844px;
+            overflow-y: auto;
+            position: relative;
+            scrollbar-width: none;
+        }
+        .ios-container::-webkit-scrollbar {
+            display: none;
+        }
+        .progress-track {
+            background-color: #E5E7EB;
+        }
+        .progress-fill {
+            background-color: #F5C518;
+            width: 66%;
+        }
+        .strength-bar {
+            height: 4px;
+            flex: 1;
+            border-radius: 2px;
+            background-color: #E5E7EB;
+        }
+        .strength-bar.active {
+            background-color: #5B5BD6;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-dim flex items-center justify-center min-h-screen font-body-md text-on-surface">
+<div class="ios-container bg-surface flex flex-col shadow-2xl">
+<!-- [1] TOP NAV -->
+<header class="bg-surface flex items-center justify-between px-margin-mobile h-16 w-full shrink-0 z-50">
+<button class="flex items-center justify-center w-10 h-10 -ml-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-on-surface" data-icon="arrow_back_ios_new">arrow_back_ios_new</span>
+</button>
+<div class="flex items-center gap-0.5">
+<span class="font-headline-md text-headline-md tracking-tight">bizo</span>
+<div class="w-1.5 h-1.5 rounded-full bg-primary-container mt-1.5"></div>
+</div>
+<div class="w-10"></div> <!-- Spacer for balance -->
+</header>
+<!-- [2] PROGRESS BAR -->
+<div class="w-full">
+<div class="w-full h-1 progress-track">
+<div class="h-full progress-fill rounded-r-full"></div>
+</div>
+<div class="px-margin-mobile py-2 flex justify-end">
+<span class="font-label-bold text-[12px] text-secondary">Étape 2 sur 3</span>
+</div>
+</div>
+<main class="flex-1 px-margin-mobile">
+<!-- [3] HEADING -->
+<div class="py-6">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Sécurisez votre compte</h1>
+<p class="font-body-sm text-body-sm text-secondary mt-1">Choisissez un mot de passe solide.</p>
+</div>
+<!-- [4] FORM -->
+<form class="space-y-6">
+<!-- Field: Mot de passe -->
+<div class="space-y-2">
+<label class="font-label-bold text-[13px] text-on-surface block">Mot de passe</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-on-surface-variant" data-icon="lock">lock</span>
+<input class="w-full h-[52px] pl-12 pr-12 rounded-xl border border-[#E5E7EB] bg-white focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all outline-none" placeholder="••••••••" type="password" value="Password123"/>
+<button class="absolute right-4 flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="visibility_off">visibility_off</span>
+</button>
+</div>
+<!-- PASSWORD STRENGTH -->
+<div class="flex items-center gap-3 mt-4">
+<div class="flex flex-1 gap-1">
+<div class="strength-bar active"></div>
+<div class="strength-bar active"></div>
+<div class="strength-bar active"></div>
+<div class="strength-bar"></div>
+</div>
+<span class="font-label-bold text-[12px] text-custom-strength">Fort</span>
+</div>
+</div>
+<!-- RULES LIST -->
+<ul class="space-y-3">
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-custom-success text-[20px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-[14px] text-on-surface">8 caractères minimum</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-custom-success text-[20px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-[14px] text-on-surface">Une majuscule</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-custom-success text-[20px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-[14px] text-on-surface">Un chiffre</span>
+</li>
+<li class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary-fixed-dim text-[20px]" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+<span class="text-[14px] text-secondary">Un caractère spécial</span>
+</li>
+</ul>
+<!-- Field: Confirmer le mot de passe -->
+<div class="space-y-2 mt-8">
+<label class="font-label-bold text-[13px] text-on-surface block">Confirmer le mot de passe</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-4 text-on-surface-variant" data-icon="lock">lock</span>
+<input class="w-full h-[52px] pl-12 pr-12 rounded-xl border border-[#E5E7EB] bg-white focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all outline-none" placeholder="••••••••" type="password" value="Password123"/>
+<div class="absolute right-4 flex items-center justify-center">
+<span class="material-symbols-outlined text-custom-success" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+</div>
+</form>
+</main>
+<!-- [5] BOTTOM STICKY -->
+<footer class="mt-auto p-margin-mobile border-t border-[#E5E7EB] bg-white pb-10">
+<button class="w-full h-[52px] bg-on-background text-on-primary rounded-full flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg">
+<span class="font-label-bold text-body-md">Continuer</span>
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</footer>
+</div>
+<script>
+        // Simple visual interaction for input fields
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.querySelector('.material-symbols-outlined').style.color = '#745b00';
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.querySelector('.material-symbols-outlined').style.color = '#4e4633';
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700;900&amp;family=Inter:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        /* Custom scrollbar for a cleaner mobile look */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#e2dfde",
+                        "on-background": "#191c1d",
+                        "tertiary-fixed-dim": "#42d7fb",
+                        "outline-variant": "#d1c5ac",
+                        "outline": "#807660",
+                        "on-primary-fixed": "#241a00",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-tertiary-fixed-variant": "#004e5e",
+                        "background": "#f8f9fa",
+                        "tertiary-fixed": "#b0ecff",
+                        "surface-container": "#edeeef",
+                        "on-secondary-fixed": "#1c1b1b",
+                        "inverse-on-surface": "#f0f1f2",
+                        "surface-tint": "#745b00",
+                        "surface": "#f8f9fa",
+                        "primary-fixed": "#ffe08b",
+                        "on-tertiary-fixed": "#001f27",
+                        "inverse-primary": "#f0c110",
+                        "surface-variant": "#e1e3e4",
+                        "primary-container": "#f5c518",
+                        "on-secondary-container": "#636262",
+                        "on-primary-fixed-variant": "#584400",
+                        "secondary-fixed": "#e5e2e1",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#4e4633",
+                        "error-container": "#ffdad6",
+                        "surface-bright": "#f8f9fa",
+                        "on-tertiary-container": "#005e70",
+                        "primary-fixed-dim": "#f0c110",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary": "#00687c",
+                        "surface-container-low": "#f3f4f5",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#695200",
+                        "on-surface": "#191c1d",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#49dbff",
+                        "secondary": "#5f5e5e",
+                        "on-primary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface-container-high": "#e7e8e9",
+                        "on-secondary-fixed-variant": "#474746",
+                        "inverse-surface": "#2e3132",
+                        "surface-dim": "#d9dadb",
+                        "primary": "#745b00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section-gap": "32px",
+                        "gutter": "12px",
+                        "base": "8px",
+                        "container-margin": "20px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "headline-lg": ["Archivo Narrow"],
+                        "headline-md": ["Archivo Narrow"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Archivo Narrow"],
+                        "label-bold": ["Inter"],
+                        "display": ["Archivo Narrow"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "900"}],
+                        "headline-md": ["20px", {"lineHeight": "1.3", "fontWeight": "800"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "300"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "300"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "900"}],
+                        "label-bold": ["12px", {"lineHeight": "1", "fontWeight": "700"}],
+                        "display": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "900"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen font-body-md flex flex-col items-center">
+<!-- Mobile View Container -->
+<div class="w-[390px] min-h-[844px] bg-white shadow-2xl relative flex flex-col overflow-x-hidden">
+<!-- Top App Bar (Custom Implementation per JSON guidance) -->
+<header class="w-full top-0 sticky bg-white z-40 px-4 py-4 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<button class="transition-opacity duration-200 hover:opacity-80">
+<span class="material-symbols-outlined text-on-background">arrow_back</span>
+</button>
+<button class="transition-opacity duration-200 hover:opacity-80">
+<span class="material-symbols-outlined text-on-background">close</span>
+</button>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-background">Publier une annonce</h1>
+<button class="font-label-bold text-label-bold text-[#6366f1] hover:opacity-80 transition-opacity">
+                Brouillon
+            </button>
+</header>
+<!-- Progress Bar -->
+<div class="px-4 py-2">
+<div class="flex justify-between items-center mb-1.5">
+<div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden mr-4">
+<div class="h-full bg-primary-container w-[71.4%] transition-all duration-500"></div>
+</div>
+<span class="font-label-bold text-[10px] uppercase text-secondary whitespace-nowrap">Étape 5 sur 7</span>
+</div>
+</div>
+<!-- Main Content Area -->
+<main class="flex-grow px-4 pb-32 pt-4">
+<!-- Heading Section -->
+<section class="mb-section-gap">
+<h2 class="font-headline-md text-headline-md text-on-background mb-1">Troc avec complément</h2>
+<p class="font-body-sm text-body-sm text-secondary">Précisez ce que vous voulez et le montant cash attendu.</p>
+</section>
+<!-- Exchange Description -->
+<section class="mb-6">
+<label class="block font-label-bold text-body-sm text-on-background mb-3">Objet souhaité en échange</label>
+<div class="relative">
+<textarea class="w-full h-[140px] p-4 bg-white border border-[#E5E7EB] rounded-xl focus:ring-2 focus:ring-primary-container focus:border-primary-container outline-none resize-none font-body-md text-on-background placeholder:text-secondary/50 transition-all duration-200" placeholder="Ex: Cherche vélo de ville, trottinette électrique ou console PS5..."></textarea>
+<span class="absolute bottom-3 right-3 font-label-bold text-[10px] text-secondary">0/300</span>
+</div>
+</section>
+<!-- Complement Amount Section -->
+<section class="mb-8">
+<label class="block font-label-bold text-body-sm text-on-background mb-6">Complément cash attendu</label>
+<div class="flex flex-col items-center justify-center">
+<div class="flex items-baseline group">
+<span class="text-[32px] font-bold text-on-background mr-2">€</span>
+<input class="w-32 bg-transparent border-b-2 border-surface-container text-[48px] font-black text-center focus:outline-none focus:border-primary-container transition-colors duration-300" type="number" value="0"/>
+</div>
+<p class="mt-4 font-label-bold text-[11px] text-secondary text-center leading-tight max-w-[240px]">
+                        Le receveur devra vous verser ce montant en plus de l'échange.
+                    </p>
+</div>
+</section>
+<!-- Complement Mode Chips -->
+<section class="mb-8">
+<label class="block font-label-bold text-body-sm text-on-background mb-3">Type de complément</label>
+<div class="grid grid-cols-2 gap-3 mb-2">
+<button class="flex items-center justify-center gap-2 py-3.5 px-4 bg-inverse-surface text-white rounded-xl shadow-md transition-transform active:scale-95">
+<span class="material-symbols-outlined text-[20px]">arrow_circle_down</span>
+<span class="font-label-bold">Je reçois</span>
+</button>
+<button class="flex items-center justify-center gap-2 py-3.5 px-4 bg-surface-container text-on-surface-variant rounded-xl border border-outline-variant/30 hover:bg-surface-container-high transition-transform active:scale-95">
+<span class="material-symbols-outlined text-[20px]">arrow_circle_up</span>
+<span class="font-label-bold">Je donne</span>
+</button>
+</div>
+<p class="font-label-bold text-[11px] text-secondary">Vous recevez un complément de l'autre partie.</p>
+</section>
+<!-- Flexibility Toggle -->
+<section class="mb-6">
+<div class="flex items-center justify-between p-4 bg-white rounded-xl shadow-[0_4px_20px_0_rgba(0,0,0,0.04)] border border-surface-container">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">tune</span>
+</div>
+<span class="font-label-bold text-body-md text-on-background">Ouvert à d'autres propositions</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+</section>
+<!-- Info Card -->
+<section class="mb-4">
+<div class="flex gap-3 p-4 bg-[#EFF6FF] rounded-xl border border-[#DBEAFE]">
+<span class="material-symbols-outlined text-[#6366f1] text-[20px]">info</span>
+<p class="font-body-sm text-[13px] text-[#1e40af] leading-snug">
+                        Le paiement du complément se règle entre les deux parties lors de la remise en main propre.
+                    </p>
+</div>
+</section>
+</main>
+<!-- Bottom Sticky CTA -->
+<footer class="fixed bottom-0 w-[390px] bg-white/80 backdrop-blur-xl p-4 pb-8 z-50">
+<button class="w-full py-4 bg-on-background text-white rounded-full flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98] hover:opacity-90">
+<span class="font-headline-md text-headline-md tracking-tight">Continuer</span>
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</footer>
+</div>
+<!-- Micro-interaction Scripts -->
+<script>
+        // Simple character counter and state toggles for demo
+        const textarea = document.querySelector('textarea');
+        const counter = document.querySelector('span.absolute.bottom-3');
+        
+        if(textarea) {
+            textarea.addEventListener('input', (e) => {
+                const len = e.target.value.length;
+                counter.innerText = `${len}/300`;
+                if(len > 300) counter.classList.add('text-error');
+                else counter.classList.remove('text-error');
+            });
+        }
+
+        // Handle Chip Selection Visuals
+        const chips = document.querySelectorAll('section:nth-of-type(4) button');
+        chips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                chips.forEach(c => {
+                    c.classList.remove('bg-inverse-surface', 'text-white', 'shadow-md');
+                    c.classList.add('bg-surface-container', 'text-on-surface-variant');
+                });
+                chip.classList.add('bg-inverse-surface', 'text-white', 'shadow-md');
+                chip.classList.remove('bg-surface-container', 'text-on-surface-variant');
+            });
+        });
+
+        // Numeric Input Polish
+        const priceInput = document.querySelector('input[type="number"]');
+        if(priceInput) {
+            priceInput.addEventListener('focus', () => {
+                priceInput.parentElement.classList.add('scale-105');
+                priceInput.parentElement.style.transition = 'transform 0.3s ease';
+            });
+            priceInput.addEventListener('blur', () => {
+                priceInput.parentElement.classList.remove('scale-105');
+            });
+        }
+    </script>
+</body></html>

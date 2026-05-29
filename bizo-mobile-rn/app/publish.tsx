@@ -1,10 +1,5 @@
-import { PlaceholderScreen } from "@/src/components/ui/placeholder-screen";
+import { PublishFlowScreen } from "@/src/features/publish/screens/publish-flow-screen";
 
 export default function PublishRoute() {
-  return (
-    <PlaceholderScreen
-      title="Publish Flow"
-      subtitle="Route reservee au futur flow complet de publication. On gardera ici le wizard/classified posting."
-    />
-  );
+  return <PublishFlowScreen />;
 }

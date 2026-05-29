@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=390, height=844, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&amp;family=Archivo+Narrow:wght@800;900&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@100..900&amp;family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "primary": "#745b00",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f3f4f5",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed-variant": "#584400",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#695200",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#b0ecff",
+                        "primary-fixed-dim": "#f0c110",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-secondary": "#ffffff",
+                        "inverse-primary": "#f0c110",
+                        "background": "#f8f9fa",
+                        "tertiary": "#00687c",
+                        "surface-container": "#edeeef",
+                        "on-secondary-container": "#636262",
+                        "surface": "#f8f9fa",
+                        "secondary": "#5f5e5e",
+                        "on-tertiary-fixed": "#001f27",
+                        "surface-container-high": "#e7e8e9",
+                        "primary-fixed": "#ffe08b",
+                        "on-background": "#191c1d",
+                        "tertiary-fixed-dim": "#42d7fb",
+                        "secondary-container": "#e2dfde",
+                        "on-primary-fixed": "#241a00",
+                        "surface-dim": "#d9dadb",
+                        "on-secondary-fixed-variant": "#474746",
+                        "surface-tint": "#745b00",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed": "#1c1b1b",
+                        "primary-container": "#f5c518",
+                        "outline-variant": "#d1c5ac",
+                        "on-error-container": "#93000a",
+                        "surface-variant": "#e1e3e4",
+                        "on-surface": "#191c1d",
+                        "error": "#ba1a1a",
+                        "secondary-fixed": "#e5e2e1",
+                        "on-tertiary-container": "#005e70",
+                        "tertiary-container": "#49dbff",
+                        "inverse-surface": "#2e3132",
+                        "outline": "#807660",
+                        "on-tertiary-fixed-variant": "#004e5e",
+                        "on-surface-variant": "#4e4633",
+                        "surface-bright": "#f8f9fa",
+                        "inverse-on-surface": "#f0f1f2",
+                        "brand-blue": "#5B5BD6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section-gap": "32px",
+                        "gutter": "12px",
+                        "base": "8px",
+                        "container-margin": "20px"
+                    },
+                    "fontFamily": {
+                        "label-bold": ["Inter"],
+                        "headline-lg-mobile": ["Archivo Narrow"],
+                        "display": ["Archivo Narrow"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Archivo Narrow"],
+                        "body-sm": ["Inter"],
+                        "headline-lg": ["Archivo Narrow"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-bold": ["12px", {"lineHeight": "1", "fontWeight": "700"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "900"}],
+                        "display": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "900"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "300"}],
+                        "headline-md": ["20px", {"lineHeight": "1.3", "fontWeight": "800"}],
+                        "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "900"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "300"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { -webkit-tap-highlight-color: transparent; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        ::-webkit-scrollbar { display: none; }
+        .ios-shadow { box-shadow: 0 4px 20px 0 rgba(0,0,0,0.04); }
+        .card-shadow { box-shadow: 0 8px 24px rgba(0,0,0,0.05); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md selection:bg-primary-container">
+<!-- Header Section -->
+<header class="bg-white sticky top-0 z-40">
+<!-- Status Bar Space -->
+<div class="h-10 w-full"></div>
+<!-- Top Nav -->
+<div class="flex justify-between items-center px-container-margin py-3">
+<div class="flex items-center gap-2">
+<span class="font-display text-headline-md text-on-background">Marketplace</span>
+<div class="flex items-center text-secondary gap-1 ml-2">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+<span class="text-body-sm">Berlin, DE</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined text-on-background">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full border border-white"></span>
+</div>
+<span class="material-symbols-outlined text-on-background">account_circle</span>
+</div>
+</div>
+<!-- Search Bar -->
+<div class="px-container-margin pb-4">
+<div class="flex items-center bg-surface-container-low rounded-full px-4 py-2.5 gap-3">
+<span class="material-symbols-outlined text-secondary">search</span>
+<input class="bg-transparent border-none focus:ring-0 flex-grow text-body-sm placeholder:text-secondary" placeholder="Rechercher..." type="text"/>
+<div class="w-[1px] h-4 bg-outline-variant"></div>
+<span class="material-symbols-outlined text-brand-blue">tune</span>
+</div>
+</div>
+</header>
+<main class="pb-24">
+<!-- Categories Row -->
+<div class="flex overflow-x-auto gap-3 px-container-margin py-4 no-scrollbar">
+<button class="flex items-center gap-2 bg-on-background text-white px-5 py-2 rounded-full whitespace-nowrap">
+<span class="font-label-bold text-label-bold">Tout</span>
+</button>
+<button class="flex items-center gap-2 bg-white border border-outline-variant px-5 py-2 rounded-full whitespace-nowrap">
+<span class="material-symbols-outlined text-[18px]">directions_car</span>
+<span class="font-label-bold text-label-bold">Véhicules</span>
+</button>
+<button class="flex items-center gap-2 bg-white border border-outline-variant px-5 py-2 rounded-full whitespace-nowrap">
+<span class="material-symbols-outlined text-[18px]">home</span>
+<span class="font-label-bold text-label-bold">Immobilier</span>
+</button>
+<button class="flex items-center gap-2 bg-white border border-outline-variant px-5 py-2 rounded-full whitespace-nowrap">
+<span class="material-symbols-outlined text-[18px]">devices</span>
+<span class="font-label-bold text-label-bold">Électronique</span>
+</button>
+</div>
+<!-- Banner Promo -->
+<div class="px-container-margin mb-section-gap">
+<div class="h-[110px] rounded-xl bg-gradient-to-r from-[#EFF6FF] to-[#E0E7FF] flex items-center justify-between px-6 relative overflow-hidden">
+<div class="z-10">
+<h2 class="font-display text-headline-md text-on-background">Vendez vos objets</h2>
+<p class="text-body-sm text-secondary">Rapide et gratuit</p>
+</div>
+<div class="bg-primary-container p-4 rounded-full shadow-lg rotate-12 flex items-center justify-center">
+<span class="font-display text-label-bold text-on-primary-fixed">TOP</span>
+</div>
+</div>
+</div>
+<!-- Annonces récentes -->
+<section class="mb-section-gap">
+<div class="flex justify-between items-center px-container-margin mb-4">
+<h3 class="font-headline-md text-headline-md">Annonces récentes</h3>
+<a class="text-brand-blue font-label-bold text-label-bold" href="#">Voir tout</a>
+</div>
+<div class="grid grid-cols-2 gap-4 px-container-margin">
+<!-- Card 1 -->
+<div class="bg-white rounded-xl overflow-hidden card-shadow">
+<div class="relative h-40">
+<img class="w-full h-full object-cover" data-alt="A pair of premium black over-ear headphones resting on a minimalist white marble surface with soft natural lighting coming from a nearby window. The scene is bright and airy, reflecting a modern light-mode aesthetic with clean lines and a professional marketplace quality. Subtle golden accents from the headphone hinges glisten in the light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNcsGIY9s5XJTbe_CvvWp9PWXCQKBM5TKVa4VONxEFzFHwKNuylOtj0iX0r3xLxxOJdlEKNqs_O4KbaFCZrgKPAQDTb7PJH5ZGSi37O_lJA5Kdn5NgameBZ1pC2gXTlgHq-xq69Dacgn-wNeiokef3NM0LNtvX6XLyvUH7HUK-SJ5tzZwPgxBZnnWycIJYJpokC2NZREoP6oXH09JCgUsTEK3SaWwjSpy_Sr7j1MQoMaNSgOL-7Bkm9S1Omv7uub-aCwU1opsA3rg"/>
+<div class="absolute top-2 left-2 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-bold">Neuf</div>
+<button class="absolute top-2 right-2 bg-white/80 p-1.5 rounded-full backdrop-blur-md">
+<span class="material-symbols-outlined text-[18px] text-error">favorite</span>
+</button>
+</div>
+<div class="p-3">
+<p class="font-label-bold text-body-sm text-on-background line-clamp-2 mb-1">Casque Audio Premium Noise Cancelling</p>
+<p class="font-display text-headline-md text-primary-container mb-2">129 €</p>
+<div class="flex items-center text-secondary gap-1">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+<span class="text-[10px]">Paris • 2h</span>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-white rounded-xl overflow-hidden card-shadow">
+<div class="relative h-40">
+<img class="w-full h-full object-cover" data-alt="A sleek silver laptop open on a clean wooden desk with a small succulent plant nearby. The lighting is diffused and professional, emphasizing the metallic finish of the device. The background is a soft-focus modern workspace, creating a high-end utility vibe consistent with a premium technology marketplace." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGr4ynbrn3mVO5UTNkQJem8OuikRZpLJTjgk7nSmlXbprqOLEXAd0xvGODEhLq4g_uvFqrKD1xS0Y7-uAy5xVpiK03q4zEP90bbcWCNWjK22zZ_LsBHvPCl3rXFLUeY7rDqWsCUzcQf0Rnq8CN2y6Ni_DU5NjZ1J62IMDOrF5hl5OJ4om82dr5knv2AugMz-8UHz6mKYzzEgCzDOMUh0CWSZ3d0QwDsMRch0YHVtvGP7091rKBaKFOv4CrqABHalpurqiLitOD2Gc"/>
+<div class="absolute top-2 left-2 bg-white/90 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-bold">Occasion</div>
+<button class="absolute top-2 right-2 bg-white/80 p-1.5 rounded-full backdrop-blur-md">
+<span class="material-symbols-outlined text-[18px] text-secondary">favorite</span>
+</button>
+</div>
+<div class="p-3">
+<p class="font-label-bold text-body-sm text-on-background line-clamp-2 mb-1">MacBook Air M2 256GB - Gris Sidéral</p>
+<p class="font-display text-headline-md text-primary-container mb-2">950 €</p>
+<div class="flex items-center text-secondary gap-1">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+<span class="text-[10px]">Lyon • 4h</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Près de toi -->
+<section class="mb-section-gap">
+<div class="flex justify-between items-center px-container-margin mb-4">
+<h3 class="font-headline-md text-headline-md">Près de toi</h3>
+<a class="text-brand-blue font-label-bold text-label-bold" href="#">Voir tout</a>
+</div>
+<div class="flex overflow-x-auto gap-4 px-container-margin no-scrollbar pb-4">
+<!-- Wide Card 1 -->
+<div class="min-w-[160px] bg-white rounded-xl overflow-hidden card-shadow">
+<img class="w-full h-32 object-cover" data-alt="A mid-century modern wooden chair with a textured grey fabric cushion set against a minimalist white wall. Soft morning light creates gentle shadows on the light wood floor, emphasizing the furniture's clean silhouette. The mood is peaceful and stylish, perfect for a high-end home decor marketplace category." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmthPIvAmAzx69Za59nOKnoSRKFwIDvglGGZ7cx1-WFF1qXefwysSzNppMshOGk5KqU3SPPf24M1cxqruqSMWH07m-P16IrlJbkWD7zlgwOJ-7Qc_vV1cUvVAmBP43RaJGVgkVhpTgv7bbqnahqbGGIAYYlX8FkFCJ7tZLm27sUH5GGFjxZNfSSKJvrbssu-tn3Wdh6x-X_Sv-lGbRCA-C6N1vFIKqBreS6UpH5MpGXllJrAXxld-Y1uZmeS-FTYxuMZg4GGOqYuk"/>
+<div class="p-3">
+<p class="text-body-sm font-label-bold truncate">Fauteuil Design</p>
+<p class="font-display text-headline-md text-primary-container">45 €</p>
+</div>
+</div>
+<!-- Wide Card 2 -->
+<div class="min-w-[160px] bg-white rounded-xl overflow-hidden card-shadow">
+<img class="w-full h-32 object-cover" data-alt="A vintage 35mm film camera with a leather strap resting on an old map. The lighting is warm and nostalgic, using a golden hour glow to highlight the camera's mechanical details. The scene feels adventurous and authentic, aimed at photography enthusiasts in a lifestyle marketplace." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQQzpZWCEWyCYqOv794JcmSXrrfjJ2Ki2LT5B7uN6vOESJ-6FR_E-6syhl2VpvD0WuHDLOzeF90F7hAHuulNptNmVdeDckqk4QRzuKESjAvve7Kq6WqenTJrOaQPBDQxXyeNBcGFnX6vCLUWnjkz_9C03X7XXRYAYQlWdIKGAO0znbhBwbM_DWYlgoyX3l7-S9D9xbrUN9sH3lBj5WcjICGgJHcH0G9S4aQndvW0sKn0Wztl4XINPGna3q4OWDj_2-bnIfQCHutHU"/>
+<div class="p-3">
+<p class="text-body-sm font-label-bold truncate">Caméra Vintage</p>
+<p class="font-display text-headline-md text-primary-container">120 €</p>
+</div>
+</div>
+<!-- Wide Card 3 -->
+<div class="min-w-[160px] bg-white rounded-xl overflow-hidden card-shadow">
+<img class="w-full h-32 object-cover" data-alt="A stack of folded organic cotton t-shirts in neutral earth tones—beige, olive, and cream—on a clean white shelf. The lighting is bright and even, showcasing the soft fabric texture. The aesthetic is minimal and sustainable, representative of a premium fashion resale category." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCt4g8OUAw1iu1Q8NPtLjj-vnTyWSB7HFB7jFhpBQmsnIMP4bi7xUUQsb0Pj9OTjqu694sIJaUO2fEpBPo35Xw7SufHSZlzzBjKrrxvNcXgrnk4vcWPNlZjE37DppkvKVqdcNNbV9xyOTJEMNLFKr6myEZgPyfPH8Lo4JoD8p-c-CHgivce2Ia8_oEUqVhUPb-TPreiedOtWlbjw36_eTPyO3ZIO_SmC2ZU6aJ_yQN3ESEBjSv65LWaChob6IN2dIsfAgDrgarvu2M"/>
+<div class="p-3">
+<p class="text-body-sm font-label-bold truncate">Lot T-shirts Bio</p>
+<p class="font-display text-headline-md text-primary-container">25 €</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-xl z-50 px-4 py-3 pb-6 flex justify-around items-center ios-shadow border-t border-surface-container">
+<div class="flex flex-col items-center gap-1 text-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-[10px] font-bold">Home</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-secondary">
+<span class="material-symbols-outlined">search</span>
+<span class="text-[10px] font-bold">Search</span>
+</div>
+<div class="relative -top-6">
+<div class="w-14 h-14 bg-on-background rounded-full flex items-center justify-center shadow-xl active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-white text-3xl">add</span>
+</div>
+<span class="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-secondary">Post</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-secondary">
+<span class="material-symbols-outlined">favorite</span>
+<span class="text-[10px] font-bold">Likes</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-secondary">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-bold">Profile</span>
+</div>
+</nav>
+<script>
+        // Simple touch interaction for cards
+        document.querySelectorAll('.card-shadow').forEach(card => {
+            card.addEventListener('touchstart', () => {
+                card.style.transform = 'scale(0.98)';
+                card.style.transition = 'transform 0.1s ease';
+            });
+            card.addEventListener('touchend', () => {
+                card.style.transform = 'scale(1)';
+            });
+        });
+
+        // Sticky header transparency effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 20) {
+                header.classList.add('shadow-md');
+            } else {
+                header.classList.remove('shadow-md');
+            }
+        });
+    </script>
+</body></html>

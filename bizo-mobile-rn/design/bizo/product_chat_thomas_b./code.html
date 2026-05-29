@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>Messages - Thomas B.</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#745b00",
+                        "surface-bright": "#f9f9ff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "outline": "#807660",
+                        "inverse-primary": "#f0c110",
+                        "on-secondary-fixed-variant": "#3533b0",
+                        "secondary-fixed-dim": "#c1c1ff",
+                        "surface-container": "#e7eefe",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#e2e8f8",
+                        "on-primary-container": "#695200",
+                        "inverse-on-surface": "#ebf1ff",
+                        "error": "#ba1a1a",
+                        "surface": "#f9f9ff",
+                        "primary-fixed": "#ffe08b",
+                        "on-primary-fixed": "#241a00",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#f0c110",
+                        "secondary-container": "#8283ff",
+                        "inverse-surface": "#2a313d",
+                        "outline-variant": "#d1c5ac",
+                        "on-surface-variant": "#4e4633",
+                        "tertiary-fixed": "#e5e2e1",
+                        "tertiary-fixed-dim": "#c8c6c5",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed-variant": "#474746",
+                        "surface-container-highest": "#dce2f3",
+                        "primary-container": "#f5c518",
+                        "secondary": "#4e4ec9",
+                        "background": "#f9f9ff",
+                        "on-secondary-fixed": "#0a006b",
+                        "on-primary": "#ffffff",
+                        "surface-container-low": "#f0f3ff",
+                        "on-surface": "#151c27",
+                        "on-primary-fixed-variant": "#584400",
+                        "on-tertiary-container": "#565555",
+                        "on-secondary-container": "#120094",
+                        "secondary-fixed": "#e2dfff",
+                        "tertiary": "#5f5e5e",
+                        "on-tertiary-fixed": "#1c1b1b",
+                        "surface-variant": "#dce2f3",
+                        "tertiary-container": "#cdcaca",
+                        "surface-dim": "#d3daea",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#745b00",
+                        "on-background": "#151c27"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "max-width": "1280px",
+                        "base": "8px",
+                        "margin-mobile": "16px",
+                        "margin-desktop": "48px"
+                    },
+                    "fontFamily": {
+                        "headline-sm": ["Archivo Narrow"],
+                        "headline-lg-mobile": ["Archivo Narrow"],
+                        "body-sm": ["Archivo Narrow"],
+                        "headline-md": ["Archivo Narrow"],
+                        "label-sm": ["Archivo Narrow"],
+                        "label-caps": ["Archivo Narrow"],
+                        "headline-lg": ["Archivo Narrow"],
+                        "body-lg": ["Archivo Narrow"],
+                        "body-md": ["Archivo Narrow"]
+                    },
+                    "fontSize": {
+                        "headline-sm": ["20px", {"lineHeight": "1.3", "letterSpacing": "0em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "1.4", "letterSpacing": "0.01em", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "1.2", "letterSpacing": "0em", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-lg": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "0em", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0em", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #f9f9ff;
+            color: #151c27;
+        }
+        .message-received {
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+            border-top-right-radius: 16px;
+            border-top-left-radius: 4px;
+        }
+        .message-sent {
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 4px;
+        }
+        .safe-pb {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-body-md overflow-hidden flex flex-col h-screen">
+<!-- [1] TOP NAV: Brand Anchor Translation -->
+<!-- Content from Shared Components JSON for TopAppBar where headline is "Messages" -->
+<header class="bg-surface docked full-width top-0 shadow-[0_4px_20px_0_rgba(0,0,0,0.04)] z-50 flex justify-between items-center px-4 h-16 w-full">
+<div class="flex items-center gap-3">
+<button class="text-on-surface hover:bg-surface-container-high transition-colors p-2 rounded-full active:scale-95 duration-200">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<div class="flex items-center gap-3">
+<div class="relative">
+<img alt="Seller Avatar" class="w-9 h-9 rounded-full object-cover" data-alt="A high-resolution portrait of a smiling young man with light stubble, photographed in soft, natural daylight against a blurred urban background. The aesthetic is clean and professional, using a bright and airy color palette with soft whites and subtle blue tones to convey trust and approachability in a modern digital marketplace context." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCS-biPBdVrZUVytCnTVIL-hpKoePSI6nrt2skrAtJovAMwE6t_k7NyA5tWOpt6UVgZFLDcdDUhkgSyDPlGfq8cYRiXRA9HqSjoRWei8Ifi3ZN3JrJCxufsu4bPyqX4PxWpxZ3fbf3P4TBm1d1xfN3foTc_9ckX37iWz--oRh-9vImeUSnak7FnRmZwOiYX-Zk-iFySbynPKFeSnx8Npf5db6dgylfMgsVkgs0vGDdH53bQKJoHkrxU6giuH4QB54Srt1-Uko4B3AU"/>
+<div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-surface rounded-full"></div>
+</div>
+<div class="flex flex-col">
+<span class="font-bold text-[15px] leading-none text-on-surface">Thomas B.</span>
+<span class="text-[11px] text-green-600 font-medium leading-none mt-0.5">En ligne</span>
+</div>
+</div>
+</div>
+<button class="text-on-surface hover:bg-surface-container-high transition-colors p-2 rounded-full active:scale-95 duration-200">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</header>
+<!-- Main Scrollable Area -->
+<main class="flex-1 overflow-y-auto bg-[#F9FAFB] flex flex-col">
+<!-- [2] PINNED LISTING -->
+<section class="sticky top-0 bg-white border-b border-[#E5E7EB] px-4 py-3 z-40 flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-3">
+<img alt="Listing Thumbnail" class="w-14 h-14 rounded-lg object-cover" data-alt="A professional studio product shot of a sleek iPhone 13 Pro in Graphite, positioned at a slight angle on a clean, light gray surface. The lighting is sophisticated and directional, creating soft shadows and highlighting the metallic textures and premium glass finish of the device. The overall mood is high-end, modern, and high-impact, aligning with a premium classifieds marketplace aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUOK4mkECdiAAC95yz6NLoxiq0E6fyYLQBc-JgcksFIjy0SQVqCvixsk6TmxBR0lZr5zq0a5akVgHQcWZXJ1Uo3jd5--TiGBbNbbLdQEdt0-Q-kOZcCgSBitVFoC6pIWlgVrxsDWaa6vRWeWW4TDFxJ_9peuRYk7RiV-rvICG8BcqPXoQb1ldEPfhlb-nB9p-LCO-eSC9h0Z4kiFVhradeaoXPDj3T2s-JiCs-VKkfNcJJi2qwUIFmEAOQfFvODDTQXO15L7ntyeY"/>
+<div class="flex flex-col">
+<h3 class="font-bold text-[13px] text-on-surface leading-tight">iPhone 13 Pro - 128Go</h3>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-[#F5C518] font-bold text-[14px]">750 €</span>
+<span class="bg-on-surface text-white text-[10px] font-bold px-2 py-0.5 rounded-full">VENTE</span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</section>
+<!-- [3] MESSAGES AREA -->
+<div class="flex-1 px-4 py-6 space-y-6">
+<!-- Date Divider -->
+<div class="flex justify-center">
+<span class="bg-white border border-outline-variant/30 text-tertiary px-3 py-1 rounded-full text-[12px] font-medium shadow-sm">Aujourd'hui</span>
+</div>
+<!-- Message Received -->
+<div class="flex flex-col max-w-[85%] items-start">
+<span class="text-[#5B5BD6] text-[12px] font-bold mb-1 ml-1">Thomas B.</span>
+<div class="bg-white message-received p-4 shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-outline-variant/20">
+<p class="text-on-surface text-[14px] leading-relaxed">Bonjour ! Est-ce que le prix est négociable ?</p>
+<div class="text-right mt-1">
+<span class="text-tertiary text-[11px]">10:30</span>
+</div>
+</div>
+</div>
+<!-- Security Warning -->
+<div class="flex justify-center py-2">
+<div class="bg-[#FEF3C7] flex items-center gap-3 px-4 py-3 rounded-xl border border-yellow-200/50 max-w-[90%]">
+<span class="material-symbols-outlined text-[#745b00]" style="font-variation-settings: 'FILL' 1;">shield</span>
+<span class="text-[#1A1A1A] font-bold text-[12px] leading-snug">Coordonnées masquées pour votre sécurité</span>
+</div>
+</div>
+<!-- Message Sent -->
+<div class="flex flex-col max-w-[85%] items-end self-end">
+<div class="bg-[#1A1A1A] message-sent p-4 shadow-[0_4px_12px_rgba(0,0,0,0.1)]">
+<p class="text-white text-[14px] leading-relaxed">Bonjour, je peux faire un petit geste si vous venez le chercher.</p>
+<div class="flex items-center justify-end gap-1 mt-1">
+<span class="text-white/60 text-[11px]">10:32</span>
+<span class="material-symbols-outlined text-[#F5C518] text-[16px]">done_all</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- [4] BOTTOM INPUT -->
+<footer class="bg-surface border-t border-outline-variant/20 px-4 py-3 safe-pb z-50">
+<div class="flex items-center gap-3 max-w-screen-xl mx-auto">
+<div class="flex items-center gap-2">
+<button class="text-tertiary hover:bg-surface-container-high transition-colors p-2 rounded-full active:scale-90 duration-200">
+<span class="material-symbols-outlined text-[24px]">image</span>
+</button>
+<button class="text-tertiary hover:bg-surface-container-high transition-colors p-2 rounded-full active:scale-90 duration-200">
+<span class="material-symbols-outlined text-[24px]">mic</span>
+</button>
+</div>
+<div class="flex-1 relative">
+<input class="w-full h-11 bg-[#F3F4F6] border-none rounded-full px-5 text-[14px] focus:ring-2 focus:ring-secondary/50 transition-all placeholder:text-tertiary" placeholder="Votre message..." type="text"/>
+</div>
+<button class="w-11 h-11 bg-[#1A1A1A] text-white rounded-full flex items-center justify-center active:scale-90 transition-transform shadow-lg hover:shadow-xl">
+<span class="material-symbols-outlined -rotate-45 ml-1 mt-0.5">send</span>
+</button>
+</div>
+</footer>
+<script>
+        // Micro-interactions for input focus
+        const input = document.querySelector('input');
+        const footer = document.querySelector('footer');
+        
+        input.addEventListener('focus', () => {
+            footer.classList.add('shadow-[0_-4px_20px_rgba(0,0,0,0.08)]');
+        });
+
+        input.addEventListener('blur', () => {
+            footer.classList.remove('shadow-[0_-4px_20px_rgba(0,0,0,0.08)]');
+        });
+
+        // Simple send animation
+        const sendBtn = document.querySelector('button.bg-\\[\\#1A1A1A\\]');
+        sendBtn.addEventListener('click', () => {
+            if(input.value.trim() !== "") {
+                input.value = "";
+                // Visual feedback only for demo
+                sendBtn.classList.add('scale-110');
+                setTimeout(() => sendBtn.classList.remove('scale-110'), 150);
+            }
+        });
+    </script>
+</body></html>

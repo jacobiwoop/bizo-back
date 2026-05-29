@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed-dim": "#f0c110",
+                    "on-secondary": "#ffffff",
+                    "primary-container": "#f5c518",
+                    "on-primary-fixed-variant": "#584400",
+                    "surface-bright": "#f9f9ff",
+                    "on-secondary-container": "#120094",
+                    "on-tertiary": "#ffffff",
+                    "tertiary": "#5f5e5e",
+                    "on-background": "#151c27",
+                    "outline-variant": "#d1c5ac",
+                    "surface-tint": "#745b00",
+                    "tertiary-container": "#cdcaca",
+                    "surface-dim": "#d3daea",
+                    "surface-variant": "#dce2f3",
+                    "error": "#ba1a1a",
+                    "on-tertiary-fixed": "#1c1b1b",
+                    "error-container": "#ffdad6",
+                    "on-surface": "#151c27",
+                    "surface-container-low": "#f0f3ff",
+                    "inverse-on-surface": "#ebf1ff",
+                    "surface-container-high": "#e2e8f8",
+                    "surface": "#f9f9ff",
+                    "inverse-primary": "#f0c110",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-container": "#695200",
+                    "on-primary-fixed": "#241a00",
+                    "on-tertiary-container": "#565555",
+                    "outline": "#807660",
+                    "inverse-surface": "#2a313d",
+                    "surface-container-highest": "#dce2f3",
+                    "secondary-fixed-dim": "#c1c1ff",
+                    "secondary-fixed": "#e2dfff",
+                    "on-tertiary-fixed-variant": "#474746",
+                    "secondary-container": "#8283ff",
+                    "secondary": "#4e4ec9",
+                    "background": "#f9f9ff",
+                    "primary": "#745b00",
+                    "on-surface-variant": "#4e4633",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed": "#e5e2e1",
+                    "surface-container": "#e7eefe",
+                    "on-secondary-fixed": "#0a006b",
+                    "on-secondary-fixed-variant": "#3533b0",
+                    "on-primary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "tertiary-fixed-dim": "#c8c6c5",
+                    "primary-fixed": "#ffe08b"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "gutter": "24px",
+                    "max-width": "1280px",
+                    "base": "8px",
+                    "margin-desktop": "48px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Archivo Narrow"],
+                    "headline-lg": ["Archivo Narrow"],
+                    "body-md": ["Archivo Narrow"],
+                    "headline-sm": ["Archivo Narrow"],
+                    "headline-md": ["Archivo Narrow"],
+                    "body-lg": ["Archivo Narrow"],
+                    "label-caps": ["Archivo Narrow"],
+                    "body-sm": ["Archivo Narrow"],
+                    "label-sm": ["Archivo Narrow"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "headline-lg": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0em", "fontWeight": "400"}],
+                    "headline-sm": ["20px", {"lineHeight": "1.3", "letterSpacing": "0em", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "1.2", "letterSpacing": "0em", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "0em", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "1.4", "letterSpacing": "0.01em", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #000000;
+            color: white;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ui-element {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+        .ui-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="font-body-md">
+<!-- Immersive Gallery View -->
+<main class="relative h-screen w-full flex flex-col justify-center items-center bg-black overflow-hidden" onclick="toggleUI()">
+<!-- Top Bar (Safe Area) -->
+<header class="ui-element fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-4 pt-12 pb-4 bg-gradient-to-b from-black/80 to-transparent" id="top-bar">
+<div class="flex items-center">
+<button class="w-10 h-10 flex items-center justify-center rounded-full border border-white/40 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-white text-[28px]" data-icon="close">close</span>
+</button>
+</div>
+<div class="absolute left-1/2 -translate-x-1/2">
+<span class="font-label-caps text-label-caps text-white uppercase tracking-widest">Photos (3/6)</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-white" data-icon="download">download</span>
+</button>
+<button class="active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-white" data-icon="share">share</span>
+</button>
+</div>
+</header>
+<!-- Main Content Area -->
+<section class="relative w-full px-4 flex flex-col items-center">
+<!-- Navigation Chevrons -->
+<button class="absolute left-6 z-10 p-2 opacity-30 active:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white text-5xl" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="absolute right-6 z-10 p-2 opacity-30 active:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white text-5xl" data-icon="chevron_right">chevron_right</span>
+</button>
+<!-- Main Image Wrapper -->
+<div class="relative w-full max-w-2xl aspect-[1.37] overflow-hidden rounded-lg border border-white/20 shadow-2xl">
+<img alt="iPhone 13 Pro Alpine Blue Product View" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/ADBb0uhLj9_1z6foyBmwNcGrpeb4cPFo3eLSaOIdxrmKu_ON0cVyF2tpJGUB3O0RaEfZ4zX_q8SUJLagVZdb5AfFJevg3TI_WDq_U2hfZvVrwYBRhTLTZ5gnJk0rKpPRGfRHcP-afnMsr0SvU26aBxgNCOfH5wFIMQiSA8sayT6kWKIxvsCZU0mw6m2_A-PCA-yomZlWdOxlQ-qKKzO-5hPZxXytJIWRJT4CI7_J8yMGZHX1jH0eh0jTyIoaURk"/>
+</div>
+<!-- Thumbnail Strip -->
+<div class="ui-element mt-gutter w-full overflow-x-auto scrollbar-hide flex gap-3 px-4" id="thumbnail-strip">
+<!-- Thumbnail 1 -->
+<div class="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden opacity-50 border border-white/10">
+<img class="w-full h-full object-cover" data-alt="Close up of the triple camera system on the back of an iPhone 13 Pro in Alpine Blue, showing the precision of the lenses and the metallic finish. Professional studio lighting highlights the textures and reflections of the glass and metal surfaces in a premium dark mode aesthetic." src="https://lh3.googleusercontent.com/aida/ADBb0uhLj9_1z6foyBmwNcGrpeb4cPFo3eLSaOIdxrmKu_ON0cVyF2tpJGUB3O0RaEfZ4zX_q8SUJLagVZdb5AfFJevg3TI_WDq_U2hfZvVrwYBRhTLTZ5gnJk0rKpPRGfRHcP-afnMsr0SvU26aBxgNCOfH5wFIMQiSA8sayT6kWKIxvsCZU0mw6m2_A-PCA-yomZlWdOxlQ-qKKzO-5hPZxXytJIWRJT4CI7_J8yMGZHX1jH0eh0jTyIoaURk"/>
+</div>
+<!-- Thumbnail 2 -->
+<div class="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden opacity-50 border border-white/10">
+<img class="w-full h-full object-cover" data-alt="Side profile shot of the iPhone 13 Pro Alpine Blue, showcasing the flat stainless steel edges and the volume buttons. The image is captured with a high-contrast lighting setup against a deep charcoal background, emphasizing the sleek and modern design of the smartphone for a marketplace display." src="https://lh3.googleusercontent.com/aida/ADBb0uhLj9_1z6foyBmwNcGrpeb4cPFo3eLSaOIdxrmKu_ON0cVyF2tpJGUB3O0RaEfZ4zX_q8SUJLagVZdb5AfFJevg3TI_WDq_U2hfZvVrwYBRhTLTZ5gnJk0rKpPRGfRHcP-afnMsr0SvU26aBxgNCOfH5wFIMQiSA8sayT6kWKIxvsCZU0mw6m2_A-PCA-yomZlWdOxlQ-qKKzO-5hPZxXytJIWRJT4CI7_J8yMGZHX1jH0eh0jTyIoaURk"/>
+</div>
+<!-- Thumbnail 3 (Active) -->
+<div class="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 border-primary-container ring-2 ring-black">
+<img class="w-full h-full object-cover" data-alt="Full front view of the iPhone 13 Pro in Alpine Blue, displaying the vibrant OLED screen with a minimalist wallpaper. The phone is centered in a high-key studio environment with soft shadows, creating a premium and reliable feel for a professional classifieds listing." src="https://lh3.googleusercontent.com/aida/ADBb0uhLj9_1z6foyBmwNcGrpeb4cPFo3eLSaOIdxrmKu_ON0cVyF2tpJGUB3O0RaEfZ4zX_q8SUJLagVZdb5AfFJevg3TI_WDq_U2hfZvVrwYBRhTLTZ5gnJk0rKpPRGfRHcP-afnMsr0SvU26aBxgNCOfH5wFIMQiSA8sayT6kWKIxvsCZU0mw6m2_A-PCA-yomZlWdOxlQ-qKKzO-5hPZxXytJIWRJT4CI7_J8yMGZHX1jH0eh0jTyIoaURk"/>
+</div>
+<!-- Thumbnail 4 -->
+<div class="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden opacity-50 border border-white/10">
+<img class="w-full h-full object-cover" data-alt="Wide angle view of the iPhone 13 Pro lying horizontally on a textured surface, showing the Alpine Blue color under natural-looking studio light. The composition is clean and focused, using a shallow depth of field to draw attention to the device's build quality and premium materials." src="https://lh3.googleusercontent.com/aida/ADBb0uhLj9_1z6foyBmwNcGrpeb4cPFo3eLSaOIdxrmKu_ON0cVyF2tpJGUB3O0RaEfZ4zX_q8SUJLagVZdb5AfFJevg3TI_WDq_U2hfZvVrwYBRhTLTZ5gnJk0rKpPRGfRHcP-afnMsr0SvU26aBxgNCOfH5wFIMQiSA8sayT6kWKIxvsCZU0mw6m2_A-PCA-yomZlWdOxlQ-qKKzO-5hPZxXytJIWRJT4CI7_J8yMGZHX1jH0eh0jTyIoaURk"/>
+</div>
+<!-- Thumbnail 5 -->
+<div class="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden opacity-50 border border-white/10">
+<img class="w-full h-full object-cover" data-alt="The iPhone 13 Pro's bottom edge, showing the lightning port and speaker grilles with extreme detail. The lighting is moody and dramatic, with golden yellow accents reflecting off the metallic surfaces to match the brand identity of the Bizo marketplace." src="https://lh3.googleusercontent.com/aida/ADBb0uhLj9_1z6foyBmwNcGrpeb4cPFo3eLSaOIdxrmKu_ON0cVyF2tpJGUB3O0RaEfZ4zX_q8SUJLagVZdb5AfFJevg3TI_WDq_U2hfZvVrwYBRhTLTZ5gnJk0rKpPRGfRHcP-afnMsr0SvU26aBxgNCOfH5wFIMQiSA8sayT6kWKIxvsCZU0mw6m2_A-PCA-yomZlWdOxlQ-qKKzO-5hPZxXytJIWRJT4CI7_J8yMGZHX1jH0eh0jTyIoaURk"/>
+</div>
+<!-- Thumbnail 6 -->
+<div class="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden opacity-50 border border-white/10">
+<img class="w-full h-full object-cover" data-alt="A lifestyle shot of an iPhone 13 Pro in Alpine Blue placed on a minimalist desk setup. The image uses a cool color temperature with soft, diffused lighting, creating a high-impact and sophisticated visual for a modern tech marketplace." src="https://lh3.googleusercontent.com/aida/ADBb0uhLj9_1z6foyBmwNcGrpeb4cPFo3eLSaOIdxrmKu_ON0cVyF2tpJGUB3O0RaEfZ4zX_q8SUJLagVZdb5AfFJevg3TI_WDq_U2hfZvVrwYBRhTLTZ5gnJk0rKpPRGfRHcP-afnMsr0SvU26aBxgNCOfH5wFIMQiSA8sayT6kWKIxvsCZU0mw6m2_A-PCA-yomZlWdOxlQ-qKKzO-5hPZxXytJIWRJT4CI7_J8yMGZHX1jH0eh0jTyIoaURk"/>
+</div>
+<!-- Additional thumb placeholders for scrolling feel -->
+<div class="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden opacity-50 border border-white/10 bg-white/5 flex items-center justify-center">
+<span class="material-symbols-outlined text-white/20" data-icon="image">image</span>
+</div>
+<div class="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden opacity-50 border border-white/10 bg-white/5 flex items-center justify-center">
+<span class="material-symbols-outlined text-white/20" data-icon="image">image</span>
+</div>
+</div>
+</section>
+<!-- Bottom Bar -->
+<footer class="ui-element fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black via-black/90 to-transparent pt-20 pb-10 px-4" id="bottom-bar">
+<div class="flex flex-col items-center">
+<h1 class="font-headline-sm text-headline-sm text-white text-center mb-1">iPhone 13 Pro 256Go Bleu Alpin</h1>
+<p class="font-headline-md text-headline-md text-primary-container font-bold mb-6">150 000 FCFA</p>
+<div class="w-full flex justify-end">
+<button class="flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-full font-label-bold text-label-sm active:scale-95 transition-transform shadow-lg">
+<span>Voir l'annonce</span>
+<span class="material-symbols-outlined text-sm font-bold" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</footer>
+</main>
+<script>
+        let uiVisible = true;
+        const topBar = document.getElementById('top-bar');
+        const bottomBar = document.getElementById('bottom-bar');
+        const thumbStrip = document.getElementById('thumbnail-strip');
+
+        function toggleUI() {
+            uiVisible = !uiVisible;
+            if (uiVisible) {
+                topBar.classList.remove('ui-hidden');
+                bottomBar.classList.remove('ui-hidden');
+                thumbStrip.classList.remove('ui-hidden');
+                topBar.classList.remove('-translate-y-full');
+                bottomBar.classList.remove('translate-y-full');
+            } else {
+                topBar.classList.add('ui-hidden');
+                bottomBar.classList.add('ui-hidden');
+                thumbStrip.classList.add('ui-hidden');
+                topBar.classList.add('-translate-y-full');
+                bottomBar.classList.add('translate-y-full');
+            }
+        }
+
+        // Handle thumbnail scrolling behavior
+        const scrollContainer = document.getElementById('thumbnail-strip');
+        scrollContainer.addEventListener('wheel', (evt) => {
+            evt.preventDefault();
+            scrollContainer.scrollLeft += evt.deltaY;
+        });
+    </script>
+</body></html>

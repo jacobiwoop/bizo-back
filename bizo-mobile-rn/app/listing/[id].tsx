@@ -1,10 +1,9 @@
-import { PlaceholderScreen } from "@/src/components/ui/placeholder-screen";
+import { useLocalSearchParams } from "expo-router";
+
+import { DetailProductScreen } from "@/src/features/detail/screens/detail-product-screen";
 
 export default function ListingDetailRoute() {
-  return (
-    <PlaceholderScreen
-      title="Listing Detail"
-      subtitle="Le detail produit sera reconstruit depuis les ecrans Detail Product du kit Classified AI."
-    />
-  );
+  const params = useLocalSearchParams<{ id?: string }>();
+
+  return <DetailProductScreen id={params.id} />;
 }

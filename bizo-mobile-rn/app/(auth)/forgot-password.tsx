@@ -1,10 +1,10 @@
-import { PlaceholderScreen } from "@/src/components/ui/placeholder-screen";
+import { router } from "expo-router";
+import { useEffect } from "react";
 
 export default function ForgotPasswordRoute() {
-  return (
-    <PlaceholderScreen
-      title="Forgot Password"
-      subtitle="Route creee pour le flux Expo Router. Le design final sera pose apres la serie auth Classified AI."
-    />
-  );
+  useEffect(() => {
+    router.replace("/(auth)/sign-in?modal=forgot-password");
+  }, []);
+
+  return null;
 }

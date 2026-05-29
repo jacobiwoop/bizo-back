@@ -1,10 +1,5 @@
-import { PlaceholderScreen } from "@/src/components/ui/placeholder-screen";
+import { PrivateProfileDraftsScreen } from "@/src/features/profile/screens/private-profile-drafts-screen";
 
 export default function ProfileRoute() {
-  return (
-    <PlaceholderScreen
-      title="Profile"
-      subtitle="Le compte et les reglages seront recrees ensuite avec les ecrans account/seller du kit."
-    />
-  );
+  return <PrivateProfileDraftsScreen />;
 }

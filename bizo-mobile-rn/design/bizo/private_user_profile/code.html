@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700;800;900&amp;family=Inter:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-dim": "#d9dadb",
+                    "on-error": "#ffffff",
+                    "surface-container": "#edeeef",
+                    "surface-variant": "#e1e3e4",
+                    "surface": "#f8f9fa",
+                    "on-secondary-fixed": "#1c1b1b",
+                    "on-surface-variant": "#4e4633",
+                    "on-secondary-fixed-variant": "#474746",
+                    "on-secondary-container": "#636262",
+                    "on-primary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "on-primary-container": "#695200",
+                    "on-tertiary-fixed-variant": "#004e5e",
+                    "outline-variant": "#d1c5ac",
+                    "tertiary-container": "#49dbff",
+                    "surface-container-high": "#e7e8e9",
+                    "on-tertiary": "#ffffff",
+                    "background": "#f8f9fa",
+                    "primary-fixed": "#ffe08b",
+                    "secondary": "#5f5e5e",
+                    "on-background": "#191c1d",
+                    "surface-tint": "#745b00",
+                    "on-surface": "#191c1d",
+                    "tertiary-fixed-dim": "#42d7fb",
+                    "primary": "#745b00",
+                    "on-tertiary-container": "#005e70",
+                    "error-container": "#ffdad6",
+                    "primary-fixed-dim": "#f0c110",
+                    "on-secondary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-bright": "#f8f9fa",
+                    "tertiary-fixed": "#b0ecff",
+                    "surface-container-highest": "#e1e3e4",
+                    "inverse-primary": "#f0c110",
+                    "outline": "#807660",
+                    "inverse-surface": "#2e3132",
+                    "secondary-container": "#e2dfde",
+                    "on-primary-fixed": "#241a00",
+                    "secondary-fixed-dim": "#c8c6c5",
+                    "primary-container": "#f5c518",
+                    "on-tertiary-fixed": "#001f27",
+                    "on-primary-fixed-variant": "#584400",
+                    "inverse-on-surface": "#f0f1f2",
+                    "surface-container-low": "#f3f4f5",
+                    "secondary-fixed": "#e5e2e1",
+                    "error": "#ba1a1a",
+                    "tertiary": "#00687c"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "12px",
+                    "base": "8px",
+                    "section-gap": "32px",
+                    "container-margin": "20px"
+            },
+            "fontFamily": {
+                    "label-bold": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-md": ["Archivo Narrow"],
+                    "body-sm": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-lg-mobile": ["Archivo Narrow"],
+                    "headline-lg": ["Archivo Narrow"],
+                    "display": ["Archivo Narrow"]
+            },
+            "fontSize": {
+                    "label-bold": ["12px", {"lineHeight": "1", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "300"}],
+                    "headline-md": ["20px", {"lineHeight": "1.3", "fontWeight": "800"}],
+                    "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "300"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "900"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "900"}],
+                    "display": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "900"}]
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+        .glass-nav {
+            background: rgba(248, 249, 250, 0.8);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen pb-24 font-body-md">
+<!-- [1] TOP NAV -->
+<header class="sticky top-0 z-50 bg-surface shadow-sm px-container-margin py-4 flex justify-between items-center">
+<h1 class="font-headline-md text-headline-md text-on-background">Mon Profil</h1>
+<button class="p-2 hover:bg-surface-variant/50 rounded-full transition-all active:scale-95">
+<span class="material-symbols-outlined text-on-background">settings</span>
+</button>
+</header>
+<!-- [2] PROFILE HEADER -->
+<section class="bg-gradient-to-b from-[#EFF6FF] to-[#E0E7FF] px-container-margin pt-8 pb-10 flex flex-col items-center">
+<div class="relative mb-4">
+<div class="w-[84px] h-[84px] rounded-full border-2 border-primary-container p-0.5 bg-white overflow-hidden">
+<img alt="Marc-Antoine Profile" class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida/ADBb0uiKx5lxO6EmhqIu9BRVYIlcW2tkqf9mM27B1XReh7dPAWch4i-7FIzYqQPB_GsSDPxunY0Sc-KQio1L06hiGj_nNZb535vDypNEvpeyqHctP3VeRNOTQvX2_R3Os7lpL-V-HlcgIokbDJ9dpxQ3zgwW8G-YZpAV2xOnyjt-TMoVf2G2xWfBn4QWQIMtAF-uZJqUAE9gjNMZNfHwlT-oUuOZauUMGbrV3peJZAYZBiimn64S7oeGtT5Tpg"/>
+</div>
+<button class="absolute bottom-0 right-0 bg-white shadow-md p-1.5 rounded-full border border-surface-variant active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[16px] text-on-background">photo_camera</span>
+</button>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-background mb-0.5">Marc-Antoine</h2>
+<p class="font-body-sm text-body-sm text-secondary mb-4">marc.antoine@email.com</p>
+<div class="flex flex-wrap justify-center gap-2 mb-6">
+<span class="px-3 py-1 bg-primary-container text-on-primary-container text-label-bold font-label-bold rounded-full">Super Vendeur</span>
+<span class="px-3 py-1 bg-tertiary text-on-tertiary text-label-bold font-label-bold rounded-full">Vérifié</span>
+<span class="px-3 py-1 bg-on-background text-on-primary text-label-bold font-label-bold rounded-full">Top Troc</span>
+</div>
+<button class="flex items-center gap-2 px-6 py-2 rounded-full border border-on-surface-variant/30 text-on-surface font-label-bold text-label-bold hover:bg-white/50 transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+            Modifier le profil
+        </button>
+</section>
+<div class="-mt-6 px-container-margin space-y-gutter">
+<!-- [3] PRIVATE STATS BANNER -->
+<article class="bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.04)] border-l-4 border-primary-container p-5 flex items-center gap-4">
+<div class="bg-primary-container/10 p-3 rounded-full">
+<span class="material-symbols-outlined text-primary">visibility</span>
+</div>
+<div class="flex-grow">
+<p class="font-label-bold text-[15px] text-on-background">Vos annonces ont été vues</p>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-[28px] leading-none text-on-background">1 243 fois</span>
+<span class="font-body-sm text-body-sm text-secondary">cette semaine</span>
+</div>
+</div>
+<div class="flex items-center gap-1 text-[#22C55E]">
+<span class="material-symbols-outlined text-[18px] font-bold">trending_up</span>
+<span class="font-label-bold">+12%</span>
+</div>
+</article>
+<!-- [4] QUICK STATS ROW -->
+<section class="grid grid-cols-4 gap-2 bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.04)] p-4 text-center">
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md text-on-background">47</span>
+<span class="font-body-sm text-body-sm text-secondary">Annonces</span>
+</div>
+<div class="flex flex-col border-l border-surface-variant">
+<span class="font-headline-md text-headline-md text-primary">4.8★</span>
+<span class="font-body-sm text-body-sm text-secondary">Note</span>
+</div>
+<div class="flex flex-col border-l border-surface-variant">
+<span class="font-headline-md text-headline-md text-on-background">312</span>
+<span class="font-body-sm text-body-sm text-secondary">Followers</span>
+</div>
+<div class="flex flex-col border-l border-surface-variant relative">
+<span class="font-headline-md text-headline-md text-tertiary">5</span>
+<span class="font-body-sm text-body-sm text-secondary">Messages</span>
+<span class="absolute top-0 right-2 w-2.5 h-2.5 bg-[#EF4444] rounded-full border-2 border-white"></span>
+</div>
+</section>
+</div>
+<!-- [5] TABS BAR -->
+<nav class="mt-section-gap border-b border-surface-variant px-container-margin flex gap-8">
+<button class="pb-3 border-b-2 border-primary-container text-on-background font-label-bold text-label-bold">Actives</button>
+<button class="pb-3 text-secondary font-label-bold text-label-bold hover:text-on-background transition-colors">Brouillons</button>
+<button class="pb-3 text-secondary font-label-bold text-label-bold hover:text-on-background transition-colors">Favoris</button>
+</nav>
+<!-- [6] ACTIVES TAB CONTENT -->
+<main class="px-container-margin pt-gutter grid grid-cols-2 gap-gutter">
+<!-- Listing Card 1 -->
+<div class="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col group">
+<div class="relative aspect-square">
+<img class="w-full h-full object-cover" data-alt="A premium over-ear headphone in sleek matte black finish, resting on a clean white marble surface. Soft studio lighting highlights the metallic details and leather padding. The composition is modern and high-end, reflecting a luxury tech accessory brand aesthetic with ample negative space." src="https://lh3.googleusercontent.com/aida-public/AB6AXuApicc57VtGw1xfTE4GgczfyXqXqitMgHh-l59h8Iyv5sigNMWkTK3-NxLSdh-6IH6ELDQg--8dPYyg6rc0AWCdmwLwp2PyFV4wlqHcxSSCHvz_i_umuu-kPCsfaHdIsjAGM4ndjJEUABO30C5rw_1coDBA2O2MxlnPzrFEZPzEgjEBvo4ayWL8jNrxhT-36dAFnUn_6RhKRD506jXGuvcrJG61E5gFit5WbZ3VnPj5fGbcJB7CiKvS6uSTVt1w9Nuwh3kSSWLrVSE"/>
+<div class="absolute top-2 left-2 bg-white/90 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-[#22C55E]">En ligne</div>
+<div class="absolute bottom-2 left-2 px-3 py-1 bg-primary-container text-on-primary-container rounded-full font-headline-md text-body-sm shadow-md">
+                    240€
+                </div>
+</div>
+<div class="p-3 flex flex-col flex-grow">
+<h3 class="font-label-bold text-body-sm text-on-background truncate mb-4">Casque Audio Premium</h3>
+<div class="flex gap-2 mt-auto">
+<button class="flex-1 flex items-center justify-center gap-1 py-1.5 border border-surface-variant rounded-lg text-secondary hover:bg-surface transition-colors">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+<button class="flex-1 flex items-center justify-center gap-1 py-1.5 bg-on-background text-white rounded-lg hover:bg-on-background/90 transition-colors">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Listing Card 2 -->
+<div class="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col group">
+<div class="relative aspect-square">
+<img class="w-full h-full object-cover" data-alt="A minimalist white smartwatch with a silver metallic bezel displayed on a soft grey gradient background. The lighting is diffused and atmospheric, emphasizing the clean lines and modern design. The image captures a high-tech lifestyle vibe with a focus on efficiency and sophisticated simplicity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUSGoyGJnvzilwqSjbfFqi7hglywOxkOIt9HB7N8saFhOAVXaY6P9zN9LOXEy2MQK5yREycGQRd0oERKtNZpT-5is2DqQ3MQlVgk5Eqp-3BksCxLv6VyAXLHprDD-jSAT5GutUJaq4mnOF0AomERYnY-fKfp5Ghun5fMdAiE8MEz--bw11rjFjreaMwHWV-YwqygFhUz7mdS3WFceCnqfPTOn8CafBoI64oOmAijQ5ZpWk4lO0No1JBJM6zM1YmkD25386INf2IWw"/>
+<div class="absolute top-2 left-2 bg-white/90 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-[#22C55E]">En ligne</div>
+<div class="absolute bottom-2 left-2 px-3 py-1 bg-primary-container text-on-primary-container rounded-full font-headline-md text-body-sm shadow-md">
+                    185€
+                </div>
+</div>
+<div class="p-3 flex flex-col flex-grow">
+<h3 class="font-label-bold text-body-sm text-on-background truncate mb-4">Smartwatch S Pro</h3>
+<div class="flex gap-2 mt-auto">
+<button class="flex-1 flex items-center justify-center gap-1 py-1.5 border border-surface-variant rounded-lg text-secondary hover:bg-surface transition-colors">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+<button class="flex-1 flex items-center justify-center gap-1 py-1.5 bg-on-background text-white rounded-lg hover:bg-on-background/90 transition-colors">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Listing Card 3 -->
+<div class="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col group">
+<div class="relative aspect-square">
+<img class="w-full h-full object-cover" data-alt="A vintage film camera with a leather strap, placed on a weathered wooden tabletop. Warm sunlight filters through a window, creating long, soft shadows and a nostalgic, creative atmosphere. The image is rich in texture and earthy tones, suggesting a professional yet authentic lifestyle for photography enthusiasts." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7vqZSvm73W07SaXRnyAUAGj625vFxo31cdtbrS3UTfR7J6BAGq1sht590Ujql4pWj2d_EH2gWCzzZgda5A7_LXmsP4BICbRWrorkW0rRZXQxfS1NA84xMo79X3M2WTP-Qw8OeQ2ULEvi6HHSLqT7Me6q-4zqQn7koHk8Yz52JShmqIBs7KYGgSLEI-Fc7DJ_KrnBuDM8lhegYFyw8SZDhajfe4L1ZZ69hwtXd7Zo2Hm-rxLBxn3IAATW4aypASbNg9xz_dAIvGww"/>
+<div class="absolute top-2 left-2 bg-white/90 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-secondary">Pause</div>
+<div class="absolute bottom-2 left-2 px-3 py-1 bg-primary-container text-on-primary-container rounded-full font-headline-md text-body-sm shadow-md">
+                    420€
+                </div>
+</div>
+<div class="p-3 flex flex-col flex-grow">
+<h3 class="font-label-bold text-body-sm text-on-background truncate mb-4">Caméra Argentique 35mm</h3>
+<div class="flex gap-2 mt-auto">
+<button class="flex-1 flex items-center justify-center gap-1 py-1.5 border border-surface-variant rounded-lg text-secondary hover:bg-surface transition-colors">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+<button class="flex-1 flex items-center justify-center gap-1 py-1.5 bg-on-background text-white rounded-lg hover:bg-on-background/90 transition-colors">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Listing Card 4 -->
+<div class="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col group">
+<div class="relative aspect-square">
+<img class="w-full h-full object-cover" data-alt="Bright red performance running shoes captured mid-air against a minimalist, clean white background. High-speed studio lighting freezes the movement, highlighting the athletic power and vibrant color. The aesthetic is energetic and commercial, emphasizing speed and modern fitness culture with sharp focus." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcouQf8Sb63Vijvj5eR4qC4wJOVCVwYpmtPjW6k8DNwmjExJPKSzDmx616-nzpPRZesFhmrCebQ4IHiur9XH_8jPPCg6FXoh2Wsfcw8JT4QlPtpU0jZS2tSlZfkg0qWt0t_HyK11XJq5KNHGBPNBvDD1lvlKxjQKhDdDG2lqT4A-2Ui7FIuyvrj7CAerWevSC3dZDDBp8ArnxTWIyKzYpmaIaGkaQBO-p_2H9V5d7vTDreXTBa3YbgDDY-DAdyIxndQf1fPWkOzoA"/>
+<div class="absolute top-2 left-2 bg-white/90 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-[#22C55E]">En ligne</div>
+<div class="absolute bottom-2 left-2 px-3 py-1 bg-primary-container text-on-primary-container rounded-full font-headline-md text-body-sm shadow-md">
+                    90€
+                </div>
+</div>
+<div class="p-3 flex flex-col flex-grow">
+<h3 class="font-label-bold text-body-sm text-on-background truncate mb-4">Running Speed V2</h3>
+<div class="flex gap-2 mt-auto">
+<button class="flex-1 flex items-center justify-center gap-1 py-1.5 border border-surface-variant rounded-lg text-secondary hover:bg-surface transition-colors">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+<button class="flex-1 flex items-center justify-center gap-1 py-1.5 bg-on-background text-white rounded-lg hover:bg-on-background/90 transition-colors">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- [7] BOTTOM NAVIGATION BAR -->
+<nav class="fixed bottom-0 w-full glass-nav flex justify-around items-center px-4 py-3 pb-8 z-50 rounded-t-xl shadow-[0_-4px_20px_rgba(0,0,0,0.04)]">
+<button class="flex flex-col items-center justify-center text-secondary active:scale-90 duration-200">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-label-bold mt-1">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary active:scale-90 duration-200">
+<span class="material-symbols-outlined">search</span>
+<span class="text-[10px] font-label-bold mt-1">Search</span>
+</button>
+<button class="relative -top-5 bg-on-background text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg active:scale-90 duration-200">
+<span class="material-symbols-outlined text-[32px]">add</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary active:scale-90 duration-200">
+<span class="material-symbols-outlined">chat_bubble</span>
+<span class="text-[10px] font-label-bold mt-1">Messages</span>
+</button>
+<button class="flex flex-col items-center justify-center text-primary active:scale-90 duration-200">
+<span class="material-symbols-outlined fill-icon">person</span>
+<span class="text-[10px] font-label-bold mt-1">Profile</span>
+</button>
+</nav>
+<script>
+        // Micro-interaction for tabs
+        const tabs = document.querySelectorAll('nav button');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => {
+                    t.classList.remove('border-b-2', 'border-primary-container', 'text-on-background');
+                    t.classList.add('text-secondary');
+                });
+                tab.classList.add('border-b-2', 'border-primary-container', 'text-on-background');
+                tab.classList.remove('text-secondary');
+            });
+        });
+    </script>
+</body></html>

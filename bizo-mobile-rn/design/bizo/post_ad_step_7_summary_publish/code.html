@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700;800;900&amp;family=Inter:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#584400",
+                        "on-tertiary-fixed": "#001f27",
+                        "surface-container": "#edeeef",
+                        "primary-container": "#f5c518",
+                        "on-background": "#191c1d",
+                        "tertiary-fixed-dim": "#42d7fb",
+                        "on-surface": "#191c1d",
+                        "on-primary": "#ffffff",
+                        "surface-container-low": "#f3f4f5",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#695200",
+                        "surface-tint": "#745b00",
+                        "surface-container-highest": "#e1e3e4",
+                        "primary-fixed-dim": "#f0c110",
+                        "on-tertiary-container": "#005e70",
+                        "on-tertiary-fixed-variant": "#004e5e",
+                        "error-container": "#ffdad6",
+                        "surface-dim": "#d9dadb",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "on-secondary-fixed-variant": "#474746",
+                        "primary-fixed": "#ffe08b",
+                        "secondary-fixed": "#e5e2e1",
+                        "surface-variant": "#e1e3e4",
+                        "tertiary-fixed": "#b0ecff",
+                        "tertiary-container": "#49dbff",
+                        "outline-variant": "#d1c5ac",
+                        "inverse-surface": "#2e3132",
+                        "primary": "#745b00",
+                        "outline": "#807660",
+                        "secondary": "#5f5e5e",
+                        "on-primary-fixed": "#241a00",
+                        "on-error": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface-container-high": "#e7e8e9",
+                        "on-tertiary": "#ffffff",
+                        "background": "#f8f9fa",
+                        "surface-bright": "#f8f9fa",
+                        "inverse-on-surface": "#f0f1f2",
+                        "secondary-container": "#e2dfde",
+                        "tertiary": "#00687c",
+                        "on-secondary-container": "#636262",
+                        "surface": "#f8f9fa",
+                        "on-surface-variant": "#4e4633",
+                        "on-secondary-fixed": "#1c1b1b",
+                        "inverse-primary": "#f0c110",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "16px",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "section-gap": "32px",
+                        "gutter": "12px",
+                        "container-margin": "20px"
+                    },
+                    "fontFamily": {
+                        "label-bold": ["Inter"],
+                        "headline-lg-mobile": ["Archivo Narrow"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Archivo Narrow"],
+                        "headline-md": ["Archivo Narrow"],
+                        "display": ["Archivo Narrow"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-bold": ["12px", {"lineHeight": "1", "fontWeight": "700"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "900"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "300"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "300"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "900"}],
+                        "headline-md": ["20px", {"lineHeight": "1.3", "fontWeight": "800"}],
+                        "display": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "900"}],
+                        "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md text-body-md antialiased min-h-screen flex flex-col">
+<!-- Top Navigation & Progress Bar -->
+<header class="w-full sticky top-0 z-50 bg-background">
+<div class="flex items-center justify-between px-container-margin py-4 max-w-[1200px] mx-auto">
+<span class="material-symbols-outlined text-secondary hover:opacity-80 transition-opacity cursor-pointer">arrow_back</span>
+<div class="flex items-center gap-2">
+<span class="text-body-sm text-secondary">Dernière étape !</span>
+<div class="bg-primary-container h-8 w-8 rounded-full flex items-center justify-center text-on-primary-container shadow-sm">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+</div>
+</div>
+<div class="w-full h-[3px] bg-primary-container relative">
+<div class="absolute left-0 top-0 h-full w-full bg-primary-container"></div>
+</div>
+</header>
+<main class="flex-grow w-full max-w-[1200px] mx-auto px-container-margin py-6 pb-40">
+<!-- Heading -->
+<section class="mb-6">
+<h1 class="font-headline-md text-headline-md text-on-surface mb-1">Vérifiez votre annonce</h1>
+<p class="font-body-sm text-body-sm text-secondary">Voici comment elle apparaîtra aux acheteurs.</p>
+</section>
+<!-- Annonce Preview Card -->
+<article class="bg-surface-container-lowest rounded-2xl border border-surface-container-highest shadow-[0_4px_20px_0_rgba(0,0,0,0.04)] overflow-hidden mb-8">
+<div class="relative h-[180px] w-full overflow-hidden">
+<img alt="Preview" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/ADBb0uh87IkLFidw7GYFSqWQWd1E3mP2pJ0uTVj2ZF-WThGORhMIw_Pqf2GfCxK-sA9BRkei2b_rNTxhpG4iAt1u1RwC6Puu8w-f4wL7oLzn6Q9g88N4RWAKA9DGz_GM_SLdUHi8D1PjV1ovLjNeUWg8Tibix_rewC0YavAHvD6so9sjMZZKUquHp6nACfOfBGOURCg0qFJdM8KT4RRmCnDtW1LvYOycmvQ_OJrh0cPfB9gPF15q_cq_pzKhMw"/>
+<div class="absolute top-3 left-3 bg-primary-container text-on-primary-container px-3 py-1 rounded-full text-[11px] font-bold tracking-tight uppercase">
+                    TROC+CASH
+                </div>
+</div>
+<div class="p-4">
+<div class="flex justify-between items-start mb-2">
+<h2 class="font-headline-md text-headline-md leading-tight max-w-[70%]">Leica M3 Replica - État Exceptionnel</h2>
+<span class="text-primary-container font-headline-md text-[22px] leading-none">150 €</span>
+</div>
+<div class="flex items-center gap-4 text-secondary mb-4">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+<span class="text-[12px] font-body-sm">Paris, 75001</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+<span class="text-[12px] font-body-sm">À l'instant</span>
+</div>
+<div class="bg-on-background text-on-primary px-2 py-0.5 rounded text-[11px] font-bold">
+                        Très bon état
+                    </div>
+</div>
+<div class="pt-3 border-t border-surface-container-highest flex justify-end">
+<button class="flex items-center gap-1 text-[#6200EE] text-[13px] font-bold hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+                        Modifier l'annonce
+                    </button>
+</div>
+</div>
+</article>
+<!-- Summary List -->
+<section class="bg-surface-container-lowest rounded-xl border border-surface-container-highest overflow-hidden mb-8">
+<div class="divide-y divide-surface-container-highest">
+<div class="flex items-center justify-between p-4">
+<div class="flex flex-col">
+<span class="text-body-sm text-secondary font-medium">Catégorie</span>
+<span class="text-on-surface">Électronique › Smartphones</span>
+</div>
+<span class="material-symbols-outlined text-secondary cursor-pointer">edit</span>
+</div>
+<div class="flex items-center justify-between p-4">
+<div class="flex flex-col">
+<span class="text-body-sm text-secondary font-medium">Mode</span>
+<span class="text-on-surface">Troc + Complément</span>
+</div>
+<span class="material-symbols-outlined text-secondary cursor-pointer">edit</span>
+</div>
+<div class="flex items-center justify-between p-4">
+<div class="flex flex-col">
+<span class="text-body-sm text-secondary font-medium">Complément</span>
+<span class="text-on-surface">150 €</span>
+</div>
+<span class="material-symbols-outlined text-secondary cursor-pointer">edit</span>
+</div>
+<div class="flex items-center justify-between p-4">
+<div class="flex flex-col">
+<span class="text-body-sm text-secondary font-medium">État</span>
+<span class="text-on-surface">Très bon état</span>
+</div>
+<span class="material-symbols-outlined text-secondary cursor-pointer">edit</span>
+</div>
+<div class="flex items-center justify-between p-4">
+<div class="flex flex-col">
+<span class="text-body-sm text-secondary font-medium">Localisation</span>
+<span class="text-on-surface">Paris, 75001</span>
+</div>
+<span class="material-symbols-outlined text-secondary cursor-pointer">edit</span>
+</div>
+<div class="p-4">
+<div class="flex items-center justify-between mb-3">
+<div class="flex flex-col">
+<span class="text-body-sm text-secondary font-medium">Photos</span>
+<span class="text-on-surface">6 photos</span>
+</div>
+<span class="material-symbols-outlined text-secondary cursor-pointer">edit</span>
+</div>
+<div class="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+<div class="min-w-[48px] h-[48px] rounded-lg bg-surface-container-high overflow-hidden flex-shrink-0">
+<img alt="Thumb" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/ADBb0uh87IkLFidw7GYFSqWQWd1E3mP2pJ0uTVj2ZF-WThGORhMIw_Pqf2GfCxK-sA9BRkei2b_rNTxhpG4iAt1u1RwC6Puu8w-f4wL7oLzn6Q9g88N4RWAKA9DGz_GM_SLdUHi8D1PjV1ovLjNeUWg8Tibix_rewC0YavAHvD6so9sjMZZKUquHp6nACfOfBGOURCg0qFJdM8KT4RRmCnDtW1LvYOycmvQ_OJrh0cPfB9gPF15q_cq_pzKhMw"/>
+</div>
+<div class="min-w-[48px] h-[48px] rounded-lg bg-surface-container-high flex-shrink-0" data-alt="A macro close-up of a vintage analog camera lens reflecting soft warm studio light. The metal body has a subtle patina, conveying a premium quality and heritage feel. Deep shadows and bright highlights create a dramatic, artistic mood. Minimalist aesthetic on a clean light gray background.">
+<img alt="Cam" class="w-full h-full object-cover rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqb-e84zbUuL6XWTGDXYCqjebSKpvCjMdtk-AeNtq--JK9tJDZa7TOXE_yaEcwurYw80nk57ein_FLW2U1A8NZP04GBrVq943DjKwGHm7nN1QwEjth0L2nqNJhOrOxC1UEhOp_8a10ajN5QzVLD_rWI3I6zagPBo9Amg9uuBPpwctTUGLASMsUVKCBy_SNE8n2lHGIOgrzhD1IvOhotjze_CjHvdGPwJw32I9mxRa6EYUW2AmB0CyBXclNsAl2FJS0w1baxiO_qIs"/>
+</div>
+<div class="min-w-[48px] h-[48px] rounded-lg bg-surface-container-high flex-shrink-0" data-alt="The top view of a classic silver rangefinder camera showing detailed dials and the shutter button. The lighting is soft and atmospheric, highlighting the precision engineering and elegant lines. A sense of timeless design and professional utility. Monochrome tones with golden hour warmth.">
+<img alt="Cam" class="w-full h-full object-cover rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5_86YIKvqMU3tJ1EE4xTKGXHM9yAE-5eq2-fJXtNbDTkUqyY2GklxelmxRKaz3nDG24F-zoiEDT7y9QuA0nfJoWtfDmJoqA-gJUVM7IHmEipOHTcdNnkR1cem5e-XtHFq6FMY_cHBtpPbfZa-K9E0RcInxAV7-9DTmcDz7cVx8de_mkUO2GPLYAC_M2w6FhgqWXN8E0oyKZOHq26H_0pCWdIf_0YYs56mlJrc1ezVwm9mhTvGqSRMgts0U_hyP6RZfCElBUpzqbw"/>
+</div>
+<div class="min-w-[48px] h-[48px] rounded-lg bg-surface-container-high flex-shrink-0 flex items-center justify-center border border-dashed border-outline-variant">
+<span class="text-[10px] font-bold text-secondary">+3</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Terms -->
+<p class="text-center text-[12px] text-secondary px-8 mb-4">
+            En publiant vous acceptez nos <a class="underline font-bold text-on-surface" href="#">Conditions d'utilisation</a>
+</p>
+</main>
+<!-- Bottom Sticky Buttons -->
+<div class="fixed bottom-0 left-0 w-full bg-surface-bright/80 backdrop-blur-[20px] p-4 pb-safe flex flex-col gap-3 z-[60] shadow-[0_-4px_20px_0_rgba(0,0,0,0.06)]">
+<div class="max-w-[600px] w-full mx-auto flex flex-col gap-3">
+<button class="w-full h-[52px] bg-on-background text-on-primary rounded-full flex items-center justify-center gap-2 font-bold transition-transform active:scale-95 shadow-lg">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">rocket_launch</span>
+                Publier maintenant
+            </button>
+<button class="w-full h-[44px] border border-[#6200EE] text-[#6200EE] rounded-full flex items-center justify-center gap-2 font-bold transition-colors hover:bg-[#6200EE]/5 active:scale-95">
+<span class="material-symbols-outlined text-[20px]">bookmark</span>
+                Sauvegarder en brouillon
+            </button>
+</div>
+</div>
+<script>
+        // Micro-interaction for buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('touchstart', () => btn.classList.add('opacity-90'));
+            btn.addEventListener('touchend', () => btn.classList.remove('opacity-90'));
+        });
+    </script>
+</body></html>

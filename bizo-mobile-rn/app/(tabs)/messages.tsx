@@ -1,10 +1,9 @@
-import { PlaceholderScreen } from "@/src/components/ui/placeholder-screen";
+import { useRouter } from "expo-router";
+
+import { MessagingInboxScreen } from "@/src/features/chat/screens/messaging-inbox-screen";
 
 export default function MessagesRoute() {
-  return (
-    <PlaceholderScreen
-      title="Messages"
-      subtitle="Le shell message est cree. La conversation temps reel sera rebranchee apres la passe UI Classified AI."
-    />
-  );
+  const router = useRouter();
+
+  return <MessagingInboxScreen onOpenConversation={() => router.push("/chat/direct-contact")} />;
 }

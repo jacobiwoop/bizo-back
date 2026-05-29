@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700;800;900&amp;family=Inter:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-container": "#49dbff",
+                    "primary-fixed": "#ffe08b",
+                    "primary-fixed-dim": "#f0c110",
+                    "outline": "#807660",
+                    "secondary-container": "#e2dfde",
+                    "error-container": "#ffdad6",
+                    "on-error": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "surface-bright": "#f8f9fa",
+                    "inverse-primary": "#f0c110",
+                    "on-secondary": "#ffffff",
+                    "background": "#f8f9fa",
+                    "surface-container-lowest": "#ffffff",
+                    "surface": "#f8f9fa",
+                    "surface-tint": "#745b00",
+                    "on-secondary-container": "#636262",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed-dim": "#c8c6c5",
+                    "on-primary-fixed": "#241a00",
+                    "primary": "#745b00",
+                    "on-secondary-fixed-variant": "#474746",
+                    "surface-container-low": "#f3f4f5",
+                    "surface-container-highest": "#e1e3e4",
+                    "secondary": "#5f5e5e",
+                    "surface-dim": "#d9dadb",
+                    "on-tertiary-fixed-variant": "#004e5e",
+                    "tertiary": "#00687c",
+                    "secondary-fixed": "#e5e2e1",
+                    "primary-container": "#f5c518",
+                    "outline-variant": "#d1c5ac",
+                    "surface-container": "#edeeef",
+                    "on-primary-container": "#695200",
+                    "on-surface-variant": "#4e4633",
+                    "on-surface": "#191c1d",
+                    "on-tertiary-container": "#005e70",
+                    "inverse-surface": "#2e3132",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-fixed": "#001f27",
+                    "inverse-on-surface": "#f0f1f2",
+                    "tertiary-fixed": "#b0ecff",
+                    "on-secondary-fixed": "#1c1b1b",
+                    "on-primary-fixed-variant": "#584400",
+                    "tertiary-fixed-dim": "#42d7fb",
+                    "surface-variant": "#e1e3e4",
+                    "surface-container-high": "#e7e8e9",
+                    "on-background": "#191c1d",
+                    "error": "#ba1a1a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "12px",
+                    "container-margin": "20px",
+                    "section-gap": "32px",
+                    "base": "8px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Archivo Narrow"],
+                    "label-bold": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-lg": ["Archivo Narrow"],
+                    "display": ["Archivo Narrow"],
+                    "headline-md": ["Archivo Narrow"],
+                    "body-sm": ["Inter"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "900"}],
+                    "label-bold": ["12px", {"lineHeight": "1", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "300"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "900"}],
+                    "display": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "900"}],
+                    "headline-md": ["20px", {"lineHeight": "1.3", "fontWeight": "800"}],
+                    "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "300"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        body { width: 390px; height: 844px; margin: 0 auto; overflow-x: hidden; position: relative; }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- [1] TOP NAV + PROFILE MINI HEADER -->
+<header class="sticky top-0 z-50 bg-surface shadow-sm transition-opacity duration-200">
+<div class="flex justify-between items-center px-container-margin py-4 w-full">
+<button class="flex items-center justify-center p-1 text-on-surface">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<div class="flex items-center gap-2">
+<img alt="Profile Picture" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/ADBb0uiKx5lxO6EmhqIu9BRVYIlcW2tkqf9mM27B1XReh7dPAWch4i-7FIzYqQPB_GsSDPxunY0Sc-KQio1L06hiGj_nNZb535vDypNEvpeyqHctP3VeRNOTQvX2_R3Os7lpL-V-HlcgIokbDJ9dpxQ3zgwW8G-YZpAV2xOnyjt-TMoVf2G2xWfBn4QWQIMtAF-uZJqUAE9gjNMZNfHwlT-oUuOZauUMGbrV3peJZAYZBiimn64S7oeGtT5Tpg"/>
+<span class="font-label-bold text-label-bold text-on-surface">Marc-Antoine</span>
+</div>
+<button class="flex items-center justify-center p-1 text-on-surface">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<!-- [2] TABS BAR -->
+<div class="flex w-full border-b border-surface-container-highest">
+<button class="flex-1 py-3 relative text-center font-label-bold text-label-bold text-on-surface">
+                Annonces
+                <div class="absolute bottom-0 left-0 w-full h-[3px] bg-primary-container"></div>
+</button>
+<button class="flex-1 py-3 text-center font-label-bold text-label-bold text-secondary">
+                Avis
+            </button>
+</div>
+</header>
+<main class="pb-32 overflow-y-auto">
+<!-- [3] FILTER CHIPS ROW -->
+<div class="flex items-center gap-3 overflow-x-auto hide-scrollbar px-container-margin py-4">
+<button class="flex items-center gap-2 whitespace-nowrap bg-on-background text-surface-container-lowest px-4 py-2 rounded-full font-label-bold text-label-bold">
+                Tout <span class="opacity-70">47</span>
+</button>
+<button class="flex items-center gap-2 whitespace-nowrap border border-on-surface text-on-surface bg-surface px-4 py-2 rounded-full font-label-bold text-label-bold">
+                Vente <span class="opacity-70">28</span>
+</button>
+<button class="flex items-center gap-2 whitespace-nowrap bg-[#5B5BD6] text-white px-4 py-2 rounded-full font-label-bold text-label-bold">
+                Troc <span class="opacity-70">12</span>
+</button>
+<button class="flex items-center gap-2 whitespace-nowrap bg-primary-container text-on-primary-container px-4 py-2 rounded-full font-label-bold text-label-bold">
+                Troc+Cash <span class="opacity-70">7</span>
+</button>
+</div>
+<!-- [4] SORT ROW -->
+<div class="flex justify-end items-center px-container-margin gap-1 pb-4">
+<span class="material-symbols-outlined text-secondary text-[18px]">tune</span>
+<span class="font-body-sm text-[13px] text-secondary">Trier : Récent</span>
+<span class="material-symbols-outlined text-secondary text-[18px]">expand_more</span>
+</div>
+<!-- [5] ANNONCES GRID -->
+<div class="grid grid-cols-2 gap-gutter px-container-margin">
+<!-- Card 1: Vente -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_0_rgba(0,0,0,0.04)] overflow-hidden flex flex-col">
+<div class="relative h-[130px] w-full">
+<img class="w-full h-full object-cover" data-alt="A pair of vibrant red performance running shoes displayed on a minimalist white pedestal. The studio lighting is bright and clean, highlighting the sleek texture of the synthetic fabric and the dynamic silhouette. The background is a soft, airy light-mode grey, creating a premium marketplace aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTl0kQ1wESMOJ6k9Vm3_STtmQvLvgox3m2QeoYmo6RjW3Qhe5U9IUdHh8dUylmskzEiQZINyGfyYACpyf_yKtLAhXxk6Uy2wjYFoOQeozsnwatRAvM62_81AtNytBzKJEkbQyvPhDgR8dRv_NF3bX5f1UxV93BVOR0Bwc6W-G8lpSXkedeYg6TcD6jMIGrWtr8txPAq9GUKCJN4_E0JZ34nfm-apwgcIrrL21-sRgbNTm7xh4hT44g-eyY5iZ8xkiPxqxJuhGi5iw"/>
+<span class="absolute top-2 left-2 bg-white/90 text-[10px] font-bold px-2 py-0.5 rounded uppercase">Vente</span>
+<button class="absolute top-2 right-2 text-white">
+<span class="material-symbols-outlined !text-[20px]">favorite</span>
+</button>
+</div>
+<div class="p-2.5 flex flex-col gap-1.5">
+<h3 class="font-label-bold text-[13px] leading-tight text-on-surface line-clamp-2">Sneakers Nike Air Max Limited Edition</h3>
+<p class="font-headline-md text-primary-container !text-[16px]">120 €</p>
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center gap-1 text-secondary">
+<span class="material-symbols-outlined !text-[14px]">location_on</span>
+<span class="text-[10px]">Paris, 11e</span>
+</div>
+<div class="flex items-center gap-1 text-secondary">
+<span class="material-symbols-outlined !text-[14px]">schedule</span>
+<span class="text-[10px]">il y a 2j</span>
+</div>
+</div>
+<div class="mt-1">
+<span class="inline-block bg-on-background text-surface text-[9px] px-2 py-0.5 rounded-full uppercase font-bold">Occasion</span>
+</div>
+</div>
+</div>
+<!-- Card 2: Troc -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_0_rgba(0,0,0,0.04)] overflow-hidden flex flex-col">
+<div class="relative h-[130px] w-full">
+<img class="w-full h-full object-cover" data-alt="Premium over-ear headphones in deep black and metallic finish resting on a light wooden surface. High-key natural lighting emphasizes the high-quality materials and professional design. The mood is sophisticated and modern, set in a bright, minimalist studio environment with clean lines." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrW_WUwswkfJlsTw9coUYBncAvtNAs5E5DnR2MZn9cd-FN5Bx0oDUK_Eb_6UL3fxEVk5MpqRAbcAFbnb3boviNdkY3rij7SZNaHGqvujyyHDEAIvMhV-e4ta_1h_zMU1ZOzXy1dQ6LXBh-Sx1Hxg2ZzkgzgM59iprtHtAk6o21oU7ogjRYiPYL-nHuDgiJfr0Fk5KTvkVoOIuYssLFjEoEner9GPyciHVqjw2HzevyHfoq9iNGORAa3ggPQr0MwRBdoe_zwZOyB30"/>
+<span class="absolute top-2 left-2 bg-[#5B5BD6] text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">Troc</span>
+<button class="absolute top-2 right-2 text-white">
+<span class="material-symbols-outlined !text-[20px]">favorite</span>
+</button>
+</div>
+<div class="p-2.5 flex flex-col gap-1.5">
+<h3 class="font-label-bold text-[13px] leading-tight text-on-surface line-clamp-2">Casque Audio Studio High-Fidelity</h3>
+<div class="flex items-center gap-1 text-[#5B5BD6] font-headline-md !text-[16px]">
+<span>Troc</span>
+<span class="material-symbols-outlined !text-[16px]">sync</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center gap-1 text-secondary">
+<span class="material-symbols-outlined !text-[14px]">location_on</span>
+<span class="text-[10px]">Lyon, 2e</span>
+</div>
+<div class="flex items-center gap-1 text-secondary">
+<span class="material-symbols-outlined !text-[14px]">schedule</span>
+<span class="text-[10px]">il y a 1j</span>
+</div>
+</div>
+<div class="mt-1">
+<span class="inline-block bg-on-background text-surface text-[9px] px-2 py-0.5 rounded-full uppercase font-bold">Neuf</span>
+</div>
+</div>
+</div>
+<!-- Card 3: VENDU -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_0_rgba(0,0,0,0.04)] overflow-hidden flex flex-col relative">
+<div class="relative h-[130px] w-full">
+<img class="w-full h-full object-cover" data-alt="A minimalist white wristwatch with a tan leather strap isolated on a clean, light grey background. The lighting is soft and atmospheric, casting gentle shadows that give depth to the object. The overall aesthetic is Airy and modern, suitable for a high-end utility marketplace UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCE0-jENhZO8DtlyU-ucafrNojLS_crgOF3kuOvSZiiCnB3f0W6zJIvlnBiOim8MyyH-045kXsb-mLIpgzLrhwpANypFIA0nQHEqHQDaDQTuSazrqCUpjFYR8k9lyIK7Pquor1iWrQtgF4RZmXymbotwwBqjoQmkfS02EALdslBIOtWqy3FftKFF2N5JlZOHilQ9dOe2vlJ_xUx0f6b9BvA92pW9I6EpsDj4TNEVZDNJYKG_eXbpvl_LOV1EYeqe0Jpldkbd1t5lxM"/>
+<div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1">
+<span class="material-symbols-outlined text-white !text-[32px]">check_circle</span>
+<span class="text-white font-black text-[14px] tracking-widest uppercase">Vendu</span>
+</div>
+<span class="absolute top-2 left-2 bg-white/90 text-[10px] font-bold px-2 py-0.5 rounded uppercase">Vente</span>
+</div>
+<div class="p-2.5 flex flex-col gap-1.5 opacity-60">
+<h3 class="font-label-bold text-[13px] leading-tight text-on-surface line-clamp-2">Montre Minimaliste Cuir Véritable</h3>
+<p class="font-headline-md text-primary-container !text-[16px]">85 €</p>
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center gap-1 text-secondary">
+<span class="material-symbols-outlined !text-[14px]">location_on</span>
+<span class="text-[10px]">Bordeaux</span>
+</div>
+</div>
+<div class="mt-1">
+<span class="inline-block bg-on-background text-surface text-[9px] px-2 py-0.5 rounded-full uppercase font-bold">Occasion</span>
+</div>
+</div>
+</div>
+<!-- Card 4: Troc+Cash -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_0_rgba(0,0,0,0.04)] overflow-hidden flex flex-col">
+<div class="relative h-[130px] w-full">
+<img class="w-full h-full object-cover" data-alt="A retro-style 35mm film camera in silver and black metal, captured from a slightly elevated angle. The background is a clean, neutral cream color with professional photography lighting. The aesthetic is vintage-modern, highlighting the technical details and textures of the analog device." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsTXddnCR2B0xPq0HG8ON4kj0itrokRiXMGM7MLMoI0LPMLGb23DriWMkabfvP3cK_bfu6G8t827vYeRFPLcYKYvtY3FRE74zIBANc1ny9w0Lm_DwjpQLbHUFoeV2dlxGsx0IxK9JRnlAaqOs5s52IzI7sjOWdViHMIt0s50iWobQTjkId9stmcfO-2ObB3IU6z60bwBsS22Y8lYjgcPWoI0p331bxqy1NeoRFi-HSfI1TbTeQ2zdw-U5mo5Zv_Zk4aEzF7q2EvNo"/>
+<span class="absolute top-2 left-2 bg-primary-container text-on-primary-container text-[10px] font-bold px-2 py-0.5 rounded uppercase">Troc+Cash</span>
+<button class="absolute top-2 right-2 text-white">
+<span class="material-symbols-outlined !text-[20px]">favorite</span>
+</button>
+</div>
+<div class="p-2.5 flex flex-col gap-1.5">
+<h3 class="font-label-bold text-[13px] leading-tight text-on-surface line-clamp-2">Appareil Photo Argentique Vintage</h3>
+<div class="flex flex-col">
+<span class="text-[#5B5BD6] font-bold text-[10px] uppercase">Échange +</span>
+<p class="font-headline-md text-primary-container !text-[16px]">45 €</p>
+</div>
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center gap-1 text-secondary">
+<span class="material-symbols-outlined !text-[14px]">location_on</span>
+<span class="text-[10px]">Lille</span>
+</div>
+<div class="flex items-center gap-1 text-secondary">
+<span class="material-symbols-outlined !text-[14px]">schedule</span>
+<span class="text-[10px]">il y a 4j</span>
+</div>
+</div>
+<div class="mt-1">
+<span class="inline-block bg-on-background text-surface text-[9px] px-2 py-0.5 rounded-full uppercase font-bold">Occasion</span>
+</div>
+</div>
+</div>
+</div>
+<!-- [6] LOAD MORE -->
+<div class="flex justify-center py-section-gap px-container-margin">
+<button class="w-full flex items-center justify-center gap-2 border border-on-surface py-3 rounded-full font-label-bold text-label-bold text-on-surface hover:bg-surface-container-low transition-colors">
+                Voir plus
+                <span class="material-symbols-outlined">expand_more</span>
+</button>
+</div>
+</main>
+<!-- BOTTOM NAV -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-safe bg-surface/80 backdrop-blur-[15px] rounded-t-xl shadow-[0_-4px_20px_0_rgba(0,0,0,0.04)]">
+<button class="flex flex-col items-center justify-center text-secondary px-4 py-1 hover:bg-secondary-container/50 transition-transform duration-150 active:scale-90">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-bold text-label-bold mt-1">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary px-4 py-1 hover:bg-secondary-container/50 transition-transform duration-150 active:scale-90">
+<span class="material-symbols-outlined">search</span>
+<span class="font-label-bold text-label-bold mt-1">Search</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary px-4 py-1 hover:bg-secondary-container/50 transition-transform duration-150 active:scale-90">
+<span class="material-symbols-outlined">add_circle</span>
+<span class="font-label-bold text-label-bold mt-1">Post</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary px-4 py-1 hover:bg-secondary-container/50 transition-transform duration-150 active:scale-90">
+<span class="material-symbols-outlined">chat_bubble</span>
+<span class="font-label-bold text-label-bold mt-1">Messages</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 transition-transform duration-150 active:scale-90">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-bold text-label-bold mt-1">Profile</span>
+</button>
+</nav>
+<script>
+        // Simple micro-interaction for filter chips
+        const chips = document.querySelectorAll('.hide-scrollbar button');
+        chips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                chips.forEach(c => {
+                    c.classList.remove('bg-on-background', 'text-surface-container-lowest');
+                    c.classList.add('bg-surface', 'text-on-surface', 'border', 'border-on-surface');
+                });
+                chip.classList.add('bg-on-background', 'text-surface-container-lowest');
+                chip.classList.remove('bg-surface', 'text-on-surface', 'border', 'border-on-surface');
+            });
+        });
+
+        // Simple animation for the scroll header
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            const header = document.querySelector('header');
+            if (currentScroll > lastScroll && currentScroll > 50) {
+                header.classList.add('opacity-90');
+            } else {
+                header.classList.remove('opacity-90');
+            }
+            lastScroll = currentScroll;
+        });
+    </script>
+</body></html>
