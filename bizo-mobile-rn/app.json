@@ -17,7 +17,7 @@
       }
     },
     "android": {
-      "package": "io.bizo.mobile",
+      "package": "io.bizo.woop",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.POST_NOTIFICATIONS",
