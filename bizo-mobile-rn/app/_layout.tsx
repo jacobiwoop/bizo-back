@@ -2,7 +2,7 @@ import "../global.css";
 
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { View } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 
@@ -10,10 +10,18 @@ import { StartupLoadingScreen } from "@/src/components/ui/startup-loading-screen
 import { AppProviders } from "@/src/providers/app-providers";
 import { useSessionStore } from "@/src/store/session";
 
-SplashScreen.preventAutoHideAsync().catch(() => undefined);
-
 export default function RootLayout() {
   const hydrated = useSessionStore((state) => state.hydrated);
+  const splashPreparedRef = useRef(false);
+
+  useEffect(() => {
+    if (splashPreparedRef.current) {
+      return;
+    }
+
+    splashPreparedRef.current = true;
+    SplashScreen.preventAutoHideAsync().catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     if (hydrated) {

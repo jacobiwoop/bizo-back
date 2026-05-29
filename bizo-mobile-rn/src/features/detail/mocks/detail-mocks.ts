@@ -33,6 +33,11 @@ export type DetailProduct = {
   condition?: string;
   deliveryMode?: string;
   exchangeFor?: string | null;
+  attributes?: Array<{
+    label: string;
+    value: string;
+  }>;
+  favoriteCount?: number;
   preferredSellerAds?: string[];
 };
 
@@ -123,4 +128,12 @@ export function getDetailProduct(id?: string) {
   }
 
   return detailProducts["honda-jazz"];
+}
+
+export function getMockDetailProduct(id?: string) {
+  if (!id) {
+    return detailProducts["honda-jazz"];
+  }
+
+  return detailProducts[id] ?? null;
 }

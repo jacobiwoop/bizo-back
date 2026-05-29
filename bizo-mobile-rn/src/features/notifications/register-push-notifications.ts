@@ -3,24 +3,37 @@ import { Platform } from "react-native";
 
 import { updateFcmToken } from "@/src/lib/api/auth";
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+export const BIZO_NOTIFICATION_CHANNEL_ID = "bizo-alerts";
+
+let notificationHandlerConfigured = false;
+
+export function configureNotificationHandler() {
+  if (notificationHandlerConfigured) {
+    return;
+  }
+
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+
+  notificationHandlerConfigured = true;
+}
 
 export async function registerAndroidPushNotifications() {
   if (Platform.OS !== "android") {
     return null;
   }
 
-  await Notifications.setNotificationChannelAsync("default", {
+  await Notifications.setNotificationChannelAsync(BIZO_NOTIFICATION_CHANNEL_ID, {
     importance: Notifications.AndroidImportance.MAX,
     lightColor: "#F5C518",
     name: "Bizo",
+    sound: "default",
     vibrationPattern: [0, 250, 250, 250],
   });
 

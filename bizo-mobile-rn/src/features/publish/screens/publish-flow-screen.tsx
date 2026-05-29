@@ -21,6 +21,7 @@ import {
   ChevronRight,
   CircleX,
   Edit3,
+  Handshake,
   Info,
   Lightbulb,
   MapPin,
@@ -33,6 +34,7 @@ import {
   Shirt,
   Smartphone,
   Sparkles,
+  Truck,
   Wrench,
   X,
 } from "lucide-react-native";
@@ -46,6 +48,7 @@ type PublishAttributeValue = string | string[];
 type PublishAttributes = Record<string, PublishAttributeValue>;
 type PublishPhoto = ListingPhotoUpload & { id: string };
 type PublishCondition = "neuf" | "excellent" | "bon" | "correct";
+type DeliveryMode = "main_propre" | "livraison" | "les_deux";
 
 type PublishForm = {
   title: string;
@@ -57,7 +60,7 @@ type PublishForm = {
   city: string;
   neighborhood: string;
   country: string;
-  deliveryMode: "main_propre" | "livraison" | "les_deux";
+  deliveryMode: DeliveryMode;
 };
 
 const colors = {
@@ -92,13 +95,39 @@ const initialForm: PublishForm = {
   city: "Abidjan",
   condition: "excellent",
   country: "CI",
-  deliveryMode: "les_deux",
+  deliveryMode: "main_propre",
   description: "",
   exchangeFor: "",
   neighborhood: "Cocody",
   price: "",
   title: "",
 };
+
+const deliveryModeOptions: Array<{
+  description: string;
+  icon: "handshake" | "truck" | "package";
+  label: string;
+  value: DeliveryMode;
+}> = [
+  {
+    description: "Rencontre avec l’acheteur dans une zone convenue.",
+    icon: "handshake",
+    label: "Remise en main propre",
+    value: "main_propre",
+  },
+  {
+    description: "Vous pouvez envoyer ou livrer l’article.",
+    icon: "truck",
+    label: "Livraison",
+    value: "livraison",
+  },
+  {
+    description: "L’acheteur choisit entre livraison et rencontre.",
+    icon: "package",
+    label: "Les deux",
+    value: "les_deux",
+  },
+];
 
 function toListingType(mode: PublishMode) {
   if (mode === "sale") return "VENTE";
@@ -118,6 +147,10 @@ function formatAmountInput(value: string) {
 function formatPrice(value: string) {
   const amount = parseAmount(value);
   return amount === null ? "Prix à renseigner" : `${formatAmountInput(String(amount))} FCFA`;
+}
+
+function getDeliveryModeLabel(value: DeliveryMode) {
+  return deliveryModeOptions.find((option) => option.value === value)?.label ?? "Remise en main propre";
 }
 
 function getAmountFontSize(value: string) {
@@ -688,6 +721,20 @@ function SlidersMini() {
   return <Info color="#745B00" size={22} />;
 }
 
+function DeliveryIcon({ icon, selected }: { icon: "handshake" | "truck" | "package"; selected: boolean }) {
+  const color = selected ? "#745B00" : "#5F5E5E";
+
+  if (icon === "handshake") {
+    return <Handshake color={color} size={22} strokeWidth={2.3} />;
+  }
+
+  if (icon === "truck") {
+    return <Truck color={color} size={22} strokeWidth={2.3} />;
+  }
+
+  return <Package color={color} size={22} strokeWidth={2.3} />;
+}
+
 function StepFiveTradeCash({
   errorMessage,
   form,
@@ -794,6 +841,31 @@ function StepSix({
           </View>
         ))}
       </View>
+      <View className="mt-7">
+        <Text className="text-[16px] font-black text-[#191C1D]">Comment l’article peut être récupéré ?</Text>
+        <View className="mt-3 gap-3">
+          {deliveryModeOptions.map((option) => {
+            const selected = option.value === form.deliveryMode;
+
+            return (
+              <Pressable
+                key={option.value}
+                className={`flex-row items-center rounded-2xl border p-4 ${selected ? "border-[#F5C518] bg-[#FFFBEB]" : "border-[#E1E3E4] bg-white"}`}
+                onPress={() => setForm({ deliveryMode: option.value })}
+              >
+                <View className={`h-11 w-11 items-center justify-center rounded-2xl ${selected ? "bg-[#F5C518]/20" : "bg-[#F3F4F5]"}`}>
+                  <DeliveryIcon icon={option.icon} selected={selected} />
+                </View>
+                <View className="ml-3 flex-1">
+                  <Text className="text-[15px] font-bold text-[#191C1D]">{option.label}</Text>
+                  <Text className="mt-1 text-[12px] leading-4 text-[#5F5E5E]">{option.description}</Text>
+                </View>
+                {selected ? <CheckCircle color="#F5C518" fill="#F5C518" size={22} /> : <View className="h-6 w-6 rounded-full border border-[#D1C5AC]" />}
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
     </StepShell>
   );
 }
@@ -832,6 +904,7 @@ function StepSeven({
   const carouselWidth = width - 40;
   const title = form.title.trim() || "Titre à renseigner";
   const location = [form.neighborhood, form.city].filter(Boolean).join(", ") || "Localisation à renseigner";
+  const deliveryModeLabel = getDeliveryModeLabel(form.deliveryMode);
 
   return (
     <StepShell>
@@ -876,6 +949,7 @@ function StepSeven({
         <SummaryRow label="Description" onPress={() => onEditStep(4)} value={`${title} • ${conditionLabel}`} />
         <SummaryRow label={mode === "sale" ? "Prix" : "Échange"} onPress={() => onEditStep(5)} value={mode === "sale" ? formatPrice(form.price) : form.exchangeFor.trim() || modeLabel} />
         <SummaryRow label="Localisation" onPress={() => onEditStep(6)} value={location} />
+        <SummaryRow label="Livraison" onPress={() => onEditStep(6)} value={deliveryModeLabel} />
       </View>
     </StepShell>
   );

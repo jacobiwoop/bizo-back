@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreListingRequest;
 use App\Http\Resources\ListingResource;
 use App\Models\Listing;
+use App\Models\Location;
+use App\Models\Place;
 use App\Services\StorageService;
 use App\Support\ListingCategory;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -15,9 +17,43 @@ use Illuminate\Validation\Rule;
 
 class ListingController extends Controller
 {
+    private const DISTANCE_SQL = '(6371 * acos(cos(radians(?)) * cos(radians(display_lat)) * cos(radians(display_lng) - radians(?)) + sin(radians(?)) * sin(radians(display_lat))))';
+
     public function __construct(
         private readonly StorageService $storageService,
     ) {}
+
+    private function buildLocationPayload(array $validated): array
+    {
+        $payload = [
+            'location_id' => $validated['location_id'] ?? null,
+            'place_id' => $validated['place_id'] ?? null,
+            'exact_lat' => $validated['exact_lat'] ?? null,
+            'exact_lng' => $validated['exact_lng'] ?? null,
+            'display_lat' => $validated['display_lat'] ?? null,
+            'display_lng' => $validated['display_lng'] ?? null,
+            'location_accuracy' => $validated['location_accuracy'] ?? 'district',
+        ];
+
+        if ($payload['location_accuracy'] === 'exact' && $payload['display_lat'] === null && $payload['exact_lat'] !== null) {
+            $payload['display_lat'] = $payload['exact_lat'];
+            $payload['display_lng'] = $payload['exact_lng'];
+        }
+
+        if (($payload['display_lat'] === null || $payload['display_lng'] === null) && $payload['place_id']) {
+            $place = Place::find($payload['place_id']);
+            $payload['display_lat'] = $place?->lat;
+            $payload['display_lng'] = $place?->lng;
+        }
+
+        if (($payload['display_lat'] === null || $payload['display_lng'] === null) && $payload['location_id']) {
+            $location = Location::find($payload['location_id']);
+            $payload['display_lat'] = $location?->lat;
+            $payload['display_lng'] = $location?->lng;
+        }
+
+        return $payload;
+    }
 
     /**
      * Feed principal avec filtres.
@@ -25,7 +61,7 @@ class ListingController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $query = Listing::active()
-            ->with('owner')
+            ->with(['owner', 'location', 'place'])
             ->when(ListingCategory::normalize($request->category), fn ($q, $v) => $q->where('category', $v))
             ->when($request->type, fn ($q, $v) => $q->where('type', $v))
             ->when($request->condition, fn ($q, $v) => $q->where('condition', $v))
@@ -33,6 +69,19 @@ class ListingController extends Controller
             ->when($request->city, fn ($q, $v) => $q->where('city', $v))
             ->when($request->min_price, fn ($q, $v) => $q->where('price', '>=', $v))
             ->when($request->max_price, fn ($q, $v) => $q->where('price', '<=', $v));
+
+        if ($request->filled(['lat', 'lng'])) {
+            $lat = (float) $request->query('lat');
+            $lng = (float) $request->query('lng');
+            $radiusKm = min((float) $request->query('radius_km', 10), 100);
+
+            $query
+                ->whereNotNull('display_lat')
+                ->whereNotNull('display_lng')
+                ->selectRaw('listings.*, '.self::DISTANCE_SQL.' as distance_km', [$lat, $lng, $lat])
+                ->whereRaw(self::DISTANCE_SQL.' <= ?', [$lat, $lng, $lat, $radiusKm])
+                ->orderBy('distance_km');
+        }
 
         $listings = $query->orderBy('is_boosted', 'desc')
             ->orderBy('created_at', 'desc')
@@ -51,6 +100,8 @@ class ListingController extends Controller
             $photos[] = $this->storageService->uploadPhoto($photo);
         }
 
+        $locationPayload = $this->buildLocationPayload($request->validated());
+
         $listing = Listing::create([
             'owner_id' => $request->user()->id,
             'title' => $request->title,
@@ -67,11 +118,12 @@ class ListingController extends Controller
             'country' => $request->country,
             'city' => $request->city,
             'neighborhood' => $request->neighborhood,
+            ...$locationPayload,
             'tags' => $request->tags ?? [],
             'expires_at' => now()->addDays(30),
         ]);
 
-        $listing = $listing->fresh()->load('owner');
+        $listing = $listing->fresh()->load(['owner', 'location', 'place']);
 
         return response()->json([
             'data' => new ListingResource($listing),
@@ -83,11 +135,11 @@ class ListingController extends Controller
      */
     public function show(string $id): ListingResource
     {
-        $listing = Listing::with('owner')->findOrFail($id);
+        $listing = Listing::with(['owner', 'location', 'place'])->findOrFail($id);
 
         $listing->increment('view_count');
 
-        return new ListingResource($listing->fresh()->load('owner'));
+        return new ListingResource($listing->fresh()->load(['owner', 'location', 'place']));
     }
 
     /**
@@ -95,7 +147,7 @@ class ListingController extends Controller
      */
     public function update(Request $request, string $id): ListingResource
     {
-        $listing = Listing::with('owner')->findOrFail($id);
+        $listing = Listing::with(['owner', 'location', 'place'])->findOrFail($id);
 
         if ($request->user()->id !== $listing->owner_id) {
             throw new AuthorizationException();
@@ -139,6 +191,13 @@ class ListingController extends Controller
             'country' => ['sometimes', 'string', 'max:5'],
             'city' => ['sometimes', 'string', 'max:80'],
             'neighborhood' => ['nullable', 'string', 'max:80'],
+            'location_id' => ['nullable', 'uuid', 'exists:locations,id'],
+            'place_id' => ['nullable', 'uuid', 'exists:places,id'],
+            'exact_lat' => ['nullable', 'numeric', 'between:-90,90'],
+            'exact_lng' => ['nullable', 'numeric', 'between:-180,180'],
+            'display_lat' => ['nullable', 'numeric', 'between:-90,90'],
+            'display_lng' => ['nullable', 'numeric', 'between:-180,180'],
+            'location_accuracy' => ['nullable', 'string', 'in:exact,district,city'],
             'tags' => ['nullable', 'array'],
             'tags.*' => ['string', 'max:30'],
         ]);
@@ -156,9 +215,15 @@ class ListingController extends Controller
             }
         }
 
+        $locationKeys = ['location_id', 'place_id', 'exact_lat', 'exact_lng', 'display_lat', 'display_lng', 'location_accuracy'];
+
+        if (array_intersect($locationKeys, array_keys($validated))) {
+            $validated = array_merge($validated, $this->buildLocationPayload(array_merge($listing->only($locationKeys), $validated)));
+        }
+
         $listing->update($validated);
 
-        return new ListingResource($listing->fresh()->load('owner'));
+        return new ListingResource($listing->fresh()->load(['owner', 'location', 'place']));
     }
 
     /**
@@ -222,7 +287,7 @@ class ListingController extends Controller
         ]);
 
         return response()->json([
-            'data' => new ListingResource($listing->fresh()->load('owner')),
+            'data' => new ListingResource($listing->fresh()->load(['owner', 'location', 'place'])),
         ]);
     }
 
@@ -249,7 +314,7 @@ class ListingController extends Controller
         $listing->update(['photos' => array_values($photos)]);
 
         return response()->json([
-            'data' => new ListingResource($listing->fresh()->load('owner')),
+            'data' => new ListingResource($listing->fresh()->load(['owner', 'location', 'place'])),
         ]);
     }
 
@@ -258,7 +323,7 @@ class ListingController extends Controller
      */
     public function myListings(Request $request): AnonymousResourceCollection
     {
-        $listings = Listing::with('owner')
+        $listings = Listing::with(['owner', 'location', 'place'])
             ->where('owner_id', $request->user()->id)
             ->orderBy('created_at', 'desc')
             ->paginate(min($request->integer('per_page', 20), 50));
@@ -287,7 +352,7 @@ class ListingController extends Controller
         ]);
 
         return response()->json([
-            'data' => new ListingResource($listing->fresh()->load('owner')),
+            'data' => new ListingResource($listing->fresh()->load(['owner', 'location', 'place'])),
         ]);
     }
 
@@ -296,7 +361,7 @@ class ListingController extends Controller
      */
     public function renew(Request $request, string $id): JsonResponse
     {
-        $listing = Listing::with('owner')->findOrFail($id);
+        $listing = Listing::with(['owner', 'location', 'place'])->findOrFail($id);
 
         if ($request->user()->id !== $listing->owner_id) {
             throw new AuthorizationException();
@@ -314,7 +379,7 @@ class ListingController extends Controller
         ]);
 
         return response()->json([
-            'data' => new ListingResource($listing->fresh()->load('owner')),
+            'data' => new ListingResource($listing->fresh()->load(['owner', 'location', 'place'])),
         ]);
     }
 
@@ -326,7 +391,7 @@ class ListingController extends Controller
         $listing = Listing::findOrFail($id);
 
         $similar = Listing::active()
-            ->with('owner')
+            ->with(['owner', 'location', 'place'])
             ->where('category', $listing->category)
             ->where('id', '!=', $id)
             ->orderBy('created_at', 'desc')

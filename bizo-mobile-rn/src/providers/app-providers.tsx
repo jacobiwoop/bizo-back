@@ -3,7 +3,10 @@ import { PropsWithChildren, useEffect, useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { registerAndroidPushNotifications } from "@/src/features/notifications/register-push-notifications";
+import {
+  configureNotificationHandler,
+  registerAndroidPushNotifications,
+} from "@/src/features/notifications/register-push-notifications";
 import { queryClient } from "@/src/lib/query-client";
 import { getProfile } from "@/src/lib/api/auth";
 import { useSessionStore } from "@/src/store/session";
@@ -13,6 +16,10 @@ function SessionBootstrap() {
   const token = useSessionStore((state) => state.token);
   const setUser = useSessionStore((state) => state.setUser);
   const registeredPushTokenRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    configureNotificationHandler();
+  }, []);
 
   useEffect(() => {
     if (!hydrated || !token) {

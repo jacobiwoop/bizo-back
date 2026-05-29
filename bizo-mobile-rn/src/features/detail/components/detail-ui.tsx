@@ -9,13 +9,17 @@ import {
   Download,
   Eye,
   Heart,
+  Handshake,
   MapPin,
   MessageCircle,
   Palette,
+  Package,
   Share2,
+  ShieldCheck,
   Smartphone,
   Star,
   Tag,
+  Truck,
   X,
 } from "lucide-react-native";
 import * as React from "react";
@@ -35,21 +39,6 @@ const mapImage =
 
 const sellerAvatar = "https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg";
 
-const similarItems = [
-  { id: "similar-1", title: "iPhone 13 Pro 128Go", price: "135 000 FCFA", image: productImage },
-  { id: "similar-2", title: "iPhone 12 Pro Max", price: "110 000 FCFA", image: productImage },
-  { id: "similar-3", title: "iPhone 14 Pro 128Go", price: "250 000 FCFA", image: productImage },
-];
-
-const characteristics = [
-  { label: "État", value: "Très bon état", icon: BadgeCheck },
-  { label: "Marque", value: "Apple", icon: Tag },
-  { label: "Modèle", value: "13 Pro", icon: Smartphone },
-  { label: "Stockage", value: "256 Go", icon: Database },
-  { label: "Couleur", value: "Bleu Alpin", icon: Palette },
-  { label: "Référence", value: "BZ-9921", icon: Tag },
-];
-
 function getProductPhotos(product: DetailProduct): string[] {
   if (product.photos?.length) {
     return product.photos;
@@ -59,11 +48,75 @@ function getProductPhotos(product: DetailProduct): string[] {
 }
 
 function formatProductType(product: DetailProduct): string {
-  if (product.type === "TROC_CASH") {
-    return "TROC+CASH";
+  if (product.type === "TROC") {
+    return "Troc";
   }
 
-  return product.type || "VENTE";
+  if (product.type === "TROC_CASH") {
+    return "Troc + cash";
+  }
+
+  return "Vente";
+}
+
+function getPrimaryActionLabel(product: DetailProduct): string {
+  if (product.type === "TROC") {
+    return "Proposer";
+  }
+
+  if (product.type === "TROC_CASH") {
+    return "Négocier";
+  }
+
+  return "Faire offre";
+}
+
+function getDecisionLabel(product: DetailProduct): string {
+  if (product.type === "TROC") {
+    return "Échange recherché";
+  }
+
+  if (product.type === "TROC_CASH") {
+    return "Complément + échange";
+  }
+
+  return "Prix demandé";
+}
+
+function getModeTheme(product: DetailProduct) {
+  if (product.type === "TROC") {
+    return {
+      accent: "#5B5BD6",
+      badgeBackground: "#5B5BD6",
+      badgeText: "#FFFFFF",
+      border: "#C7D2FE",
+      iconBackground: "#EEF2FF",
+      panel: "#EEF2FF",
+      text: "#3730A3",
+    };
+  }
+
+  if (product.type === "TROC_CASH") {
+    return {
+      accent: "#F5C518",
+      badgeBackground: "#F5C518",
+      badgeText: "#1A1A1A",
+      border: "#F1E2BD",
+      iconBackground: "#FFFBEB",
+      panel: "#FFFBEB",
+      text: "#745B00",
+    };
+  }
+
+  return {
+    accent: "#F5C518",
+    badgeBackground: "#1A1A1A",
+    badgeText: "#FFFFFF",
+    border: "#E5E7EB",
+    iconBackground: "#F3F4F6",
+    panel: "#FFFFFF",
+    text: "#1A1A1A",
+  };
 }
 
 function getPageIndex(event: NativeSyntheticEvent<NativeScrollEvent>, width: number): number {
@@ -94,13 +147,39 @@ function FloatingHeader({ onBack }: { onBack: () => void }) {
   );
 }
 
+function MiniListingHeader({ product, onBack }: { product: DetailProduct; onBack: () => void }) {
+  const image = getProductPhotos(product)[0] || productImage;
+
+  return (
+    <SafeAreaView edges={["top"]} className="absolute left-0 right-0 top-0 z-30 bg-white shadow-soft">
+      <View className="h-[72px] flex-row items-center border-b border-[#E5E7EB] px-3">
+        <Pressable className="mr-2 h-9 w-9 items-center justify-center rounded-full bg-[#F3F4F6]" onPress={onBack}>
+          <ChevronLeft color="#1A1A1A" size={22} strokeWidth={2.2} />
+        </Pressable>
+        <Image source={image} style={{ width: 48, height: 48, borderRadius: 12 }} contentFit="cover" />
+        <View className="ml-3 min-w-0 flex-1">
+          <Text className="text-[13px] font-black leading-4 text-[#1A1A1A]" numberOfLines={1}>
+            {product.title}
+          </Text>
+          <Text className="mt-1 text-[11px] leading-4 text-[#6B7280]" numberOfLines={1}>
+            {product.description}
+          </Text>
+        </View>
+        <Text className="ml-3 max-w-[104px] text-right text-[13px] font-black text-[#F5C518]" numberOfLines={2}>
+          {product.price}
+        </Text>
+      </View>
+    </SafeAreaView>
+  );
+}
+
 function GalleryHero({ product, onOpen }: { product: DetailProduct; onOpen: () => void }) {
   const photos = getProductPhotos(product);
   const { width } = useWindowDimensions();
   const [activeIndex, setActiveIndex] = React.useState(0);
 
   return (
-    <View className="relative h-[280px] bg-[#EBE1D1]">
+    <View className="relative h-[280px] bg-[#F3F4F6]">
       <ScrollView
         horizontal
         pagingEnabled
@@ -131,38 +210,63 @@ function GalleryHero({ product, onOpen }: { product: DetailProduct; onOpen: () =
 }
 
 function ProductContentCard({ product }: { product: DetailProduct }) {
+  const typeLabel = formatProductType(product);
+  const exchangeLabel = product.type === "TROC" ? product.exchangeFor || "Proposition d’échange" : product.exchangeFor;
+  const decisionLabel = getDecisionLabel(product);
+  const theme = getModeTheme(product);
+  const isTradeOnly = product.type === "TROC";
+
   return (
-    <View className="-mt-5 rounded-t-[20px] bg-white px-4 pt-6 shadow-soft">
-      <View className="mb-4 flex-row items-center justify-between">
-        <View className="rounded-full bg-[#1F1B11] px-3 py-1">
-          <Text className="text-[10px] font-bold tracking-[1px] text-white">{formatProductType(product)}</Text>
+    <View className="-mt-4 rounded-t-2xl bg-white px-4 pt-6">
+      <View className="mb-4 flex-row items-center justify-between gap-3">
+        <View className="rounded-full px-3 py-[6px]" style={{ backgroundColor: theme.badgeBackground }}>
+          <Text className="text-[10px] font-bold uppercase tracking-[1px]" style={{ color: theme.badgeText }}>{typeLabel}</Text>
         </View>
-        <View className="flex-row items-center gap-4">
+        <View className="min-w-0 flex-1 flex-row items-center justify-end gap-3">
           <View className="flex-row items-center">
-            <Eye color="#4E4633" size={14} strokeWidth={2} />
-            <Text className="ml-1 text-[11px] font-medium text-[#4E4633]">{product.viewCount ?? 0} vues</Text>
+            <Eye color="#6B7280" size={14} strokeWidth={2} />
+            <Text className="ml-1 text-[11px] font-medium text-[#6B7280]">{product.viewCount ?? 0} vues</Text>
           </View>
           <View className="flex-row items-center">
-            <Clock3 color="#4E4633" size={14} strokeWidth={2} />
-            <Text className="ml-1 text-[11px] font-medium text-[#4E4633]">{product.posted.date}</Text>
+            <Clock3 color="#6B7280" size={14} strokeWidth={2} />
+            <Text className="ml-1 text-[11px] font-medium text-[#6B7280]">{product.posted.date}</Text>
           </View>
         </View>
       </View>
 
-      <Text className="mb-2 text-[24px] font-bold leading-8 text-[#1F1B11]">{product.title}</Text>
-      <View className="mb-6 flex-row items-center justify-between">
-        <Text className="text-[28px] font-bold text-[#F5C518]">{product.price}</Text>
-        <View className="rounded-full bg-[#22C55E]/10 px-3 py-1">
-          <Text className="text-[12px] font-bold text-[#22C55E]">Négociable</Text>
-        </View>
+      <Text className="text-[25px] font-black leading-8 text-[#1A1A1A]">{product.title}</Text>
+
+      <View className="mt-5 rounded-2xl border p-4" style={{ backgroundColor: theme.panel, borderColor: theme.border }}>
+        <Text className="text-[11px] font-black uppercase tracking-[1px]" style={{ color: theme.text }}>{decisionLabel}</Text>
+        <Text className={`mt-1 font-black leading-9 ${isTradeOnly ? "text-[24px]" : "text-[30px]"}`} style={{ color: isTradeOnly ? "#1A1A1A" : "#F5C518" }}>
+          {product.price}
+        </Text>
+        {exchangeLabel ? (
+          <View className="mt-3 flex-row rounded-xl bg-white p-3">
+            <Handshake color={theme.text} size={20} strokeWidth={2.4} />
+            <View className="ml-2 flex-1">
+              <Text className="text-[11px] font-bold uppercase tracking-[0.8px]" style={{ color: theme.text }}>Recherche</Text>
+              <Text className="mt-[2px] text-[14px] font-semibold leading-5 text-[#1A1A1A]">{exchangeLabel}</Text>
+            </View>
+          </View>
+        ) : null}
       </View>
 
-      <View className="mb-8 flex-row flex-wrap gap-2">
-        <View className="rounded-full bg-[#1F1B11] px-3 py-[6px]">
-          <Text className="text-[11px] font-semibold text-white">{product.condition || "Très bon état"}</Text>
+      <View className="mt-4 flex-row gap-2">
+        <View className="flex-1 rounded-2xl bg-[#F9FAFB] p-3">
+          <Package color="#6B7280" size={18} strokeWidth={2.2} />
+          <Text className="mt-2 text-[10px] font-black uppercase tracking-[0.8px] text-[#6B7280]">État</Text>
+          <Text className="mt-[2px] text-[13px] font-bold text-[#1A1A1A]" numberOfLines={2}>{product.condition || "À définir"}</Text>
         </View>
-        <View className="rounded-full bg-[#EBE1D1] px-3 py-[6px]">
-          <Text className="text-[11px] font-semibold text-[#4E4633]">{product.posted.category}</Text>
+        <View className="flex-1 rounded-2xl bg-[#F9FAFB] p-3">
+          <Truck color="#6B7280" size={18} strokeWidth={2.2} />
+          <Text className="mt-2 text-[10px] font-black uppercase tracking-[0.8px] text-[#6B7280]">Livraison</Text>
+          <Text className="mt-[2px] text-[13px] font-bold text-[#1A1A1A]" numberOfLines={2}>{product.deliveryMode || "À définir"}</Text>
+        </View>
+        <View className="flex-1 rounded-2xl bg-[#F9FAFB] p-3">
+          <MapPin color="#6B7280" size={18} strokeWidth={2.2} />
+          <Text className="mt-2 text-[10px] font-black uppercase tracking-[0.8px] text-[#6B7280]">Lieu</Text>
+          <Text className="mt-[2px] text-[13px] font-bold text-[#1A1A1A]" numberOfLines={2}>{product.city || product.location}</Text>
         </View>
       </View>
     </View>
@@ -171,63 +275,92 @@ function ProductContentCard({ product }: { product: DetailProduct }) {
 
 function SellerCard({ product, onPress }: { product: DetailProduct; onPress: () => void }) {
   return (
-    <Pressable className="mb-8 flex-row items-center justify-between rounded-[16px] bg-[#FCF3E1] p-4" onPress={onPress}>
-      <View className="flex-row items-center">
-        <View>
-          <Image source={product.seller.avatar || sellerAvatar} style={{ width: 48, height: 48, borderRadius: 24, borderWidth: 2, borderColor: "#FFFFFF" }} contentFit="cover" />
-          <View className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-[#FCF3E1] bg-[#22C55E]" />
-        </View>
-        <View className="ml-3">
-          <Text className="text-[16px] font-bold text-[#1F1B11]">{product.seller.name}</Text>
-          <View className="mt-1 flex-row items-center">
-            <Star color="#F5C518" fill="#F5C518" size={14} strokeWidth={1.5} />
-            <Text className="ml-1 text-[12px] font-medium text-[#4E4633]">{product.seller.rating}</Text>
-          </View>
+    <Pressable className="mb-8 mt-5 rounded-2xl bg-[#F9FAFB] p-4" onPress={onPress}>
+      <View className="mb-3 flex-row items-center justify-between">
+        <Text className="text-[16px] font-black text-[#1A1A1A]">Vendeur</Text>
+        <View className="flex-row items-center">
+          <Text className="text-[13px] font-bold text-[#5B5BD6]">Voir profil</Text>
+          <ArrowRight color="#5B5BD6" size={15} strokeWidth={2.4} style={{ marginLeft: 3 }} />
         </View>
       </View>
-      <View className="rounded-full bg-[#4E4EC9]/10 px-3 py-[6px]">
-        <Text className="text-[11px] font-bold text-[#4E4EC9]">{product.seller.role}</Text>
+      <View className="flex-row items-center justify-between">
+        <View className="flex-1 flex-row items-center">
+          <View>
+            <Image source={product.seller.avatar || sellerAvatar} style={{ width: 48, height: 48, borderRadius: 24, borderWidth: 2, borderColor: "#FFFFFF" }} contentFit="cover" />
+            <View className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-[#22C55E]" />
+          </View>
+          <View className="ml-3 flex-1">
+            <Text className="text-[16px] font-bold text-[#1A1A1A]">{product.seller.name}</Text>
+            <View className="mt-1 flex-row items-center">
+              <Star color="#F5C518" fill="#F5C518" size={14} strokeWidth={1.5} />
+              <Text className="ml-1 text-[12px] font-medium text-[#6B7280]">{product.seller.rating}</Text>
+            </View>
+          </View>
+        </View>
+        <View className="ml-2 flex-row items-center rounded-full bg-[#EEF2FF] px-3 py-[6px]">
+          <ShieldCheck color="#5B5BD6" size={14} strokeWidth={2.2} />
+          <Text className="ml-1 text-[11px] font-bold text-[#5B5BD6]">{product.seller.role}</Text>
+        </View>
       </View>
     </Pressable>
   );
 }
 
 function DescriptionBlock({ product }: { product: DetailProduct }) {
+  const [expanded, setExpanded] = React.useState(false);
+  const canExpand = product.description.length > 160;
+
   return (
     <View className="mb-8">
-      <Text className="mb-2 text-[16px] font-bold text-[#1F1B11]">Description</Text>
-      <Text className="text-[14px] leading-6 text-[#4E4633]" numberOfLines={3}>
+      <Text className="mb-2 text-[16px] font-bold text-[#1A1A1A]">Description</Text>
+      <Text className="text-[14px] leading-6 text-[#6B7280]" numberOfLines={expanded ? undefined : 4}>
         {product.description}
       </Text>
-      <Text className="mt-1 text-[14px] font-bold text-[#4E4EC9]">Voir plus</Text>
+      {canExpand ? (
+        <Pressable className="self-start" onPress={() => setExpanded((current) => !current)}>
+          <Text className="mt-1 text-[14px] font-bold text-[#5B5BD6]">{expanded ? "Voir moins" : "Voir plus"}</Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
 
 function CharacteristicsGrid({ product }: { product: DetailProduct }) {
-  const items = [
-    { label: "État", value: product.condition || characteristics[0].value, icon: BadgeCheck },
+  const baseItems = [
+    { label: "État", value: product.condition || "À définir", icon: BadgeCheck },
     { label: "Catégorie", value: product.posted.category, icon: Tag },
     { label: "Mode", value: formatProductType(product), icon: Smartphone },
     { label: "Livraison", value: product.deliveryMode || "À définir", icon: Database },
     { label: "Ville", value: product.city || product.location, icon: MapPin },
     { label: "Référence", value: product.posted.idRef, icon: Tag },
   ];
+  const attributeItems =
+    product.attributes?.map((attribute) => ({
+      icon: Palette,
+      label: attribute.label,
+      value: attribute.value,
+    })) ?? [];
+  const items = [...baseItems, ...attributeItems];
 
   return (
-    <View className="mb-8 flex-row flex-wrap justify-between gap-y-3">
-      {items.map((item) => {
-        const Icon = item.icon;
-        return (
-          <View key={item.label} className="w-[48%] flex-row items-center rounded-xl bg-[#FCF3E1] p-3">
-            <Icon color="#4E4633" size={20} strokeWidth={2} />
-            <View className="ml-3">
-              <Text className="text-[10px] font-bold uppercase tracking-[0.8px] text-[#4E4633]">{item.label}</Text>
-              <Text className="mt-[2px] text-[13px] font-semibold text-[#1F1B11]">{item.value}</Text>
+    <View className="mb-8">
+      <Text className="mb-3 text-[16px] font-bold text-[#1A1A1A]">Caractéristiques</Text>
+      <View className="flex-row flex-wrap justify-between gap-y-3">
+        {items.map((item, index) => {
+          const Icon = item.icon;
+          return (
+            <View key={`${item.label}-${index}`} className="w-[48%] flex-row items-center rounded-xl bg-[#F9FAFB] p-3">
+              <Icon color="#6B7280" size={20} strokeWidth={2} />
+              <View className="ml-3 flex-1">
+                <Text className="text-[10px] font-bold uppercase tracking-[0.8px] text-[#6B7280]">{item.label}</Text>
+                <Text className="mt-[2px] text-[13px] font-semibold text-[#1A1A1A]" numberOfLines={2}>
+                  {item.value}
+                </Text>
+              </View>
             </View>
-          </View>
-        );
-      })}
+          );
+        })}
+      </View>
     </View>
   );
 }
@@ -235,7 +368,8 @@ function CharacteristicsGrid({ product }: { product: DetailProduct }) {
 function LocationBlock({ product }: { product: DetailProduct }) {
   return (
     <View className="mb-10">
-      <View className="mb-3 h-40 overflow-hidden rounded-2xl">
+      <Text className="mb-3 text-[16px] font-bold text-[#1A1A1A]">Localisation</Text>
+      <View className="mb-3 h-40 overflow-hidden rounded-2xl bg-[#EFF6FF]">
         <Image source={mapImage} style={{ width: "100%", height: "100%" }} contentFit="cover" />
         <View className="absolute inset-0 items-center justify-center">
           <View className="h-12 w-12 items-center justify-center rounded-full bg-[#F5C518]/30">
@@ -245,52 +379,29 @@ function LocationBlock({ product }: { product: DetailProduct }) {
       </View>
       <View className="flex-row items-center justify-between">
         <View>
-          <Text className="text-[16px] font-bold text-[#1F1B11]">{product.location}</Text>
-          <Text className="mt-1 text-[13px] text-[#4E4633]">À 2.3 km de votre position</Text>
+          <Text className="text-[16px] font-bold text-[#1A1A1A]">{product.location}</Text>
+          <Text className="mt-1 text-[13px] text-[#6B7280]">{product.deliveryMode || "Mode de livraison à confirmer"}</Text>
         </View>
-        <View className="flex-row items-center">
-          <Text className="text-[14px] font-bold text-[#4E4EC9]">Ouvrir dans Maps</Text>
-          <ArrowRight color="#4E4EC9" size={16} strokeWidth={2} style={{ marginLeft: 4 }} />
+        <View className="flex-row items-center opacity-60">
+          <Text className="text-[14px] font-bold text-[#5B5BD6]">Ouvrir dans Maps</Text>
+          <ArrowRight color="#5B5BD6" size={16} strokeWidth={2} style={{ marginLeft: 4 }} />
         </View>
       </View>
     </View>
   );
 }
 
-function SimilarItems() {
-  return (
-    <View className="mb-6">
-      <Text className="mb-4 text-[24px] font-bold text-[#1F1B11]">Annonces similaires</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-4" contentContainerStyle={{ gap: 16, paddingHorizontal: 16, paddingBottom: 16 }}>
-        {similarItems.map((item) => (
-          <View key={item.id} className="w-40 overflow-hidden rounded-2xl bg-white shadow-soft">
-            <View className="h-28 bg-[#EBE1D1]">
-              <Image source={item.image} style={{ width: "100%", height: "100%" }} contentFit="cover" />
-              <View className="absolute right-2 top-2 h-6 w-6 items-center justify-center rounded-full bg-white/80">
-                <Heart color="#1F1B11" size={14} strokeWidth={2} />
-              </View>
-            </View>
-            <View className="p-3">
-              <Text className="mb-1 text-[12px] font-bold text-[#1F1B11]" numberOfLines={1}>
-                {item.title}
-              </Text>
-              <Text className="text-[14px] font-extrabold text-[#F5C518]">{item.price}</Text>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
-    </View>
-  );
-}
+function DetailBottomBar({ product }: { product: DetailProduct }) {
+  const offerLabel = getPrimaryActionLabel(product);
+  const theme = getModeTheme(product);
 
-function DetailBottomBar() {
   return (
-    <View className="absolute bottom-0 left-0 right-0 flex-row gap-3 bg-white p-4 shadow-soft">
-      <Pressable className="h-12 flex-1 flex-row items-center justify-center rounded-full border-2 border-[#1F1B11]">
-        <Tag color="#1F1B11" size={20} strokeWidth={2} />
-        <Text className="ml-2 text-[14px] font-bold text-[#1F1B11]">Faire une offre</Text>
+    <View className="absolute bottom-0 left-0 right-0 flex-row gap-3 border-t border-[#EDEEEF] bg-white px-4 pb-5 pt-3 shadow-soft">
+      <Pressable className="h-12 flex-1 flex-row items-center justify-center rounded-full border-2 px-3" style={{ borderColor: theme.badgeBackground }}>
+        <Tag color={theme.badgeBackground} size={20} strokeWidth={2} />
+        <Text className="ml-2 text-[13px] font-bold" numberOfLines={1} style={{ color: theme.badgeBackground }}>{offerLabel}</Text>
       </Pressable>
-      <Pressable className="h-12 flex-[1.5] flex-row items-center justify-center rounded-full bg-[#1F1B11]">
+      <Pressable className="h-12 flex-[1.35] flex-row items-center justify-center rounded-full bg-[#1A1A1A] px-4">
         <MessageCircle color="#FFFFFF" fill="#FFFFFF" size={20} strokeWidth={2} />
         <Text className="ml-2 text-[14px] font-bold text-white">Contacter</Text>
       </Pressable>
@@ -384,10 +495,22 @@ export function DetailProductScreen({
   onSellerPress: () => void;
 }) {
   const [galleryOpen, setGalleryOpen] = React.useState(false);
+  const [showMiniHeader, setShowMiniHeader] = React.useState(false);
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const nextShowMiniHeader = event.nativeEvent.contentOffset.y > 430;
+
+    setShowMiniHeader((current) => (current === nextShowMiniHeader ? current : nextShowMiniHeader));
+  };
 
   return (
-    <View className="flex-1 bg-[#FFF8F1]">
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 104 }}>
+    <View className="flex-1 bg-[#F9FAFB]">
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 104 }}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+      >
         <View>
           <GalleryHero product={product} onOpen={() => setGalleryOpen(true)} />
           <FloatingHeader onBack={onBack} />
@@ -398,10 +521,10 @@ export function DetailProductScreen({
           <DescriptionBlock product={product} />
           <CharacteristicsGrid product={product} />
           <LocationBlock product={product} />
-          <SimilarItems />
         </View>
       </ScrollView>
-      <DetailBottomBar />
+      {showMiniHeader ? <MiniListingHeader product={product} onBack={onBack} /> : null}
+      <DetailBottomBar product={product} />
       {galleryOpen ? <FullscreenGallery product={product} onClose={() => setGalleryOpen(false)} /> : null}
     </View>
   );

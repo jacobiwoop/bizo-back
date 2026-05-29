@@ -36,6 +36,13 @@ class Listing extends Model
         'country',
         'city',
         'neighborhood',
+        'location_id',
+        'place_id',
+        'exact_lat',
+        'exact_lng',
+        'display_lat',
+        'display_lng',
+        'location_accuracy',
         'tags',
         'status',
         'is_boosted',
@@ -53,6 +60,10 @@ class Listing extends Model
             'tags' => 'array',
             'price_history' => 'array',
             'is_boosted' => 'boolean',
+            'exact_lat' => 'float',
+            'exact_lng' => 'float',
+            'display_lat' => 'float',
+            'display_lng' => 'float',
             'boosted_until' => 'datetime',
             'expires_at' => 'datetime',
             'reminder_sent_at' => 'datetime',
@@ -90,6 +101,16 @@ class Listing extends Model
     public function conversations(): HasMany
     {
         return $this->hasMany(Conversation::class);
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class);
+    }
+
+    public function place(): BelongsTo
+    {
+        return $this->belongsTo(Place::class);
     }
 
     public function scopeActive($query)

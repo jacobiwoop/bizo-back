@@ -41,7 +41,15 @@
       "expo-image",
       "expo-secure-store",
       "expo-sharing",
-      "expo-splash-screen",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FFFFFF",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180,
+          "resizeMode": "contain"
+        }
+      ],
       [
         "expo-notifications",
         {

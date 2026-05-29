@@ -44,4 +44,9 @@ return [
         'play_store_url' => env('ANDROID_APP_PLAY_STORE_URL', '#'),
     ],
 
+    'location' => [
+        'osm_user_agent' => env('BIZO_OSM_USER_AGENT', 'BizoLocationResearch/1.0'),
+        'mapbox_token' => env('MAPBOX_TOKEN'),
+    ],
+
 ];
