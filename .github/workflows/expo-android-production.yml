@@ -70,7 +70,7 @@ jobs:
 
       - name: Remove non-production workspace files
         run: |
-          rm -rf .expo .claude artifacts design
+          rm -rf .expo .claude artifacts
           find . -type f \( -name "*.log" -o -name "*.tmp" -o -name ".DS_Store" \) -delete
 
       - name: Expo prebuild Android
