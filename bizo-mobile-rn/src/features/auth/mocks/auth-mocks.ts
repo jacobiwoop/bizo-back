@@ -37,14 +37,14 @@ export const authMocks = {
     password: "",
   },
   forgotPassword: {
-    contact: "roberts.adams@gmail.com",
+    contact: "",
   },
   createPassword: {
-    oldPassword: "robertsadams2121",
-    newPassword: "987654321",
+    oldPassword: "",
+    newPassword: "",
   },
   verification: {
-    destination: "robert.adams@email.com",
-    initialCode: ["6", "0", "4", ""],
+    destination: "",
+    initialCode: ["", "", "", ""],
   },
 };

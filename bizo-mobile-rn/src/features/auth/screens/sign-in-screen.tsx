@@ -13,7 +13,6 @@ import {
   PrimaryButton,
 } from "@/src/features/auth/components/auth-ui";
 import { useForgotPasswordMutation, useLoginMutation, useResetPasswordMutation } from "@/src/features/auth/api/use-auth-mutations";
-import { authMocks } from "@/src/features/auth/mocks/auth-mocks";
 import { normalizeApiError } from "@/src/lib/api/errors";
 
 const bizoBrandLogo = require("../../../../design/bizo/bizo_brand_logo/brand.png");
@@ -90,13 +89,13 @@ function GoogleMark() {
 
 export function SignInScreen() {
   const params = useLocalSearchParams<{ modal?: string }>();
-  const [email, setEmail] = useState("votre@email.com");
-  const [password, setPassword] = useState(authMocks.signIn.password);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [forgotContact, setForgotContact] = useState("");
-  const [resetEmail, setResetEmail] = useState("votre@email.com");
+  const [resetEmail, setResetEmail] = useState("");
   const [resetOtp, setResetOtp] = useState("");
-  const [newPassword, setNewPassword] = useState(authMocks.createPassword.newPassword);
-  const [confirmPassword, setConfirmPassword] = useState(authMocks.createPassword.newPassword);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [activeSheet, setActiveSheet] = useState<"forgot-password" | "create-password" | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const loginMutation = useLoginMutation();

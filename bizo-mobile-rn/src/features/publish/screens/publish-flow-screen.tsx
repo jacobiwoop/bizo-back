@@ -8,6 +8,7 @@ import { getListingCategory, listingCategories, type ListingAttributeField, type
 import { useSessionStore } from "@/src/store/session";
 import {
   ArrowDownCircle,
+  ArrowLeft,
   ArrowRight,
   ArrowUpCircle,
   Armchair,
@@ -36,7 +37,7 @@ import {
   X,
 } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, type DimensionValue, Text, TextInput, useWindowDimensions, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, type DimensionValue, Text, TextInput, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type PublishMode = "sale" | "trade" | "trade-cash";
@@ -207,7 +208,7 @@ function Footer({
             <Text className="ml-1 text-[16px] font-bold text-[#191C1D]">Précédent</Text>
           </Pressable>
         ) : null}
-        <Pressable className={`h-14 flex-row items-center justify-center rounded-full shadow-soft ${onBack ? "flex-1" : ""} ${disabled ? "bg-[#9A9A9A]" : "bg-[#191C1D]"}`} disabled={disabled} onPress={onNext}>
+        <Pressable className={`h-14 flex-1 flex-row items-center justify-center rounded-full shadow-soft ${disabled ? "bg-[#9A9A9A]" : "bg-[#191C1D]"}`} disabled={disabled} onPress={onNext}>
           <Text className="text-[16px] font-bold text-white">{label}</Text>
           {disabled ? null : <ArrowRight color="#FFFFFF" size={20} strokeWidth={2.4} style={{ marginLeft: 8 }} />}
         </Pressable>
@@ -250,7 +251,7 @@ function ModeCard({
 
 function StepShell({ children }: { children: React.ReactNode }) {
   return (
-    <ScrollView className="flex-1 bg-[#F8F9FA]" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 132 }}>
+    <ScrollView className="flex-1 bg-[#F8F9FA]" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 180 }}>
       <View className="px-5 pt-6">{children}</View>
     </ScrollView>
   );
@@ -333,10 +334,30 @@ function StepTwo({
   );
 }
 
-function PhotoTile({ index, onPress, url }: { index: number; onPress: () => void; url?: string }) {
+function PhotoTile({
+  canMoveLeft,
+  canMoveRight,
+  index,
+  onAdd,
+  onMakeMain,
+  onMoveLeft,
+  onMoveRight,
+  onRemove,
+  url,
+}: {
+  canMoveLeft?: boolean;
+  canMoveRight?: boolean;
+  index: number;
+  onAdd: () => void;
+  onMakeMain?: () => void;
+  onMoveLeft?: () => void;
+  onMoveRight?: () => void;
+  onRemove?: () => void;
+  url?: string;
+}) {
   if (!url) {
     return (
-      <Pressable className="aspect-square items-center justify-center rounded-xl border-2 border-dashed border-[#D1C5AC] bg-white" onPress={onPress}>
+      <Pressable className="aspect-square items-center justify-center rounded-xl border-2 border-dashed border-[#D1C5AC] bg-white" onPress={onAdd}>
         {index === 0 ? <Camera color="#807660" size={26} /> : <Plus color="#D1C5AC" size={24} />}
         {index === 0 ? <Text className="mt-1 text-[11px] font-bold text-[#807660]">Ajouter</Text> : null}
       </Pressable>
@@ -344,27 +365,47 @@ function PhotoTile({ index, onPress, url }: { index: number; onPress: () => void
   }
 
   return (
-    <Pressable className="aspect-square overflow-hidden rounded-xl bg-white" onPress={onPress}>
+    <View className="aspect-square overflow-hidden rounded-xl bg-white">
       <Image source={url} style={{ width: "100%", height: "100%" }} contentFit="cover" />
-      <View className="absolute right-1 top-1 h-7 w-7 items-center justify-center rounded-full bg-black/60">
+      <Pressable className="absolute right-1 top-1 h-7 w-7 items-center justify-center rounded-full bg-black/60" onPress={onRemove}>
         <CircleX color="#FFFFFF" size={18} />
-      </View>
+      </Pressable>
       {index === 0 ? (
         <View className="absolute bottom-1 left-1 rounded bg-black/65 px-2 py-[2px]">
           <Text className="text-[10px] font-bold text-white">Photo principale</Text>
         </View>
-      ) : null}
-    </Pressable>
+      ) : (
+        <Pressable className="absolute bottom-1 left-1 rounded bg-black/65 px-2 py-[2px]" onPress={onMakeMain}>
+          <Text className="text-[10px] font-bold text-white">Principal</Text>
+        </Pressable>
+      )}
+      <View className="absolute bottom-1 right-1 flex-row gap-1">
+        {canMoveLeft ? (
+          <Pressable className="h-7 w-7 items-center justify-center rounded-full bg-white/90" onPress={onMoveLeft}>
+            <ArrowLeft color="#191C1D" size={15} strokeWidth={2.4} />
+          </Pressable>
+        ) : null}
+        {canMoveRight ? (
+          <Pressable className="h-7 w-7 items-center justify-center rounded-full bg-white/90" onPress={onMoveRight}>
+            <ArrowRight color="#191C1D" size={15} strokeWidth={2.4} />
+          </Pressable>
+        ) : null}
+      </View>
+    </View>
   );
 }
 
 function StepThree({
   errorMessage,
+  onMakeMainPhoto,
+  onMovePhoto,
   onPickPhotos,
   onRemovePhoto,
   photos,
 }: {
   errorMessage: string | null;
+  onMakeMainPhoto: (index: number) => void;
+  onMovePhoto: (fromIndex: number, toIndex: number) => void;
   onPickPhotos: () => void;
   onRemovePhoto: (id: string) => void;
   photos: PublishPhoto[];
@@ -379,14 +420,24 @@ function StepThree({
           const photo = photos[index];
           return (
           <View key={photo?.id ?? index} className="w-[31%]">
-            <PhotoTile index={index} onPress={photo ? () => onRemovePhoto(photo.id) : onPickPhotos} url={photo?.uri} />
+            <PhotoTile
+              canMoveLeft={Boolean(photo && index > 0)}
+              canMoveRight={Boolean(photo && index < photos.length - 1)}
+              index={index}
+              onAdd={onPickPhotos}
+              onMakeMain={photo ? () => onMakeMainPhoto(index) : undefined}
+              onMoveLeft={photo ? () => onMovePhoto(index, index - 1) : undefined}
+              onMoveRight={photo ? () => onMovePhoto(index, index + 1) : undefined}
+              onRemove={photo ? () => onRemovePhoto(photo.id) : undefined}
+              url={photo?.uri}
+            />
           </View>
           );
         })}
       </View>
       <View className="mt-6 flex-row items-center rounded-2xl bg-[#EEF0FF] p-4">
         <Info color="#5B5BD6" size={22} fill="#5B5BD6" />
-        <Text className="ml-3 flex-1 text-[13px] leading-5 text-[#5B5BD6]">Ajoutez jusqu’à 6 photos nettes pour obtenir plus de contacts.</Text>
+        <Text className="ml-3 flex-1 text-[13px] leading-5 text-[#5B5BD6]">Déplacez les photos avec les flèches. La première photo sera la couverture.</Text>
       </View>
     </StepShell>
   );
@@ -892,6 +943,22 @@ export function PublishFlowScreen() {
     setPickedPhotos((current) => current.filter((photo) => photo.id !== id));
   };
 
+  const movePhoto = (fromIndex: number, toIndex: number) => {
+    setFormError(null);
+    setPickedPhotos((current) => {
+      if (toIndex < 0 || toIndex >= current.length) return current;
+      const next = [...current];
+      const [photo] = next.splice(fromIndex, 1);
+      if (!photo) return current;
+      next.splice(toIndex, 0, photo);
+      return next;
+    });
+  };
+
+  const makeMainPhoto = (index: number) => {
+    movePhoto(index, 0);
+  };
+
   const validateCurrentStep = () => {
     if (step === 3 && pickedPhotos.length === 0) {
       return "Ajoutez au moins une photo.";
@@ -973,7 +1040,7 @@ export function PublishFlowScreen() {
   const content = useMemo(() => {
     if (step === 1) return <StepOne mode={mode} setMode={setMode} />;
     if (step === 2) return <StepTwo selectedCategory={selectedCategory} setSelectedCategory={selectCategory} />;
-    if (step === 3) return <StepThree errorMessage={formError} onPickPhotos={pickPhotos} onRemovePhoto={removePhoto} photos={pickedPhotos} />;
+    if (step === 3) return <StepThree errorMessage={formError} onMakeMainPhoto={makeMainPhoto} onMovePhoto={movePhoto} onPickPhotos={pickPhotos} onRemovePhoto={removePhoto} photos={pickedPhotos} />;
     if (step === 4) return <StepFour attributes={attributes} category={selectedCategory} errorMessage={formError} form={form} setAttribute={setAttribute} setForm={setForm} />;
     if (step === 5 && mode === "sale") return <StepFiveSale errorMessage={formError} form={form} setForm={setForm} />;
     if (step === 5 && mode === "trade") return <StepFiveTrade errorMessage={formError} form={form} setForm={setForm} />;
@@ -1007,7 +1074,7 @@ export function PublishFlowScreen() {
   const footerLabel = createListingMutation.isPending ? "Publication..." : step === 7 ? "Publier maintenant" : "Continuer";
 
   return (
-    <View className="flex-1 bg-[#F8F9FA]">
+    <KeyboardAvoidingView className="flex-1 bg-[#F8F9FA]" behavior={Platform.OS === "ios" ? "padding" : "height"}>
       <Header step={step} onClose={close} />
       {content}
       <Footer
@@ -1017,6 +1084,6 @@ export function PublishFlowScreen() {
         onNext={next}
         secondary={step === 7 ? "Enregistrer comme brouillon" : undefined}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }

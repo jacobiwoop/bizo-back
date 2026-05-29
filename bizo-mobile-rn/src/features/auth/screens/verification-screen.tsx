@@ -6,7 +6,6 @@ import { ChevronLeft } from "lucide-react-native";
 
 import { useForgotPasswordMutation } from "@/src/features/auth/api/use-auth-mutations";
 import { AuthNoticeTone } from "@/src/features/auth/components/auth-ui";
-import { authMocks } from "@/src/features/auth/mocks/auth-mocks";
 import { normalizeApiError } from "@/src/lib/api/errors";
 
 export function VerificationScreen() {
@@ -16,7 +15,7 @@ export function VerificationScreen() {
   const [noticeTone, setNoticeTone] = useState<AuthNoticeTone>(params.notice ? "success" : "info");
   const inputRefs = useRef<Array<TextInput | null>>([]);
   const forgotPasswordMutation = useForgotPasswordMutation();
-  const destination = params.email ?? authMocks.verification.destination;
+  const destination = params.email ?? "";
   const isResetFlow = params.mode === "reset" || Boolean(params.email);
   const otp = otpDigits.join("");
   const complete = otp.length === 6;
@@ -119,7 +118,7 @@ export function VerificationScreen() {
           <Text className="mt-6 text-center text-[14px] italic leading-[23px] text-[#888888]">
               We have sent the verification code to
           </Text>
-          <Text className="mt-[6px] text-center text-[15px] font-medium italic text-[#1A1A1A]">{destination}</Text>
+          <Text className="mt-[6px] text-center text-[15px] font-medium italic text-[#1A1A1A]">{destination || "votre email"}</Text>
 
           {notice ? (
             <View className={`mt-5 w-full rounded-2xl border px-4 py-3 ${noticeTone === "error" ? "border-[#BA1A1A]/20 bg-[#FFF2F0]" : "border-[#2D54E8]/20 bg-white"}`}>

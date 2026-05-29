@@ -310,10 +310,10 @@ export function SignUpScreen() {
   const [step, setStep] = useState<1 | 2>(1);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("votre@email.com");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("Password123");
-  const [confirmPassword, setConfirmPassword] = useState("Password123");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const registerMutation = useRegisterMutation();
 
