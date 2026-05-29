@@ -16,6 +16,7 @@ import {
   CarFront,
   Check,
   CheckCircle,
+  ChevronLeft,
   ChevronRight,
   CircleX,
   Edit3,
@@ -155,7 +156,7 @@ function Header({
       <View className="px-5 pb-3 pt-2">
         <View className="h-11 flex-row items-center justify-between">
           <Pressable className="h-10 w-10 items-center justify-center" onPress={step === 1 ? onClose : onBack}>
-            {step === 1 ? <X color={colors.text} size={25} /> : <ChevronRight color={colors.text} size={25} style={{ transform: [{ rotate: "180deg" }] }} />}
+            {step === 1 ? <X color={colors.text} size={25} /> : <ChevronLeft color={colors.text} size={27} strokeWidth={2.2} />}
           </Pressable>
           <Text className="text-[15px] font-bold text-[#191C1D]">Publier une annonce</Text>
           <Pressable className="h-10 flex-row items-center justify-center">
@@ -174,20 +175,34 @@ function Header({
 function Footer({
   disabled = false,
   label = "Continuer",
+  onBack,
   onNext,
   secondary,
 }: {
   disabled?: boolean;
   label?: string;
+  onBack?: () => void;
   onNext: () => void;
   secondary?: string;
 }) {
   return (
     <View className="absolute bottom-0 left-0 right-0 gap-3 border-t border-[#E1E3E4] bg-white px-5 pb-6 pt-4">
-      <Pressable className={`h-14 flex-row items-center justify-center rounded-full shadow-soft ${disabled ? "bg-[#9A9A9A]" : "bg-[#191C1D]"}`} disabled={disabled} onPress={onNext}>
-        <Text className="text-[16px] font-bold text-white">{label}</Text>
-        {disabled ? null : <ArrowRight color="#FFFFFF" size={20} strokeWidth={2.4} style={{ marginLeft: 8 }} />}
-      </Pressable>
+      <View className="flex-row gap-3">
+        {onBack ? (
+          <Pressable
+            className="h-14 flex-1 flex-row items-center justify-center rounded-full border border-[#D1C5AC] bg-white"
+            disabled={disabled}
+            onPress={onBack}
+          >
+            <ChevronLeft color="#191C1D" size={20} strokeWidth={2.4} />
+            <Text className="ml-1 text-[16px] font-bold text-[#191C1D]">Précédent</Text>
+          </Pressable>
+        ) : null}
+        <Pressable className={`h-14 flex-row items-center justify-center rounded-full shadow-soft ${onBack ? "flex-1" : ""} ${disabled ? "bg-[#9A9A9A]" : "bg-[#191C1D]"}`} disabled={disabled} onPress={onNext}>
+          <Text className="text-[16px] font-bold text-white">{label}</Text>
+          {disabled ? null : <ArrowRight color="#FFFFFF" size={20} strokeWidth={2.4} style={{ marginLeft: 8 }} />}
+        </Pressable>
+      </View>
       {secondary ? <Text className="text-center text-[14px] font-bold text-[#5F5E5E]">{secondary}</Text> : null}
     </View>
   );
@@ -943,7 +958,13 @@ export function PublishFlowScreen() {
     <View className="flex-1 bg-[#F8F9FA]">
       <Header step={step} onBack={back} onClose={close} />
       {content}
-      <Footer disabled={createListingMutation.isPending} label={footerLabel} onNext={next} secondary={step === 3 ? "Retour" : step === 7 ? "Enregistrer comme brouillon" : undefined} />
+      <Footer
+        disabled={createListingMutation.isPending}
+        label={footerLabel}
+        onBack={step > 1 ? back : undefined}
+        onNext={next}
+        secondary={step === 7 ? "Enregistrer comme brouillon" : undefined}
+      />
     </View>
   );
 }
