@@ -1,6 +1,11 @@
 import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
+import { useCreateListingMutation } from "@/src/features/publish/api/use-create-listing";
+import { normalizeApiError } from "@/src/lib/api/errors";
+import { type ListingPhotoUpload } from "@/src/lib/api/listings";
 import { getListingCategory, listingCategories, type ListingAttributeField, type ListingCategoryDefinition, type ListingCategoryId, type ListingCategoryIcon } from "@/src/lib/categories/listing-categories";
+import { useSessionStore } from "@/src/store/session";
 import {
   ArrowDownCircle,
   ArrowRight,
@@ -37,6 +42,21 @@ type PublishMode = "sale" | "trade" | "trade-cash";
 type PublishStep = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 type PublishAttributeValue = string | string[];
 type PublishAttributes = Record<string, PublishAttributeValue>;
+type PublishPhoto = ListingPhotoUpload & { id: string };
+type PublishCondition = "neuf" | "excellent" | "bon" | "correct";
+
+type PublishForm = {
+  title: string;
+  description: string;
+  condition: PublishCondition;
+  price: string;
+  exchangeFor: string;
+  cashComplement: string;
+  city: string;
+  neighborhood: string;
+  country: string;
+  deliveryMode: "main_propre" | "livraison" | "les_deux";
+};
 
 const colors = {
   background: "#F8F9FA",
@@ -52,11 +72,69 @@ const colors = {
   violet: "#5B5BD6",
 };
 
-const photos = [
+const samplePhotos = [
   "https://lh3.googleusercontent.com/aida/ADBb0uh87IkLFidw7GYFSqWQWd1E3mP2pJ0uTVj2ZF-WThGORhMIw_Pqf2GfCxK-sA9BRkei2b_rNTxhpG4iAt1u1RwC6Puu8w-f4wL7oLzn6Q9g88N4RWAKA9DGz_GM_SLdUHi8D1PjV1ovLjNeUWg8Tibix_rewC0YavAHvD6so9sjMZZKUquHp6nACfOfBGOURCg0qFJdM8KT4RRmCnDtW1LvYOycmvQ_OJrh0cPfB9gPF15q_cq_pzKhMw",
   "https://lh3.googleusercontent.com/aida-public/AB6AXuDfelK77Nmuqc5_8eRqRia3m9NuJnAzKfOWZYQbbwGxNZjxMQSFQgmhjnmaB-gS3cbzpDAU_HWPt6J-Gnh6u4lJC6Tf-U7rQiAqQdcPLlfgcP7ISw585oN9oGK9FKPUzQUtcSMzrdzdugVzbPEHoIp-ef_Y0M7XQzTujDFNqvP1fWq1qfErDjejeg5fI0q5brLxgpHF94cG9LHcrTIvcWuLomj0vLCRUdWGc8abm3sS7PByr4SZXSGEZX2FSbcXgNqDmNFZKmQpZWQ",
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCl1J2JkQt14uMliAZXeORX3LaqTCyRglI7z5Rm4ZmwY4FECZYPHWl700sZO6pIBpAuQqg7rHqWh9LPhs5MllTleaK2raso3bQt0DI8X4OkZOBqa2loDk6t0Lq2QSHVBZzThM53G1VSQWBsPvMZmxpOJdYIMYjC3Ki7tYdT1y3cPknmyYX1yb9NJ4rbTPFkn4U0dyHgH0XS12M_Wte-X_B_LFiSrjUZNv4oCGhLNClNkjldTLfRj5mRxH6xQ4c4MUq_FYFVqJIZWyk",
 ];
+
+const conditionOptions: Array<{ label: string; value: PublishCondition }> = [
+  { label: "Neuf", value: "neuf" },
+  { label: "Très bon état", value: "excellent" },
+  { label: "Bon état", value: "bon" },
+  { label: "État correct", value: "correct" },
+];
+
+const initialForm: PublishForm = {
+  cashComplement: "",
+  city: "Abidjan",
+  condition: "excellent",
+  country: "CI",
+  deliveryMode: "les_deux",
+  description: "",
+  exchangeFor: "",
+  neighborhood: "Cocody",
+  price: "",
+  title: "",
+};
+
+function toListingType(mode: PublishMode) {
+  if (mode === "sale") return "VENTE";
+  if (mode === "trade") return "TROC";
+  return "TROC_CASH";
+}
+
+function parseAmount(value: string): number | null {
+  const normalized = value.replace(/[^\d]/g, "");
+  return normalized ? Number(normalized) : null;
+}
+
+function formatPrice(value: string) {
+  const amount = parseAmount(value);
+  return amount === null ? "Prix à renseigner" : `${amount.toLocaleString("fr-FR")} FCFA`;
+}
+
+function isFilled(value: PublishAttributeValue | undefined) {
+  if (Array.isArray(value)) return value.length > 0;
+  return Boolean(value?.trim());
+}
+
+function getRequiredAttributeMessage(category: ListingCategoryDefinition, attributes: PublishAttributes) {
+  const missingField = category.fields.find((field) => field.required && !isFilled(attributes[field.key]));
+  return missingField ? `${missingField.label} est requis.` : null;
+}
+
+function buildPhotoUpload(asset: ImagePicker.ImagePickerAsset): PublishPhoto {
+  const name = asset.fileName ?? `photo-${Date.now()}.jpg`;
+  const type = asset.mimeType ?? "image/jpeg";
+
+  return {
+    id: `${asset.uri}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    name,
+    type,
+    uri: asset.uri,
+  };
+}
 
 const mapImage =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuAyRpQqK4fUNelktUs2pH4jNKU20tlGE_1xgGT_pt4jU-nh-yZKiJxvrCso7h63jXRwn7tpLa8OBUnZlntPMkYDT0oqpzmme3VHTrJ6flZAikh4poCM1Zag5lwzwq4WE59_OKBNR9eBfFNX98SmA-ebU7JC78RLWfdCsR3LKxmo5TSaD5dx0F8oAfv-jXkrZI8WEF54RnHwIzr22ECDtLQJo6q-M2xrs3Q-PDHhi74KPYLR-pa5UBk-cLiQlAXoQXA6nrYKm5RLKHs";
@@ -94,19 +172,21 @@ function Header({
 }
 
 function Footer({
+  disabled = false,
   label = "Continuer",
   onNext,
   secondary,
 }: {
+  disabled?: boolean;
   label?: string;
   onNext: () => void;
   secondary?: string;
 }) {
   return (
     <View className="absolute bottom-0 left-0 right-0 gap-3 border-t border-[#E1E3E4] bg-white px-5 pb-6 pt-4">
-      <Pressable className="h-14 flex-row items-center justify-center rounded-full bg-[#191C1D] shadow-soft" onPress={onNext}>
+      <Pressable className={`h-14 flex-row items-center justify-center rounded-full shadow-soft ${disabled ? "bg-[#9A9A9A]" : "bg-[#191C1D]"}`} disabled={disabled} onPress={onNext}>
         <Text className="text-[16px] font-bold text-white">{label}</Text>
-        <ArrowRight color="#FFFFFF" size={20} strokeWidth={2.4} style={{ marginLeft: 8 }} />
+        {disabled ? null : <ArrowRight color="#FFFFFF" size={20} strokeWidth={2.4} style={{ marginLeft: 8 }} />}
       </Pressable>
       {secondary ? <Text className="text-center text-[14px] font-bold text-[#5F5E5E]">{secondary}</Text> : null}
     </View>
@@ -149,6 +229,16 @@ function StepShell({ children }: { children: React.ReactNode }) {
     <ScrollView className="flex-1 bg-[#F8F9FA]" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 132 }}>
       <View className="px-5 pt-6">{children}</View>
     </ScrollView>
+  );
+}
+
+function InlineMessage({ message }: { message: string | null }) {
+  if (!message) return null;
+
+  return (
+    <View className="mb-5 rounded-2xl border border-[#F5C518] bg-[#FFFBEB] p-4">
+      <Text className="text-[13px] font-semibold leading-5 text-[#745B00]">{message}</Text>
+    </View>
   );
 }
 
@@ -219,42 +309,56 @@ function StepTwo({
   );
 }
 
-function PhotoTile({ index, url }: { index: number; url?: string }) {
+function PhotoTile({ index, onPress, url }: { index: number; onPress: () => void; url?: string }) {
   if (!url) {
     return (
-      <View className="aspect-square items-center justify-center rounded-xl border-2 border-dashed border-[#D1C5AC] bg-white">
+      <Pressable className="aspect-square items-center justify-center rounded-xl border-2 border-dashed border-[#D1C5AC] bg-white" onPress={onPress}>
         {index === 0 ? <Camera color="#807660" size={26} /> : <Plus color="#D1C5AC" size={24} />}
         {index === 0 ? <Text className="mt-1 text-[11px] font-bold text-[#807660]">Ajouter</Text> : null}
-      </View>
+      </Pressable>
     );
   }
 
   return (
-    <View className="aspect-square overflow-hidden rounded-xl bg-white">
+    <Pressable className="aspect-square overflow-hidden rounded-xl bg-white" onPress={onPress}>
       <Image source={url} style={{ width: "100%", height: "100%" }} contentFit="cover" />
       <View className="absolute right-1 top-1 h-7 w-7 items-center justify-center rounded-full bg-black/60">
         <CircleX color="#FFFFFF" size={18} />
       </View>
-      {index === 1 ? (
+      {index === 0 ? (
         <View className="absolute bottom-1 left-1 rounded bg-black/65 px-2 py-[2px]">
           <Text className="text-[10px] font-bold text-white">Photo principale</Text>
         </View>
       ) : null}
-    </View>
+    </Pressable>
   );
 }
 
-function StepThree() {
+function StepThree({
+  errorMessage,
+  onPickPhotos,
+  onRemovePhoto,
+  photos,
+}: {
+  errorMessage: string | null;
+  onPickPhotos: () => void;
+  onRemovePhoto: (id: string) => void;
+  photos: PublishPhoto[];
+}) {
   return (
     <StepShell>
+      <InlineMessage message={errorMessage} />
       <Text className="text-[24px] font-black text-[#191C1D]">Ajoutez vos photos</Text>
       <Text className="mt-2 text-[14px] leading-5 text-[#5F5E5E]">La première photo sera utilisée comme couverture de l’annonce.</Text>
       <View className="mt-6 flex-row flex-wrap justify-between gap-y-3">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <View key={index} className="w-[31%]">
-            <PhotoTile index={index} url={index > 0 && index < 3 ? photos[index - 1] : undefined} />
+        {Array.from({ length: 6 }).map((_, index) => {
+          const photo = photos[index];
+          return (
+          <View key={photo?.id ?? index} className="w-[31%]">
+            <PhotoTile index={index} onPress={photo ? () => onRemovePhoto(photo.id) : onPickPhotos} url={photo?.uri} />
           </View>
-        ))}
+          );
+        })}
       </View>
       <View className="mt-6 flex-row items-center rounded-2xl bg-[#EEF0FF] p-4">
         <Info color="#5B5BD6" size={22} fill="#5B5BD6" />
@@ -356,16 +460,21 @@ function DynamicAttributeField({
 function StepFour({
   attributes,
   category,
+  errorMessage,
+  form,
   setAttribute,
+  setForm,
 }: {
   attributes: PublishAttributes;
   category: ListingCategoryDefinition;
+  errorMessage: string | null;
+  form: PublishForm;
   setAttribute: (key: string, value: PublishAttributeValue) => void;
+  setForm: (patch: Partial<PublishForm>) => void;
 }) {
-  const states = ["Neuf", "Très bon état", "Bon état", "État correct", "Pour pièces"];
-
   return (
     <StepShell>
+      <InlineMessage message={errorMessage} />
       <Text className="mb-4 text-[30px] font-black leading-9 text-[#191C1D]">Décrivez votre article</Text>
       <View className="mb-6 self-start flex-row items-center rounded-full bg-[#F3F4F5] px-4 py-2">
         <CategoryIcon icon={category.icon} selected size={18} />
@@ -374,19 +483,19 @@ function StepFour({
       </View>
       <View className="gap-5">
         <Field label="Titre de l’annonce">
-          <InputBox placeholder="Ex: iPhone 13 Pro 256Go Bleu" />
+          <InputBox onChangeText={(title) => setForm({ title })} placeholder="Ex: iPhone 13 Pro 256Go Bleu" value={form.title} />
         </Field>
         <Field label="Description">
-          <InputBox multiline placeholder="Décrivez l'état, les accessoires inclus..." />
+          <InputBox multiline onChangeText={(description) => setForm({ description })} placeholder="Décrivez l'état, les accessoires inclus..." value={form.description} />
         </Field>
         <Field label="État">
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-            {states.map((state) => {
-              const selected = state === "Très bon état";
+            {conditionOptions.map((state) => {
+              const selected = state.value === form.condition;
               return (
-                <View key={state} className={`rounded-full border px-4 py-2 ${selected ? "border-[#745B00] bg-[#745B00]/5" : "border-[#E1E3E4] bg-white"}`}>
-                  <Text className={`text-[12px] font-bold ${selected ? "text-[#745B00]" : "text-[#191C1D]"}`}>{state}</Text>
-                </View>
+                <Pressable key={state.value} className={`rounded-full border px-4 py-2 ${selected ? "border-[#745B00] bg-[#745B00]/5" : "border-[#E1E3E4] bg-white"}`} onPress={() => setForm({ condition: state.value })}>
+                  <Text className={`text-[12px] font-bold ${selected ? "text-[#745B00]" : "text-[#191C1D]"}`}>{state.label}</Text>
+                </Pressable>
               );
             })}
           </ScrollView>
@@ -399,13 +508,22 @@ function StepFour({
   );
 }
 
-function StepFiveSale() {
+function StepFiveSale({
+  errorMessage,
+  form,
+  setForm,
+}: {
+  errorMessage: string | null;
+  form: PublishForm;
+  setForm: (patch: Partial<PublishForm>) => void;
+}) {
   return (
     <StepShell>
+      <InlineMessage message={errorMessage} />
       <Text className="text-[32px] font-black text-[#191C1D]">Quel est votre prix ?</Text>
       <View className="mt-8 items-center">
         <View className="flex-row items-end">
-          <TextInput className="w-40 text-center text-[48px] font-black text-[#191C1D]" keyboardType="number-pad" placeholder="0" defaultValue="150000" />
+          <TextInput className="w-40 text-center text-[48px] font-black text-[#191C1D]" keyboardType="number-pad" onChangeText={(price) => setForm({ price })} placeholder="0" value={form.price} />
           <Text className="mb-3 text-[20px] font-bold text-[#5F5E5E]">FCFA</Text>
         </View>
       </View>
@@ -433,14 +551,32 @@ function MessageIcon() {
   return <Info color="#191C1D" size={22} />;
 }
 
-function StepFiveTrade() {
+function StepFiveTrade({
+  errorMessage,
+  form,
+  setForm,
+}: {
+  errorMessage: string | null;
+  form: PublishForm;
+  setForm: (patch: Partial<PublishForm>) => void;
+}) {
   return (
     <StepShell>
+      <InlineMessage message={errorMessage} />
       <Text className="text-[30px] font-black leading-9 text-[#191C1D]">Que souhaitez-vous en échange?</Text>
       <Text className="mt-2 text-[15px] leading-6 text-[#5F5E5E]">Décrivez les objets que vous acceptez pour cet échange.</Text>
       <View className="mt-8 rounded-2xl bg-white p-4 shadow-soft">
-        <TextInput className="h-[140px] text-[16px] text-[#191C1D]" multiline placeholder="Ex: Cherche vélo de ville, trottinette électrique ou console PS5..." placeholderTextColor="#999999" textAlignVertical="top" />
-        <Text className="text-right text-[12px] text-[#5F5E5E]">0/300</Text>
+        <TextInput
+          className="h-[140px] text-[16px] text-[#191C1D]"
+          maxLength={255}
+          multiline
+          onChangeText={(exchangeFor) => setForm({ exchangeFor })}
+          placeholder="Ex: Cherche vélo de ville, trottinette électrique ou console PS5..."
+          placeholderTextColor="#999999"
+          textAlignVertical="top"
+          value={form.exchangeFor}
+        />
+        <Text className="text-right text-[12px] text-[#5F5E5E]">{form.exchangeFor.length}/255</Text>
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-5" contentContainerStyle={{ gap: 8 }}>
         {["Téléphone", "Ordinateur", "Vélo", "Console", "Électroménager"].map((chip) => (
@@ -466,18 +602,36 @@ function SlidersMini() {
   return <Info color="#745B00" size={22} />;
 }
 
-function StepFiveTradeCash() {
+function StepFiveTradeCash({
+  errorMessage,
+  form,
+  setForm,
+}: {
+  errorMessage: string | null;
+  form: PublishForm;
+  setForm: (patch: Partial<PublishForm>) => void;
+}) {
   return (
     <StepShell>
+      <InlineMessage message={errorMessage} />
       <Text className="text-[24px] font-black text-[#191C1D]">Troc avec complément</Text>
       <Text className="mt-2 text-[15px] leading-6 text-[#5F5E5E]">Précisez l’échange souhaité et le complément cash.</Text>
       <View className="mt-6 rounded-xl border border-[#E5E7EB] bg-white p-4">
-        <TextInput className="h-[140px] text-[15px] text-[#191C1D]" multiline placeholder="Ex: Cherche vélo de ville, trottinette électrique ou console PS5..." placeholderTextColor="#999999" textAlignVertical="top" />
+        <TextInput
+          className="h-[140px] text-[15px] text-[#191C1D]"
+          maxLength={255}
+          multiline
+          onChangeText={(exchangeFor) => setForm({ exchangeFor })}
+          placeholder="Ex: Cherche vélo de ville, trottinette électrique ou console PS5..."
+          placeholderTextColor="#999999"
+          textAlignVertical="top"
+          value={form.exchangeFor}
+        />
       </View>
       <View className="mt-8 items-center">
         <Text className="text-[13px] font-bold uppercase tracking-[1px] text-[#5F5E5E]">Complément cash</Text>
         <View className="mt-3 flex-row items-end">
-          <TextInput className="w-32 border-b-2 border-[#E1E3E4] text-center text-[48px] font-black text-[#191C1D]" keyboardType="number-pad" defaultValue="0" />
+          <TextInput className="w-32 border-b-2 border-[#E1E3E4] text-center text-[48px] font-black text-[#191C1D]" keyboardType="number-pad" onChangeText={(cashComplement) => setForm({ cashComplement })} placeholder="0" value={form.cashComplement} />
           <Text className="mb-3 text-[20px] font-bold text-[#5F5E5E]">FCFA</Text>
         </View>
       </View>
@@ -495,22 +649,35 @@ function StepFiveTradeCash() {
   );
 }
 
-function StepSix() {
+function StepSix({
+  errorMessage,
+  form,
+  setForm,
+}: {
+  errorMessage: string | null;
+  form: PublishForm;
+  setForm: (patch: Partial<PublishForm>) => void;
+}) {
   return (
     <StepShell>
+      <InlineMessage message={errorMessage} />
       <Text className="text-[24px] font-black leading-8 text-[#191C1D]">Où se trouve votre article?</Text>
       <Text className="mt-2 text-[15px] leading-6 text-[#5F5E5E]">La localisation approximative aide les acheteurs à vous trouver.</Text>
       <View className="relative mt-6">
         <MapPin color="#5B5BD6" size={22} style={{ left: 16, position: "absolute", top: 13, zIndex: 1 }} />
-        <TextInput className="h-12 rounded-2xl border border-[#8283FF] bg-white px-12 text-[15px] text-[#191C1D]" placeholder="Ex: Paris, 75001" defaultValue="Cocody, Abidjan" />
+        <TextInput className="h-12 rounded-2xl border border-[#8283FF] bg-white px-12 text-[15px] text-[#191C1D]" onChangeText={(city) => setForm({ city })} placeholder="Ex: Abidjan" value={form.city} />
         <MapPin color="#5F5E5E" size={20} style={{ position: "absolute", right: 16, top: 14 }} />
       </View>
+      <View className="relative mt-3">
+        <MapPin color="#5F5E5E" size={20} style={{ left: 16, position: "absolute", top: 13, zIndex: 1 }} />
+        <TextInput className="h-12 rounded-2xl border border-[#E1E3E4] bg-white px-12 text-[15px] text-[#191C1D]" onChangeText={(neighborhood) => setForm({ neighborhood })} placeholder="Quartier" value={form.neighborhood} />
+      </View>
       <View className="mt-4">
-        {["Cocody Riviera, Abidjan", "Cocody Angré, Abidjan"].map((place) => (
-          <View key={place} className="flex-row items-center py-2">
+        {["Cocody Riviera", "Cocody Angré"].map((place) => (
+          <Pressable key={place} className="flex-row items-center py-2" onPress={() => setForm({ city: "Abidjan", neighborhood: place })}>
             <MapPin color="#5F5E5E" size={18} />
-            <Text className="ml-3 text-[14px] text-[#5F5E5E]">{place}</Text>
-          </View>
+            <Text className="ml-3 text-[14px] text-[#5F5E5E]">{place}, Abidjan</Text>
+          </Pressable>
         ))}
       </View>
       <View className="mt-5 h-[220px] overflow-hidden rounded-3xl bg-white shadow-soft">
@@ -546,11 +713,28 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function StepSeven({ category, mode }: { category: ListingCategoryDefinition; mode: PublishMode }) {
+function StepSeven({
+  category,
+  errorMessage,
+  form,
+  mode,
+  photos,
+}: {
+  category: ListingCategoryDefinition;
+  errorMessage: string | null;
+  form: PublishForm;
+  mode: PublishMode;
+  photos: PublishPhoto[];
+}) {
   const modeLabel = mode === "sale" ? "Vente" : mode === "trade" ? "Troc" : "Troc + Cash";
+  const conditionLabel = conditionOptions.find((option) => option.value === form.condition)?.label ?? "Très bon état";
+  const heroImage = photos[0]?.uri ?? samplePhotos[0];
+  const title = form.title.trim() || "Titre à renseigner";
+  const location = [form.neighborhood, form.city].filter(Boolean).join(", ") || "Localisation à renseigner";
 
   return (
     <StepShell>
+      <InlineMessage message={errorMessage} />
       <View className="items-center">
         <View className="h-10 w-10 items-center justify-center rounded-full bg-[#D7F3FA]">
           <Check color="#00687C" size={20} strokeWidth={3} />
@@ -559,15 +743,15 @@ function StepSeven({ category, mode }: { category: ListingCategoryDefinition; mo
         <Text className="mt-2 text-center text-[14px] leading-5 text-[#5F5E5E]">Dernière étape avant publication.</Text>
       </View>
       <View className="mt-6 overflow-hidden rounded-3xl bg-white shadow-soft">
-        <Image source={photos[0]} style={{ width: "100%", height: 190 }} contentFit="cover" />
+        <Image source={heroImage} style={{ width: "100%", height: 190 }} contentFit="cover" />
         <View className="p-4">
           <View className="flex-row items-start justify-between">
-            <Text className="max-w-[70%] text-[20px] font-black leading-6 text-[#191C1D]">Leica M3 Replica - État Exceptionnel</Text>
-            <Text className="text-[18px] font-black text-[#F5C518]">150 000 FCFA</Text>
+            <Text className="max-w-[70%] text-[20px] font-black leading-6 text-[#191C1D]">{title}</Text>
+            <Text className="text-[18px] font-black text-[#F5C518]">{mode === "sale" ? formatPrice(form.price) : modeLabel}</Text>
           </View>
           <View className="mt-3 flex-row items-center">
             <MapPin color="#5F5E5E" size={14} />
-            <Text className="ml-1 text-[12px] text-[#5F5E5E]">Cocody, Abidjan</Text>
+            <Text className="ml-1 text-[12px] text-[#5F5E5E]">{location}</Text>
             <Text className="mx-3 text-[#D1C5AC]">•</Text>
             <Text className="text-[12px] text-[#5F5E5E]">Maintenant</Text>
           </View>
@@ -576,9 +760,9 @@ function StepSeven({ category, mode }: { category: ListingCategoryDefinition; mo
       <View className="mt-6 rounded-2xl bg-white px-4 shadow-soft">
         <SummaryRow label="Mode" value={modeLabel} />
         <SummaryRow label="Catégorie" value={category.label} />
-        <SummaryRow label="État" value="Très bon état" />
-        <SummaryRow label="Localisation" value="Cocody, Abidjan" />
-        <SummaryRow label="Photos" value="3 photos ajoutées" />
+        <SummaryRow label="État" value={conditionLabel} />
+        <SummaryRow label="Localisation" value={location} />
+        <SummaryRow label="Photos" value={`${photos.length} photo${photos.length > 1 ? "s" : ""} ajoutée${photos.length > 1 ? "s" : ""}`} />
       </View>
     </StepShell>
   );
@@ -589,44 +773,177 @@ export function PublishFlowScreen() {
   const [mode, setMode] = useState<PublishMode>("sale");
   const [selectedCategoryId, setSelectedCategoryId] = useState<ListingCategoryId>("telephones");
   const [attributes, setAttributes] = useState<PublishAttributes>({});
+  const [form, setFormState] = useState<PublishForm>(initialForm);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [pickedPhotos, setPickedPhotos] = useState<PublishPhoto[]>([]);
+  const token = useSessionStore((state) => state.token);
+  const createListingMutation = useCreateListingMutation();
   const selectedCategory = getListingCategory(selectedCategoryId);
+
+  const setForm = (patch: Partial<PublishForm>) => {
+    setFormError(null);
+    setFormState((current) => ({ ...current, ...patch }));
+  };
+
   const selectCategory = (category: ListingCategoryId) => {
+    setFormError(null);
     setSelectedCategoryId(category);
     setAttributes({});
   };
+
   const setAttribute = (key: string, value: PublishAttributeValue) => {
+    setFormError(null);
     setAttributes((current) => ({ ...current, [key]: value }));
+  };
+
+  const pickPhotos = async () => {
+    setFormError(null);
+
+    const remainingSlots = Math.max(10 - pickedPhotos.length, 0);
+    if (remainingSlots === 0) {
+      setFormError("Maximum 10 photos autorisées.");
+      return;
+    }
+
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      setFormError("Autorisez l'accès aux photos pour continuer.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsMultipleSelection: true,
+      mediaTypes: ["images"],
+      quality: 0.85,
+      selectionLimit: remainingSlots,
+    });
+
+    if (result.canceled) {
+      return;
+    }
+
+    setPickedPhotos((current) => [...current, ...result.assets.slice(0, remainingSlots).map(buildPhotoUpload)]);
+  };
+
+  const removePhoto = (id: string) => {
+    setFormError(null);
+    setPickedPhotos((current) => current.filter((photo) => photo.id !== id));
+  };
+
+  const validateCurrentStep = () => {
+    if (step === 3 && pickedPhotos.length === 0) {
+      return "Ajoutez au moins une photo.";
+    }
+
+    if (step === 4) {
+      if (form.title.trim().length < 5) {
+        return "Le titre doit faire au moins 5 caractères.";
+      }
+
+      if (form.description.trim().length < 20) {
+        return "La description doit faire au moins 20 caractères.";
+      }
+
+      return getRequiredAttributeMessage(selectedCategory, attributes);
+    }
+
+    if (step === 5) {
+      if (mode === "sale" && parseAmount(form.price) === null) {
+        return "Le prix est requis pour une vente.";
+      }
+
+      if (mode !== "sale" && form.exchangeFor.trim().length === 0) {
+        return "Précisez ce que vous souhaitez en échange.";
+      }
+    }
+
+    if (step === 6 && form.city.trim().length === 0) {
+      return "La ville est requise.";
+    }
+
+    return null;
+  };
+
+  const submit = async () => {
+    const stepError = validateCurrentStep();
+    if (stepError) {
+      setFormError(stepError);
+      return;
+    }
+
+    if (!token) {
+      setFormError("Connectez-vous pour publier une annonce.");
+      router.push("/(auth)/sign-in");
+      return;
+    }
+
+    try {
+      const listing = await createListingMutation.mutateAsync({
+        attributes,
+        cash_complement: mode === "trade-cash" ? parseAmount(form.cashComplement) : null,
+        category: selectedCategory.id,
+        city: form.city.trim(),
+        condition: form.condition,
+        country: form.country,
+        delivery_mode: form.deliveryMode,
+        description: form.description.trim(),
+        exchange_for: mode === "sale" ? null : form.exchangeFor.trim(),
+        neighborhood: form.neighborhood.trim() || null,
+        photos: pickedPhotos,
+        price: mode === "sale" ? parseAmount(form.price) : null,
+        tags: [],
+        title: form.title.trim(),
+        type: toListingType(mode),
+      });
+
+      router.replace(`/listing/${listing.id}`);
+    } catch (error) {
+      const normalizedError = normalizeApiError(error);
+      setFormError(normalizedError.message);
+    }
   };
 
   const content = useMemo(() => {
     if (step === 1) return <StepOne mode={mode} setMode={setMode} />;
     if (step === 2) return <StepTwo selectedCategory={selectedCategory} setSelectedCategory={selectCategory} />;
-    if (step === 3) return <StepThree />;
-    if (step === 4) return <StepFour attributes={attributes} category={selectedCategory} setAttribute={setAttribute} />;
-    if (step === 5 && mode === "sale") return <StepFiveSale />;
-    if (step === 5 && mode === "trade") return <StepFiveTrade />;
-    if (step === 5) return <StepFiveTradeCash />;
-    if (step === 6) return <StepSix />;
-    return <StepSeven category={selectedCategory} mode={mode} />;
-  }, [attributes, mode, selectedCategory, step]);
+    if (step === 3) return <StepThree errorMessage={formError} onPickPhotos={pickPhotos} onRemovePhoto={removePhoto} photos={pickedPhotos} />;
+    if (step === 4) return <StepFour attributes={attributes} category={selectedCategory} errorMessage={formError} form={form} setAttribute={setAttribute} setForm={setForm} />;
+    if (step === 5 && mode === "sale") return <StepFiveSale errorMessage={formError} form={form} setForm={setForm} />;
+    if (step === 5 && mode === "trade") return <StepFiveTrade errorMessage={formError} form={form} setForm={setForm} />;
+    if (step === 5) return <StepFiveTradeCash errorMessage={formError} form={form} setForm={setForm} />;
+    if (step === 6) return <StepSix errorMessage={formError} form={form} setForm={setForm} />;
+    return <StepSeven category={selectedCategory} errorMessage={formError} form={form} mode={mode} photos={pickedPhotos} />;
+  }, [attributes, form, formError, mode, pickedPhotos, selectedCategory, step]);
 
-  const next = () => {
+  const next = async () => {
+    setFormError(null);
+
+    const stepError = validateCurrentStep();
+    if (stepError) {
+      setFormError(stepError);
+      return;
+    }
+
     if (step === 7) {
-      router.push("/(tabs)/home");
+      await submit();
       return;
     }
 
     setStep((current) => (Math.min(current + 1, 7) as PublishStep));
   };
 
-  const back = () => setStep((current) => (Math.max(current - 1, 1) as PublishStep));
+  const back = () => {
+    setFormError(null);
+    setStep((current) => (Math.max(current - 1, 1) as PublishStep));
+  };
   const close = () => router.back();
+  const footerLabel = createListingMutation.isPending ? "Publication..." : step === 7 ? "Publier maintenant" : "Continuer";
 
   return (
     <View className="flex-1 bg-[#F8F9FA]">
       <Header step={step} onBack={back} onClose={close} />
       {content}
-      <Footer label={step === 7 ? "Publier maintenant" : "Continuer"} onNext={next} secondary={step === 3 ? "Retour" : step === 7 ? "Enregistrer comme brouillon" : undefined} />
+      <Footer disabled={createListingMutation.isPending} label={footerLabel} onNext={next} secondary={step === 3 ? "Retour" : step === 7 ? "Enregistrer comme brouillon" : undefined} />
     </View>
   );
 }

@@ -1,0 +1,149 @@
+name: Expo Android Production
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "bizo-mobile-rn/**"
+      - ".github/workflows/expo-android-production.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-production-android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    defaults:
+      run:
+        working-directory: bizo-mobile-rn
+
+    env:
+      NODE_ENV: production
+      CI: "1"
+      EX_DEV_CLIENT_NETWORK_INSPECTOR: "false"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.19.6
+          cache: npm
+          cache-dependency-path: bizo-mobile-rn/package-lock.json
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Strip unused production Expo modules
+        run: |
+          node -e '
+          const fs = require("fs");
+          const appPath = "app.json";
+          const app = JSON.parse(fs.readFileSync(appPath, "utf8"));
+          const keepPlugins = new Set(["expo-router", "expo-image", "expo-secure-store", "expo-splash-screen", "expo-image-picker"]);
+          app.expo.plugins = (app.expo.plugins || []).filter((plugin) => keepPlugins.has(Array.isArray(plugin) ? plugin[0] : plugin));
+          app.expo.android.permissions = (app.expo.android.permissions || []).filter((permission) => permission === "android.permission.READ_MEDIA_IMAGES");
+          fs.writeFileSync(appPath, `${JSON.stringify(app, null, 2)}\n`);
+          '
+          npm remove expo-dev-client expo-camera expo-location expo-notifications expo-sharing --no-save --package-lock=false
+
+      - name: Remove non-production workspace files
+        run: |
+          rm -rf .expo .claude artifacts design
+          find . -type f \( -name "*.log" -o -name "*.tmp" -o -name ".DS_Store" \) -delete
+
+      - name: Expo prebuild Android
+        run: npx expo prebuild --platform android --no-install --clean
+
+      - name: Require Android release signing secrets
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          test -n "$ANDROID_KEYSTORE_BASE64"
+          test -n "$ANDROID_KEYSTORE_PASSWORD"
+          test -n "$ANDROID_KEY_ALIAS"
+          test -n "$ANDROID_KEY_PASSWORD"
+
+      - name: Configure release signing
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/bizo-release.keystore
+          perl -0pi -e 's/signingConfigs \{\n        debug \{/signingConfigs {\n        release {\n            storeFile file("bizo-release.keystore")\n            storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")\n            keyAlias System.getenv("ANDROID_KEY_ALIAS")\n            keyPassword System.getenv("ANDROID_KEY_PASSWORD")\n        }\n        debug {/s' android/app/build.gradle
+          perl -0pi -e 's/signingConfig signingConfigs\.debug/signingConfig signingConfigs.release/g' android/app/build.gradle
+
+      - name: Configure production Gradle flags
+        run: |
+          cat >> android/gradle.properties <<'EOF'
+
+          # CI production build: lighter artifacts, no dev inspector, release-only ABIs.
+          android.enableMinifyInReleaseBuilds=true
+          android.enableShrinkResourcesInReleaseBuilds=true
+          android.enableBundleCompression=true
+          reactNativeArchitectures=armeabi-v7a,arm64-v8a
+          EX_DEV_CLIENT_NETWORK_INSPECTOR=false
+          expo.gif.enabled=false
+          expo.webp.enabled=true
+          expo.webp.animated=false
+          EOF
+
+      - name: Build production APK and AAB
+        working-directory: bizo-mobile-rn/android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon clean :app:assembleRelease :app:bundleRelease \
+            -PreactNativeArchitectures=armeabi-v7a,arm64-v8a \
+            -Pandroid.enableMinifyInReleaseBuilds=true \
+            -Pandroid.enableShrinkResourcesInReleaseBuilds=true \
+            -Pandroid.enableBundleCompression=true \
+            -PEX_DEV_CLIENT_NETWORK_INSPECTOR=false \
+            -Pexpo.gif.enabled=false \
+            -Pexpo.webp.animated=false
+
+      - name: Upload production APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: bizo-mobile-rn-production-apk
+          path: bizo-mobile-rn/android/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+
+      - name: Upload production AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: bizo-mobile-rn-production-aab
+          path: bizo-mobile-rn/android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+
+      - name: Upload release mapping
+        uses: actions/upload-artifact@v4
+        with:
+          name: bizo-mobile-rn-release-mapping
+          path: bizo-mobile-rn/android/app/build/outputs/mapping/release/mapping.txt
+          if-no-files-found: warn

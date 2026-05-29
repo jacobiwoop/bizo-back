@@ -136,18 +136,18 @@ cd /home/admin/apps/bizo-back
 
 Important: do not assume backend production auto-deploys from GitHub unless that automation is explicitly verified. The known reliable production deployment path is `git push` then server `./deploy.sh`.
 
-## Mobile Build Workflow
+## Mobile Production Build Workflow
 
-Preferred debug APK build path:
+Preferred production Android build path:
 
 ```txt
-GitHub Actions -> Expo Android Debug
+GitHub Actions -> Expo Android Production
 ```
 
 The workflow is:
 
 ```txt
-.github/workflows/expo-android-debug.yml
+.github/workflows/expo-android-production.yml
 ```
 
 It runs on:
@@ -155,6 +155,15 @@ It runs on:
 - manual `workflow_dispatch`
 - push to `main` when files under `bizo-mobile-rn/**` change
 - push to the workflow file itself
+
+It builds signed production APK and AAB artifacts. Required GitHub secrets:
+
+- `ANDROID_KEYSTORE_BASE64`
+- `ANDROID_KEYSTORE_PASSWORD`
+- `ANDROID_KEY_ALIAS`
+- `ANDROID_KEY_PASSWORD`
+
+The production workflow strips unused Expo native modules before prebuild and enables release minification/resource shrinking.
 
 For mobile app changes:
 
@@ -165,7 +174,7 @@ git commit -m "Short clear message"
 git push origin main
 ```
 
-After push, GitHub Actions should build the debug APK artifact.
+After push, GitHub Actions should build production APK and AAB artifacts.
 
 Server-side Expo Android builds are possible but heavy. Prefer GitHub Actions unless the human operator explicitly asks for a server build.
 
@@ -321,7 +330,7 @@ git push origin main
 
 Effects of push:
 
-- mobile changes under `bizo-mobile-rn/**` trigger GitHub Actions debug APK build
+- mobile changes under `bizo-mobile-rn/**` trigger GitHub Actions production Android build
 - backend production still needs server deployment through `./deploy.sh` unless auto-deploy has been explicitly verified
 
 ## Backend API Reference
