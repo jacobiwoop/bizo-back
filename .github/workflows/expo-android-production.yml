@@ -61,17 +61,34 @@ jobs:
           const fs = require("fs");
           const appPath = "app.json";
           const app = JSON.parse(fs.readFileSync(appPath, "utf8"));
-          const keepPlugins = new Set(["expo-router", "expo-image", "expo-secure-store", "expo-splash-screen", "expo-image-picker"]);
+          const keepPlugins = new Set(["expo-router", "expo-image", "expo-secure-store", "expo-splash-screen", "expo-image-picker", "expo-notifications"]);
           app.expo.plugins = (app.expo.plugins || []).filter((plugin) => keepPlugins.has(Array.isArray(plugin) ? plugin[0] : plugin));
-          app.expo.android.permissions = (app.expo.android.permissions || []).filter((permission) => permission === "android.permission.READ_MEDIA_IMAGES");
+          const keepPermissions = new Set(["android.permission.READ_MEDIA_IMAGES", "android.permission.POST_NOTIFICATIONS"]);
+          app.expo.android.permissions = (app.expo.android.permissions || []).filter((permission) => keepPermissions.has(permission));
           fs.writeFileSync(appPath, `${JSON.stringify(app, null, 2)}\n`);
           '
-          npm remove expo-dev-client expo-camera expo-location expo-notifications expo-sharing --no-save --package-lock=false
+          npm remove expo-dev-client expo-camera expo-location expo-sharing --no-save --package-lock=false
 
       - name: Remove non-production workspace files
         run: |
           rm -rf .expo .claude artifacts
           find . -type f \( -name "*.log" -o -name "*.tmp" -o -name ".DS_Store" \) -delete
+
+      - name: Configure Firebase Android app
+        env:
+          ANDROID_GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.ANDROID_GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          if [ -n "$ANDROID_GOOGLE_SERVICES_JSON_BASE64" ]; then
+            echo "$ANDROID_GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > google-services.json
+            node -e '
+            const fs = require("fs");
+            const appPath = "app.json";
+            const app = JSON.parse(fs.readFileSync(appPath, "utf8"));
+            app.expo.android = app.expo.android || {};
+            app.expo.android.googleServicesFile = "./google-services.json";
+            fs.writeFileSync(appPath, `${JSON.stringify(app, null, 2)}\n`);
+            '
+          fi
 
       - name: Expo prebuild Android
         run: npx expo prebuild --platform android --no-install --clean

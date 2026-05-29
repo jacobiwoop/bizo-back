@@ -36,6 +36,10 @@ export type ResetPasswordWithOtpPayload = {
   password_confirmation: string;
 };
 
+export type UpdateFcmTokenPayload = {
+  fcm_token: string;
+};
+
 function unwrapData<T>(payload: T | { data: T }): T {
   if (payload && typeof payload === "object" && "data" in payload) {
     return payload.data as T;
@@ -82,4 +86,9 @@ export async function resetPasswordWithOtp(payload: ResetPasswordWithOtpPayload)
 export async function getProfile(): Promise<ApiUser> {
   const response = await api.get<ApiUser | { data: ApiUser }>("/profile");
   return unwrapData<ApiUser>(response.data);
+}
+
+export async function updateFcmToken(payload: UpdateFcmTokenPayload): Promise<ApiMessageResponse> {
+  const response = await api.post<ApiMessageResponse>("/auth/fcm-token", payload);
+  return response.data;
 }

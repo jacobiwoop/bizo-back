@@ -183,7 +183,9 @@ class AuthTest extends TestCase
 
     public function test_logout_revokes_token(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'fcm_token' => 'fcm_token_device_123',
+        ]);
         $token = $user->createToken('auth-token')->plainTextToken;
 
         $response = $this->withToken($token)
@@ -192,6 +194,10 @@ class AuthTest extends TestCase
         $response->assertStatus(200);
 
         $this->assertDatabaseCount('personal_access_tokens', 0);
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'fcm_token' => null,
+        ]);
     }
 
     public function test_logout_requires_auth(): void

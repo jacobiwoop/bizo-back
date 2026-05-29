@@ -65,6 +65,8 @@ class AuthController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
+        $user->update(['fcm_token' => null]);
+
         if ($token = $user->currentAccessToken()) {
             $token->delete();
         }

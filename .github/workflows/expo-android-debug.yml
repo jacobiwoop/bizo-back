@@ -50,6 +50,22 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Configure Firebase Android app
+        env:
+          ANDROID_GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.ANDROID_GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          if [ -n "$ANDROID_GOOGLE_SERVICES_JSON_BASE64" ]; then
+            echo "$ANDROID_GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > google-services.json
+            node -e '
+            const fs = require("fs");
+            const appPath = "app.json";
+            const app = JSON.parse(fs.readFileSync(appPath, "utf8"));
+            app.expo.android = app.expo.android || {};
+            app.expo.android.googleServicesFile = "./google-services.json";
+            fs.writeFileSync(appPath, `${JSON.stringify(app, null, 2)}\n`);
+            '
+          fi
+
       - name: Expo prebuild Android
         env:
           CI: "1"
