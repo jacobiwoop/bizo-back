@@ -29,6 +29,7 @@ class Listing extends Model
         'cash_complement',
         'exchange_for',
         'category',
+        'attributes',
         'condition',
         'delivery_mode',
         'photos',
@@ -48,6 +49,7 @@ class Listing extends Model
     {
         return [
             'photos' => 'array',
+            'attributes' => 'array',
             'tags' => 'array',
             'price_history' => 'array',
             'is_boosted' => 'boolean',

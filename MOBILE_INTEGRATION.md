@@ -727,6 +727,7 @@ Champs :
 - `cash_complement`
 - `exchange_for`
 - `category` requis
+- `attributes` objet JSON optionnel, avec les reponses dynamiques propres a la categorie
 - `condition` requis : `neuf|excellent|bon|correct`
 - `delivery_mode` requis : `main_propre|livraison|les_deux`
 - `country` requis
@@ -739,6 +740,8 @@ Regles metier :
 
 - `type = VENTE` => `price` requis
 - `type = TROC|TROC_CASH` => `exchange_for` requis
+- `category` accepte notamment `telephones`, `electronique`, `vehicules`, `vetements`, `maison`, `services`
+- `attributes` garde les champs variables de categorie, par exemple `brand`, `model`, `storage`, `mileage`
 - `photos[]` min `1`, max `10`
 - chaque photo max `15 Mo`
 - la requete HTTP totale doit rester sous environ `80 Mo`

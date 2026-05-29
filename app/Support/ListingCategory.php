@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 class ListingCategory
 {
     public const ELECTRONIQUE = 'electronique';
+    public const TELEPHONES = 'telephones';
     public const VETEMENTS = 'vetements';
     public const VEHICULES = 'vehicules';
     public const MAISON = 'maison';
@@ -19,6 +20,7 @@ class ListingCategory
     {
         return [
             self::ELECTRONIQUE,
+            self::TELEPHONES,
             self::VETEMENTS,
             self::VEHICULES,
             self::MAISON,
@@ -41,6 +43,7 @@ class ListingCategory
 
         return match ($normalized) {
             'electronique', 'electroniques', 'electro', 'high_tech', 'tech' => self::ELECTRONIQUE,
+            'telephone', 'telephones', 'phone', 'phones', 'smartphone', 'smartphones', 'mobile', 'mobiles' => self::TELEPHONES,
             'vetement', 'vetements', 'vêtement', 'vêtements', 'mode', 'fashion' => self::VETEMENTS,
             'vehicule', 'vehicules', 'automobile', 'auto', 'moto', 'transport' => self::VEHICULES,
             'maison', 'home', 'mobilier', 'deco', 'decoration' => self::MAISON,

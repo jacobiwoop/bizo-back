@@ -18,6 +18,7 @@ class ListingResource extends JsonResource
             'cash_complement' => $this->cash_complement,
             'exchange_for' => $this->exchange_for,
             'category' => $this->category,
+            'attributes' => $this->attributes ?? [],
             'condition' => $this->condition,
             'delivery_mode' => $this->delivery_mode,
             'photos' => $this->photos ?? [],

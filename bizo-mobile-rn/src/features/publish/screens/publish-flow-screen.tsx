@@ -1,12 +1,12 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
+import { getListingCategory, listingCategories, type ListingAttributeField, type ListingCategoryDefinition, type ListingCategoryId, type ListingCategoryIcon } from "@/src/lib/categories/listing-categories";
 import {
   ArrowDownCircle,
   ArrowRight,
   ArrowUpCircle,
   Armchair,
   BadgeDollarSign,
-  Bookmark,
   Camera,
   CarFront,
   Check,
@@ -14,21 +14,19 @@ import {
   ChevronRight,
   CircleX,
   Edit3,
-  Home,
   Info,
   Lightbulb,
   MapPin,
   Minus,
   Package,
   Plus,
-  Rocket,
   RotateCcw,
   Save,
   Search,
   Shirt,
   Smartphone,
   Sparkles,
-  Trophy,
+  Wrench,
   X,
 } from "lucide-react-native";
 import { useMemo, useState } from "react";
@@ -37,6 +35,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 type PublishMode = "sale" | "trade" | "trade-cash";
 type PublishStep = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+type PublishAttributeValue = string | string[];
+type PublishAttributes = Record<string, PublishAttributeValue>;
 
 const colors = {
   background: "#F8F9FA",
@@ -166,16 +166,24 @@ function StepOne({ mode, setMode }: { mode: PublishMode; setMode: (mode: Publish
   );
 }
 
-const categories = [
-  { label: "Véhicules", icon: CarFront },
-  { label: "Immobilier", icon: Home },
-  { label: "Électronique", icon: Smartphone, selected: true },
-  { label: "Mode", icon: Shirt },
-  { label: "Maison", icon: Armchair },
-  { label: "Sport", icon: Trophy },
-];
+function CategoryIcon({ icon, selected = false, size = 24 }: { icon: ListingCategoryIcon; selected?: boolean; size?: number }) {
+  const color = selected ? "#191C1D" : "#5F5E5E";
 
-function StepTwo() {
+  if (icon === "phone") return <Smartphone color={color} size={size} />;
+  if (icon === "electronics") return <Package color={color} size={size} />;
+  if (icon === "vehicle") return <CarFront color={color} size={size} />;
+  if (icon === "fashion") return <Shirt color={color} size={size} />;
+  if (icon === "home") return <Armchair color={color} size={size} />;
+  return <Wrench color={color} size={size} />;
+}
+
+function StepTwo({
+  selectedCategory,
+  setSelectedCategory,
+}: {
+  selectedCategory: ListingCategoryDefinition;
+  setSelectedCategory: (category: ListingCategoryId) => void;
+}) {
   return (
     <StepShell>
       <View className="flex-row items-center">
@@ -188,13 +196,17 @@ function StepTwo() {
         <TextInput className="h-11 rounded-full bg-[#F3F4F5] pl-12 pr-4 text-[15px] text-[#191C1D]" placeholder="Rechercher une catégorie..." placeholderTextColor="#5F5E5E" />
       </View>
       <View className="mt-6 overflow-hidden rounded-2xl bg-white shadow-soft">
-        {categories.map((category) => {
-          const Icon = category.icon;
+        {listingCategories.map((category) => {
+          const selected = category.id === selectedCategory.id;
           return (
-            <Pressable key={category.label} className={`flex-row items-center border-b border-[#EDEEEF] px-5 py-5 ${category.selected ? "border-l-4 border-l-[#F5C518] bg-[#FFFBEB]" : ""}`}>
-              <Icon color={category.selected ? "#191C1D" : "#5F5E5E"} size={24} />
-              <Text className={`ml-4 flex-1 text-[16px] ${category.selected ? "font-black text-[#191C1D]" : "font-semibold text-[#5F5E5E]"}`}>{category.label}</Text>
-              {category.selected ? <CheckCircle color="#F5C518" fill="#F5C518" size={20} /> : <ChevronRight color="#5F5E5E" size={20} />}
+            <Pressable
+              key={category.id}
+              className={`flex-row items-center border-b border-[#EDEEEF] px-5 py-5 ${selected ? "border-l-4 border-l-[#F5C518] bg-[#FFFBEB]" : ""}`}
+              onPress={() => setSelectedCategory(category.id)}
+            >
+              <CategoryIcon icon={category.icon} selected={selected} />
+              <Text className={`ml-4 flex-1 text-[16px] ${selected ? "font-black text-[#191C1D]" : "font-semibold text-[#5F5E5E]"}`}>{category.label}</Text>
+              {selected ? <CheckCircle color="#F5C518" fill="#F5C518" size={20} /> : <ChevronRight color="#5F5E5E" size={20} />}
             </Pressable>
           );
         })}
@@ -261,27 +273,103 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function InputBox({ placeholder, multiline = false }: { placeholder: string; multiline?: boolean }) {
+function InputBox({
+  keyboardType = "default",
+  multiline = false,
+  onChangeText,
+  placeholder,
+  value,
+}: {
+  keyboardType?: "default" | "number-pad";
+  multiline?: boolean;
+  onChangeText?: (text: string) => void;
+  placeholder: string;
+  value?: string;
+}) {
   return (
     <TextInput
       className={`rounded-xl border border-[#E1E3E4] bg-white px-4 text-[15px] text-[#191C1D] ${multiline ? "h-[120px] py-3" : "h-12"}`}
+      keyboardType={keyboardType}
       multiline={multiline}
+      onChangeText={onChangeText}
       placeholder={placeholder}
       placeholderTextColor="#9A9A9A"
       textAlignVertical={multiline ? "top" : "center"}
+      value={value}
     />
   );
 }
 
-function StepFour() {
+function DynamicAttributeField({
+  field,
+  onChange,
+  value,
+}: {
+  field: ListingAttributeField;
+  onChange: (key: string, value: PublishAttributeValue) => void;
+  value?: PublishAttributeValue;
+}) {
+  if ((field.type === "select" || field.type === "multiselect") && field.options?.length) {
+    const selectedValues = Array.isArray(value) ? value : value ? [value] : [];
+
+    return (
+      <Field label={`${field.label}${field.required ? " *" : ""}`}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+          {field.options.map((option) => {
+            const selected = selectedValues.includes(option);
+
+            return (
+              <Pressable
+                key={option}
+                className={`rounded-full border px-4 py-2 ${selected ? "border-[#745B00] bg-[#745B00]/5" : "border-[#E1E3E4] bg-white"}`}
+                onPress={() => {
+                  if (field.type === "multiselect") {
+                    const nextValue = selected ? selectedValues.filter((item) => item !== option) : [...selectedValues, option];
+                    onChange(field.key, nextValue);
+                    return;
+                  }
+
+                  onChange(field.key, option);
+                }}
+              >
+                <Text className={`text-[12px] font-bold ${selected ? "text-[#745B00]" : "text-[#191C1D]"}`}>{option}</Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      </Field>
+    );
+  }
+
+  return (
+    <Field label={`${field.label}${field.required ? " *" : ""}`}>
+      <InputBox
+        keyboardType={field.type === "number" ? "number-pad" : "default"}
+        onChangeText={(text) => onChange(field.key, text)}
+        placeholder={field.placeholder ?? field.label}
+        value={typeof value === "string" ? value : ""}
+      />
+    </Field>
+  );
+}
+
+function StepFour({
+  attributes,
+  category,
+  setAttribute,
+}: {
+  attributes: PublishAttributes;
+  category: ListingCategoryDefinition;
+  setAttribute: (key: string, value: PublishAttributeValue) => void;
+}) {
   const states = ["Neuf", "Très bon état", "Bon état", "État correct", "Pour pièces"];
 
   return (
     <StepShell>
       <Text className="mb-4 text-[30px] font-black leading-9 text-[#191C1D]">Décrivez votre article</Text>
       <View className="mb-6 self-start flex-row items-center rounded-full bg-[#F3F4F5] px-4 py-2">
-        <Smartphone color="#191C1D" size={18} />
-        <Text className="ml-2 text-[13px] font-bold text-[#191C1D]">Électronique › Smartphones</Text>
+        <CategoryIcon icon={category.icon} selected size={18} />
+        <Text className="ml-2 text-[13px] font-bold text-[#191C1D]">{category.label}</Text>
         <Edit3 color="#5F5E5E" size={16} style={{ marginLeft: 6 }} />
       </View>
       <View className="gap-5">
@@ -303,12 +391,9 @@ function StepFour() {
             })}
           </ScrollView>
         </Field>
-        <Field label="Marque">
-          <InputBox placeholder="Ex: Apple" />
-        </Field>
-        <Field label="Modèle">
-          <InputBox placeholder="Ex: iPhone 13 Pro" />
-        </Field>
+        {category.fields.map((field) => (
+          <DynamicAttributeField key={field.key} field={field} onChange={setAttribute} value={attributes[field.key]} />
+        ))}
       </View>
     </StepShell>
   );
@@ -461,7 +546,7 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function StepSeven({ mode }: { mode: PublishMode }) {
+function StepSeven({ category, mode }: { category: ListingCategoryDefinition; mode: PublishMode }) {
   const modeLabel = mode === "sale" ? "Vente" : mode === "trade" ? "Troc" : "Troc + Cash";
 
   return (
@@ -490,7 +575,7 @@ function StepSeven({ mode }: { mode: PublishMode }) {
       </View>
       <View className="mt-6 rounded-2xl bg-white px-4 shadow-soft">
         <SummaryRow label="Mode" value={modeLabel} />
-        <SummaryRow label="Catégorie" value="Électronique › Smartphones" />
+        <SummaryRow label="Catégorie" value={category.label} />
         <SummaryRow label="État" value="Très bon état" />
         <SummaryRow label="Localisation" value="Cocody, Abidjan" />
         <SummaryRow label="Photos" value="3 photos ajoutées" />
@@ -502,18 +587,28 @@ function StepSeven({ mode }: { mode: PublishMode }) {
 export function PublishFlowScreen() {
   const [step, setStep] = useState<PublishStep>(1);
   const [mode, setMode] = useState<PublishMode>("sale");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<ListingCategoryId>("telephones");
+  const [attributes, setAttributes] = useState<PublishAttributes>({});
+  const selectedCategory = getListingCategory(selectedCategoryId);
+  const selectCategory = (category: ListingCategoryId) => {
+    setSelectedCategoryId(category);
+    setAttributes({});
+  };
+  const setAttribute = (key: string, value: PublishAttributeValue) => {
+    setAttributes((current) => ({ ...current, [key]: value }));
+  };
 
   const content = useMemo(() => {
     if (step === 1) return <StepOne mode={mode} setMode={setMode} />;
-    if (step === 2) return <StepTwo />;
+    if (step === 2) return <StepTwo selectedCategory={selectedCategory} setSelectedCategory={selectCategory} />;
     if (step === 3) return <StepThree />;
-    if (step === 4) return <StepFour />;
+    if (step === 4) return <StepFour attributes={attributes} category={selectedCategory} setAttribute={setAttribute} />;
     if (step === 5 && mode === "sale") return <StepFiveSale />;
     if (step === 5 && mode === "trade") return <StepFiveTrade />;
     if (step === 5) return <StepFiveTradeCash />;
     if (step === 6) return <StepSix />;
-    return <StepSeven mode={mode} />;
-  }, [mode, step]);
+    return <StepSeven category={selectedCategory} mode={mode} />;
+  }, [attributes, mode, selectedCategory, step]);
 
   const next = () => {
     if (step === 7) {

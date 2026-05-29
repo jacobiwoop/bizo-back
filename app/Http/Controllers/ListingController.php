@@ -60,6 +60,7 @@ class ListingController extends Controller
             'cash_complement' => $request->cash_complement,
             'exchange_for' => $request->type !== 'VENTE' ? $request->exchange_for : null,
             'category' => $request->category,
+            'attributes' => $request->attributes ?? [],
             'condition' => $request->condition,
             'delivery_mode' => $request->delivery_mode,
             'photos' => $photos,
@@ -102,10 +103,26 @@ class ListingController extends Controller
 
         $type = $request->input('type', $listing->type);
         $isChangingType = $request->has('type');
+        $merge = [];
 
-        $request->merge([
-            'category' => ListingCategory::normalize($request->input('category')),
-        ]);
+        if ($request->has('category')) {
+            $merge['category'] = ListingCategory::normalize($request->input('category'));
+        }
+
+        if ($request->has('attributes')) {
+            $attributes = $request->input('attributes');
+
+            if (is_string($attributes)) {
+                $decodedAttributes = json_decode($attributes, true);
+                $attributes = is_array($decodedAttributes) ? $decodedAttributes : $attributes;
+            }
+
+            $merge['attributes'] = $attributes;
+        }
+
+        if ($merge !== []) {
+            $request->merge($merge);
+        }
 
         $validated = $request->validate([
             'title' => ['sometimes', 'string', 'min:5', 'max:80'],
@@ -115,6 +132,8 @@ class ListingController extends Controller
             'cash_complement' => ['nullable', 'integer', 'min:0'],
             'exchange_for' => ['sometimes', 'nullable', 'string', 'max:255'],
             'category' => ['sometimes', 'string', Rule::in(ListingCategory::values())],
+            'attributes' => ['nullable', 'array'],
+            'attributes.*' => ['nullable'],
             'condition' => ['sometimes', 'string', 'in:neuf,excellent,bon,correct'],
             'delivery_mode' => ['sometimes', 'string', 'in:main_propre,livraison,les_deux'],
             'country' => ['sometimes', 'string', 'max:5'],

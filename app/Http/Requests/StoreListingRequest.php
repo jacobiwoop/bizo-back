@@ -23,6 +23,8 @@ class StoreListingRequest extends FormRequest
             'cash_complement' => ['nullable', 'integer', 'min:0'],
             'exchange_for' => ['required_if:type,TROC,TROC_CASH', 'nullable', 'string', 'max:255'],
             'category' => ['required', 'string', Rule::in(ListingCategory::values())],
+            'attributes' => ['nullable', 'array'],
+            'attributes.*' => ['nullable'],
             'condition' => ['required', 'string', 'in:neuf,excellent,bon,correct'],
             'delivery_mode' => ['required', 'string', 'in:main_propre,livraison,les_deux'],
             'country' => ['required', 'string', 'max:5'],
@@ -68,8 +70,16 @@ class StoreListingRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        $attributes = $this->input('attributes');
+
+        if (is_string($attributes)) {
+            $decodedAttributes = json_decode($attributes, true);
+            $attributes = is_array($decodedAttributes) ? $decodedAttributes : $attributes;
+        }
+
         $this->merge([
             'category' => ListingCategory::normalize($this->input('category')),
+            'attributes' => $attributes,
         ]);
     }
 }

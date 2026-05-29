@@ -47,6 +47,7 @@ export type PaginatedApiResponse<T> = {
 };
 
 export type ListingType = "VENTE" | "TROC" | "TROC_CASH";
+export type ListingAttributes = Record<string, string | number | boolean | string[] | null>;
 
 export type ListingResource = {
   id: string;
@@ -57,6 +58,7 @@ export type ListingResource = {
   cash_complement: number | null;
   exchange_for: string | null;
   category: string;
+  attributes: ListingAttributes;
   condition: string;
   delivery_mode: string;
   photos: string[];
