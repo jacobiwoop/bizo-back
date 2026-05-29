@@ -32,6 +32,11 @@ export type CreateListingPayload = {
   country: string;
   city: string;
   neighborhood?: string | null;
+  location_id?: string | null;
+  place_id?: string | null;
+  display_lat?: number | null;
+  display_lng?: number | null;
+  location_accuracy?: "exact" | "district" | "city" | null;
   tags?: string[];
   photos: ListingPhotoUpload[];
 };
@@ -73,6 +78,26 @@ export async function createListing(payload: CreateListingPayload): Promise<List
 
   if (payload.neighborhood) {
     formData.append("neighborhood", payload.neighborhood);
+  }
+
+  if (payload.location_id) {
+    formData.append("location_id", payload.location_id);
+  }
+
+  if (payload.place_id) {
+    formData.append("place_id", payload.place_id);
+  }
+
+  if (payload.display_lat !== undefined && payload.display_lat !== null) {
+    formData.append("display_lat", String(payload.display_lat));
+  }
+
+  if (payload.display_lng !== undefined && payload.display_lng !== null) {
+    formData.append("display_lng", String(payload.display_lng));
+  }
+
+  if (payload.location_accuracy) {
+    formData.append("location_accuracy", payload.location_accuracy);
   }
 
   payload.tags?.forEach((tag) => {

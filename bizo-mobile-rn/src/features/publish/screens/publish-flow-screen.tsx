@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import { useCreateListingMutation } from "@/src/features/publish/api/use-create-listing";
 import { normalizeApiError } from "@/src/lib/api/errors";
 import { type ListingPhotoUpload } from "@/src/lib/api/listings";
+import { searchLocations, type LocationResource, type PlaceResource } from "@/src/lib/api/locations";
 import { getListingCategory, listingCategories, type ListingAttributeField, type ListingCategoryDefinition, type ListingCategoryId, type ListingCategoryIcon } from "@/src/lib/categories/listing-categories";
 import { useSessionStore } from "@/src/store/session";
 import {
@@ -38,8 +39,8 @@ import {
   Wrench,
   X,
 } from "lucide-react-native";
-import { useMemo, useState } from "react";
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, type DimensionValue, Text, TextInput, useWindowDimensions, View } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, type DimensionValue, Text, TextInput, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type PublishMode = "sale" | "trade" | "trade-cash";
@@ -60,6 +61,12 @@ type PublishForm = {
   city: string;
   neighborhood: string;
   country: string;
+  locationId: string | null;
+  placeId: string | null;
+  displayLat: number | null;
+  displayLng: number | null;
+  locationAccuracy: "exact" | "district" | "city";
+  locationLabel: string;
   deliveryMode: DeliveryMode;
 };
 
@@ -92,13 +99,19 @@ const conditionOptions: Array<{ label: string; value: PublishCondition }> = [
 
 const initialForm: PublishForm = {
   cashComplement: "",
-  city: "Abidjan",
+  city: "",
   condition: "excellent",
-  country: "CI",
+  country: "BJ",
   deliveryMode: "main_propre",
   description: "",
+  displayLat: null,
+  displayLng: null,
   exchangeFor: "",
-  neighborhood: "Cocody",
+  locationAccuracy: "district",
+  locationId: null,
+  locationLabel: "",
+  neighborhood: "",
+  placeId: null,
   price: "",
   title: "",
 };
@@ -184,6 +197,38 @@ function buildPhotoUpload(asset: ImagePicker.ImagePickerAsset): PublishPhoto {
 
 const mapImage =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuAyRpQqK4fUNelktUs2pH4jNKU20tlGE_1xgGT_pt4jU-nh-yZKiJxvrCso7h63jXRwn7tpLa8OBUnZlntPMkYDT0oqpzmme3VHTrJ6flZAikh4poCM1Zag5lwzwq4WE59_OKBNR9eBfFNX98SmA-ebU7JC78RLWfdCsR3LKxmo5TSaD5dx0F8oAfv-jXkrZI8WEF54RnHwIzr22ECDtLQJo6q-M2xrs3Q-PDHhi74KPYLR-pa5UBk-cLiQlAXoQXA6nrYKm5RLKHs";
+
+type PublishLocationSuggestion =
+  | { id: string; kind: "location"; label: string; subtitle: string; location: LocationResource }
+  | { id: string; kind: "place"; label: string; subtitle: string; place: PlaceResource };
+
+function locationSuggestionLabel(location: LocationResource) {
+  return [location.name, location.parent?.name].filter(Boolean).join(", ");
+}
+
+function placeSuggestionLabel(place: PlaceResource) {
+  const locationLabel = place.location ? locationSuggestionLabel(place.location) : null;
+  return [place.name, locationLabel].filter(Boolean).join(", ");
+}
+
+function buildLocationSuggestions(locations: LocationResource[], places: PlaceResource[]): PublishLocationSuggestion[] {
+  return [
+    ...locations.map((location) => ({
+      id: `location-${location.id}`,
+      kind: "location" as const,
+      label: locationSuggestionLabel(location),
+      location,
+      subtitle: location.type === "city" ? "Ville" : location.type === "district" ? "Quartier" : "Pays",
+    })),
+    ...places.map((place) => ({
+      id: `place-${place.id}`,
+      kind: "place" as const,
+      label: placeSuggestionLabel(place),
+      place,
+      subtitle: "Repère proche",
+    })),
+  ];
+}
 
 function Header({
   step,
@@ -802,28 +847,158 @@ function StepSix({
   form: PublishForm;
   setForm: (patch: Partial<PublishForm>) => void;
 }) {
+  const [query, setQuery] = useState(form.locationLabel);
+  const [suggestions, setSuggestions] = useState<PublishLocationSuggestion[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  useEffect(() => {
+    setQuery(form.locationLabel);
+  }, [form.locationLabel]);
+
+  useEffect(() => {
+    const trimmedQuery = query.trim();
+
+    if (trimmedQuery.length < 2 || trimmedQuery === form.locationLabel) {
+      setSuggestions([]);
+      setIsSearching(false);
+      return;
+    }
+
+    let cancelled = false;
+    setIsSearching(true);
+
+    const timeout = setTimeout(async () => {
+      try {
+        const results = await searchLocations(trimmedQuery);
+        if (!cancelled) {
+          setSuggestions(buildLocationSuggestions(results.locations, results.places));
+        }
+      } catch {
+        if (!cancelled) {
+          setSuggestions([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsSearching(false);
+        }
+      }
+    }, 350);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
+  }, [form.locationLabel, query]);
+
+  const selectSuggestion = (suggestion: PublishLocationSuggestion) => {
+    if (suggestion.kind === "location") {
+      const location = suggestion.location;
+      const isCity = location.type === "city";
+
+      setForm({
+        city: isCity ? location.name : location.parent?.name ?? location.name,
+        country: location.country_code,
+        displayLat: location.lat,
+        displayLng: location.lng,
+        locationAccuracy: isCity ? "city" : "district",
+        locationId: location.id,
+        locationLabel: suggestion.label,
+        neighborhood: isCity ? "" : location.name,
+        placeId: null,
+      });
+    } else {
+      const place = suggestion.place;
+      const location = place.location;
+      const parent = location?.parent;
+
+      setForm({
+        city: parent?.name ?? location?.name ?? place.name,
+        country: place.country_code,
+        displayLat: place.lat,
+        displayLng: place.lng,
+        locationAccuracy: location?.type === "city" ? "city" : "district",
+        locationId: location?.id ?? null,
+        locationLabel: suggestion.label,
+        neighborhood: location?.type === "district" ? location.name : "",
+        placeId: place.id,
+      });
+    }
+
+    setSuggestions([]);
+  };
+
   return (
     <StepShell>
       <InlineMessage message={errorMessage} />
       <Text className="text-[24px] font-black leading-8 text-[#191C1D]">Où se trouve votre article?</Text>
-      <Text className="mt-2 text-[15px] leading-6 text-[#5F5E5E]">La localisation approximative aide les acheteurs à vous trouver.</Text>
+      <Text className="mt-2 text-[15px] leading-6 text-[#5F5E5E]">Cherchez une ville, un quartier ou un repère proche.</Text>
       <View className="relative mt-6">
         <MapPin color="#5B5BD6" size={22} style={{ left: 16, position: "absolute", top: 13, zIndex: 1 }} />
-        <TextInput className="h-12 rounded-2xl border border-[#8283FF] bg-white px-12 text-[15px] text-[#191C1D]" onChangeText={(city) => setForm({ city })} placeholder="Ex: Abidjan" value={form.city} />
-        <MapPin color="#5F5E5E" size={20} style={{ position: "absolute", right: 16, top: 14 }} />
+        <TextInput
+          className="h-12 rounded-2xl border border-[#8283FF] bg-white px-12 pr-12 text-[15px] text-[#191C1D]"
+          onChangeText={(value) => {
+            setQuery(value);
+            setForm({
+              city: "",
+              displayLat: null,
+              displayLng: null,
+              locationId: null,
+              locationLabel: value,
+              neighborhood: "",
+              placeId: null,
+            });
+          }}
+          placeholder="Ex: Cadjéhoun, Cotonou"
+          value={query}
+        />
+        {isSearching ? (
+          <ActivityIndicator color="#5B5BD6" size="small" style={{ position: "absolute", right: 16, top: 14 }} />
+        ) : (
+          <Search color="#5F5E5E" size={20} style={{ position: "absolute", right: 16, top: 14 }} />
+        )}
       </View>
-      <View className="relative mt-3">
-        <MapPin color="#5F5E5E" size={20} style={{ left: 16, position: "absolute", top: 13, zIndex: 1 }} />
-        <TextInput className="h-12 rounded-2xl border border-[#E1E3E4] bg-white px-12 text-[15px] text-[#191C1D]" onChangeText={(neighborhood) => setForm({ neighborhood })} placeholder="Quartier" value={form.neighborhood} />
-      </View>
-      <View className="mt-4">
-        {["Cocody Riviera", "Cocody Angré"].map((place) => (
-          <Pressable key={place} className="flex-row items-center py-2" onPress={() => setForm({ city: "Abidjan", neighborhood: place })}>
-            <MapPin color="#5F5E5E" size={18} />
-            <Text className="ml-3 text-[14px] text-[#5F5E5E]">{place}, Abidjan</Text>
+
+      {suggestions.length > 0 ? (
+        <View className="mt-3 overflow-hidden rounded-2xl border border-[#E1E3E4] bg-white">
+          {suggestions.slice(0, 6).map((suggestion) => (
+            <Pressable key={suggestion.id} className="flex-row items-center border-b border-[#F3F4F5] px-4 py-3" onPress={() => selectSuggestion(suggestion)}>
+              <MapPin color={suggestion.kind === "place" ? "#745B00" : "#5B5BD6"} size={18} />
+              <View className="ml-3 flex-1">
+                <Text className="text-[14px] font-bold text-[#191C1D]">{suggestion.label}</Text>
+                <Text className="mt-1 text-[12px] text-[#5F5E5E]">{suggestion.subtitle}</Text>
+              </View>
+              <ChevronRight color="#C8C6C5" size={18} />
+            </Pressable>
+          ))}
+        </View>
+      ) : form.locationId || form.placeId ? (
+        <View className="mt-3 flex-row items-center rounded-2xl bg-[#F3F7FF] px-4 py-3">
+          <CheckCircle color="#5B5BD6" fill="#5B5BD6" size={20} />
+          <Text className="ml-3 flex-1 text-[14px] font-bold text-[#191C1D]">{form.locationLabel}</Text>
+        </View>
+      ) : null}
+
+      {query.trim().length >= 2 && !isSearching && suggestions.length === 0 && !form.locationId && !form.placeId ? (
+        <View className="mt-3 rounded-2xl border border-[#E1E3E4] bg-white px-4 py-3">
+          <Text className="text-[13px] font-semibold text-[#5F5E5E]">Aucun résultat sélectionné pour le moment.</Text>
+          <Pressable
+            className="mt-3 flex-row items-center"
+            onPress={() =>
+              setForm({
+                city: query.trim(),
+                country: "BJ",
+                locationAccuracy: "city",
+                locationLabel: query.trim(),
+                neighborhood: "",
+              })
+            }
+          >
+            <Plus color="#5B5BD6" size={18} />
+            <Text className="ml-2 text-[13px] font-bold text-[#5B5BD6]">Utiliser “{query.trim()}”</Text>
           </Pressable>
-        ))}
-      </View>
+        </View>
+      ) : null}
+
       <View className="mt-5 h-[220px] overflow-hidden rounded-3xl bg-white shadow-soft">
         <Image source={mapImage} style={{ width: "100%", height: "100%" }} contentFit="cover" />
         <View className="absolute inset-0 items-center justify-center">
@@ -903,7 +1078,7 @@ function StepSeven({
   const { width } = useWindowDimensions();
   const carouselWidth = width - 40;
   const title = form.title.trim() || "Titre à renseigner";
-  const location = [form.neighborhood, form.city].filter(Boolean).join(", ") || "Localisation à renseigner";
+  const location = form.locationLabel || [form.neighborhood, form.city].filter(Boolean).join(", ") || "Localisation à renseigner";
   const deliveryModeLabel = getDeliveryModeLabel(form.deliveryMode);
 
   return (
@@ -1060,8 +1235,8 @@ export function PublishFlowScreen() {
       }
     }
 
-    if (step === 6 && form.city.trim().length === 0) {
-      return "La ville est requise.";
+    if (step === 6 && form.locationLabel.trim().length === 0) {
+      return "La localisation est requise.";
     }
 
     return null;
@@ -1090,8 +1265,13 @@ export function PublishFlowScreen() {
         country: form.country,
         delivery_mode: form.deliveryMode,
         description: form.description.trim(),
+        display_lat: form.displayLat,
+        display_lng: form.displayLng,
         exchange_for: mode === "sale" ? null : form.exchangeFor.trim(),
+        location_accuracy: form.locationAccuracy,
+        location_id: form.locationId,
         neighborhood: form.neighborhood.trim() || null,
+        place_id: form.placeId,
         photos: pickedPhotos,
         price: mode === "sale" ? parseAmount(form.price) : null,
         tags: [],

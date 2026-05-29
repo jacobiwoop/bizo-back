@@ -29,11 +29,16 @@ export async function registerAndroidPushNotifications() {
     return null;
   }
 
+  const existingChannel = await Notifications.getNotificationChannelAsync(BIZO_NOTIFICATION_CHANNEL_ID);
+
+  if (existingChannel?.sound === "custom") {
+    await Notifications.deleteNotificationChannelAsync(BIZO_NOTIFICATION_CHANNEL_ID);
+  }
+
   await Notifications.setNotificationChannelAsync(BIZO_NOTIFICATION_CHANNEL_ID, {
     importance: Notifications.AndroidImportance.MAX,
     lightColor: "#F5C518",
     name: "Bizo",
-    sound: "default",
     vibrationPattern: [0, 250, 250, 250],
   });
 
