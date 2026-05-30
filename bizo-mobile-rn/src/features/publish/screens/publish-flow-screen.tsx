@@ -2,6 +2,7 @@ import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import * as ExpoLocation from "expo-location";
 import { router } from "expo-router";
+import { Camera as MapLibreCamera, Map as MapLibreMap, Marker as MapLibreMarker, type PressEvent as MapLibrePressEvent, type StyleSpecification, type ViewStateChangeEvent as MapLibreViewStateChangeEvent } from "@maplibre/maplibre-react-native";
 import { useCreateListingMutation } from "@/src/features/publish/api/use-create-listing";
 import { normalizeApiError } from "@/src/lib/api/errors";
 import { type ListingPhotoUpload } from "@/src/lib/api/listings";
@@ -41,8 +42,7 @@ import {
   X,
 } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, type DimensionValue, Text, TextInput, useWindowDimensions, View } from "react-native";
-import MapView, { Marker, type MapPressEvent, type MarkerDragStartEndEvent, type Region } from "react-native-maps";
+import { ActivityIndicator, KeyboardAvoidingView, type NativeSyntheticEvent, Platform, Pressable, ScrollView, type DimensionValue, Text, TextInput, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type PublishMode = "sale" | "trade" | "trade-cash";
@@ -197,11 +197,31 @@ function buildPhotoUpload(asset: ImagePicker.ImagePickerAsset): PublishPhoto {
   };
 }
 
-const defaultPublishMapRegion: Region = {
+type PublishMapCoordinate = { latitude: number; longitude: number };
+
+const defaultPublishMapCoordinate: PublishMapCoordinate = {
   latitude: 6.3676953,
-  latitudeDelta: 0.08,
   longitude: 2.4252507,
-  longitudeDelta: 0.08,
+};
+
+const publishMapStyle: StyleSpecification = {
+  glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+  layers: [
+    {
+      id: "osm-raster",
+      source: "osm",
+      type: "raster",
+    },
+  ],
+  sources: {
+    osm: {
+      attribution: "© OpenStreetMap contributors",
+      tileSize: 256,
+      tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+      type: "raster",
+    },
+  },
+  version: 8,
 };
 
 type PublishLocationSuggestion =
@@ -213,7 +233,7 @@ type PublishLocationSuggestionGroup = {
   title: string;
 };
 type PendingMapPosition = {
-  coordinate: { latitude: number; longitude: number };
+  coordinate: PublishMapCoordinate;
   reverseResult: ReverseLocationResponse["data"] | null;
 };
 
@@ -904,21 +924,22 @@ function StepSix({
     ? { latitude: form.displayLat, longitude: form.displayLng }
     : null;
   const selectedCoordinate = pendingMapPosition?.coordinate ?? selectedFormCoordinate;
+  const [mapCenterCoordinate, setMapCenterCoordinate] = useState<PublishMapCoordinate>(selectedCoordinate ?? defaultPublishMapCoordinate);
   const suggestionGroups = groupLocationSuggestions(suggestions).map((group) => ({
     ...group,
     items: group.items.slice(0, 4),
   }));
-  const mapRegion: Region = selectedCoordinate
-    ? {
-        ...selectedCoordinate,
-        latitudeDelta: form.locationAccuracy === "city" ? 0.08 : 0.025,
-        longitudeDelta: form.locationAccuracy === "city" ? 0.08 : 0.025,
-      }
-    : defaultPublishMapRegion;
+  const mapZoom = form.locationAccuracy === "city" ? 12 : 14;
 
   useEffect(() => {
     setQuery(form.locationLabel);
   }, [form.locationLabel]);
+
+  useEffect(() => {
+    if (selectedCoordinate) {
+      setMapCenterCoordinate(selectedCoordinate);
+    }
+  }, [selectedCoordinate?.latitude, selectedCoordinate?.longitude]);
 
   useEffect(() => {
     const trimmedQuery = query.trim();
@@ -995,7 +1016,7 @@ function StepSix({
     setReverseError(null);
   };
 
-  const resolveMapPosition = async (coordinate: { latitude: number; longitude: number }) => {
+  const resolveMapPosition = async (coordinate: PublishMapCoordinate) => {
     setPendingMapPosition({ coordinate, reverseResult: null });
     setReverseError(null);
     setIsReverseSearching(true);
@@ -1011,12 +1032,18 @@ function StepSix({
     }
   };
 
-  const handleMapPress = (event: MapPressEvent) => {
-    resolveMapPosition(event.nativeEvent.coordinate);
+  const handleMapPress = (event: NativeSyntheticEvent<MapLibrePressEvent>) => {
+    const [longitude, latitude] = event.nativeEvent.lngLat;
+    resolveMapPosition({ latitude, longitude });
   };
 
-  const handleMarkerDragEnd = (event: MarkerDragStartEndEvent) => {
-    resolveMapPosition(event.nativeEvent.coordinate);
+  const handleMapRegionDidChange = (event: NativeSyntheticEvent<MapLibreViewStateChangeEvent>) => {
+    const [longitude, latitude] = event.nativeEvent.center;
+    setMapCenterCoordinate({ latitude, longitude });
+  };
+
+  const handleUseMapCenter = () => {
+    resolveMapPosition(mapCenterCoordinate);
   };
 
   const handleUseCurrentPosition = async () => {
@@ -1181,31 +1208,37 @@ function StepSix({
       ) : null}
 
       <View className="mt-5 h-[220px] overflow-hidden rounded-3xl bg-white shadow-soft">
-        <MapView
-          key={`${mapRegion.latitude}-${mapRegion.longitude}-${mapRegion.latitudeDelta}`}
-          initialRegion={mapRegion}
-          loadingBackgroundColor="#FFFFFF"
-          loadingEnabled
+        <MapLibreMap
+          attribution
+          compass={false}
+          doubleTapZoom
+          dragPan
+          logo={false}
+          mapStyle={publishMapStyle}
           onPress={handleMapPress}
-          pitchEnabled={false}
-          rotateEnabled={false}
-          showsCompass={false}
-          showsMyLocationButton={false}
+          onRegionDidChange={handleMapRegionDidChange}
+          scaleBar={false}
           style={{ height: "100%", width: "100%" }}
-          toolbarEnabled={false}
-          zoomControlEnabled={false}
+          touchPitch={false}
+          touchRotate={false}
+          touchZoom
         >
+          <MapLibreCamera
+            center={[mapCenterCoordinate.longitude, mapCenterCoordinate.latitude]}
+            duration={250}
+            zoom={mapZoom}
+          />
           {selectedCoordinate ? (
-            <Marker coordinate={selectedCoordinate} draggable onDragEnd={handleMarkerDragEnd} tracksViewChanges={false}>
+            <MapLibreMarker anchor="bottom" lngLat={[selectedCoordinate.longitude, selectedCoordinate.latitude]}>
               <View className="items-center">
                 <View className="h-11 w-11 items-center justify-center rounded-full bg-[#F5C518] shadow-soft">
                   <MapPin color="#191C1D" fill="#191C1D" size={24} />
                 </View>
                 <View className="-mt-1 h-3 w-3 rotate-45 bg-[#F5C518]" />
               </View>
-            </Marker>
+            </MapLibreMarker>
           ) : null}
-        </MapView>
+        </MapLibreMap>
         {selectedCoordinate ? null : (
           <View className="absolute inset-0 items-center justify-center bg-white/55">
             <View className="h-12 w-12 items-center justify-center rounded-full bg-white shadow-soft">
@@ -1213,6 +1246,10 @@ function StepSix({
             </View>
           </View>
         )}
+        <Pressable className="absolute bottom-3 left-3 right-3 flex-row items-center justify-center rounded-2xl bg-white/95 px-4 py-3 shadow-soft" onPress={handleUseMapCenter}>
+          <MapPin color="#191C1D" size={17} />
+          <Text className="ml-2 text-[13px] font-black text-[#191C1D]">Utiliser le centre de la carte</Text>
+        </Pressable>
       </View>
       {isReverseSearching ? (
         <View className="mt-3 flex-row items-center rounded-2xl border border-[#E1E3E4] bg-white px-4 py-3">
