@@ -185,6 +185,63 @@ class LocationTest extends TestCase
         ]);
     }
 
+    public function test_location_enrichment_updates_existing_hierarchy_match(): void
+    {
+        config(['services.location.mapbox_token' => null]);
+
+        $cotonou = Location::create([
+            'name' => 'Cotonou',
+            'type' => 'city',
+            'country_code' => 'BJ',
+            'source' => 'osm',
+            'is_verified' => false,
+        ]);
+
+        $cadjehoun = Location::create([
+            'name' => 'Cadjéhoun',
+            'type' => 'district',
+            'parent_id' => $cotonou->id,
+            'country_code' => 'BJ',
+            'source' => 'osm',
+            'is_verified' => false,
+        ]);
+
+        Http::fake([
+            'nominatim.openstreetmap.org/*' => Http::response([
+                [
+                    'place_id' => 123,
+                    'osm_type' => 'node',
+                    'osm_id' => 3016019580,
+                    'name' => 'Cadjéhoun',
+                    'display_name' => 'Cadjéhoun, Cotonou, Bénin',
+                    'lat' => '6.3614375',
+                    'lon' => '2.3994000',
+                    'class' => 'place',
+                    'type' => 'neighbourhood',
+                    'addresstype' => 'neighbourhood',
+                    'importance' => 0.08,
+                    'address' => [
+                        'neighbourhood' => 'Cadjéhoun',
+                        'city' => 'Cotonou',
+                        'country_code' => 'bj',
+                    ],
+                ],
+            ]),
+        ]);
+
+        $response = $this->getJson('/api/v1/locations/search?q=Cadjéhoun&country=BJ&enrich=1');
+
+        $response->assertOk()
+            ->assertJsonPath('data.locations.0.id', $cadjehoun->id);
+
+        $this->assertDatabaseCount('locations', 2);
+        $this->assertDatabaseHas('locations', [
+            'id' => $cadjehoun->id,
+            'external_id' => 'node:3016019580',
+            'lat' => '6.36143750',
+        ]);
+    }
+
     public function test_location_search_falls_back_to_mapbox_when_osm_has_no_result(): void
     {
         config(['services.location.mapbox_token' => 'test-token']);

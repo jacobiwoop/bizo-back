@@ -204,14 +204,20 @@ class LocationEnrichmentService
         $parent = $type === 'district' ? $this->resolveParentCityFromAddress($item['address'] ?? [], $country) : null;
         $externalId = $this->osmExternalId($item);
 
+        $hierarchy = [
+            'type' => $type,
+            'parent_id' => $parent?->id,
+            'country_code' => $country,
+            'slug' => Location::normalizeName($name),
+        ];
+
         $location = $externalId
             ? Location::firstOrNew(['source' => 'osm', 'external_id' => $externalId])
-            : Location::firstOrNew([
-                'type' => $type,
-                'parent_id' => $parent?->id,
-                'country_code' => $country,
-                'slug' => Location::normalizeName($name),
-            ]);
+            : Location::firstOrNew($hierarchy);
+
+        if (! $location->exists && $externalId) {
+            $location = Location::firstOrNew($hierarchy);
+        }
 
         $location->fill([
             'name' => $name,
@@ -243,14 +249,20 @@ class LocationEnrichmentService
         $location = $this->resolveBestLocationFromAddress($item['address'] ?? [], $country);
         $category = $forcedCategory ?: $this->categoryFromOsm($item);
 
+        $fallback = [
+            'country_code' => $country,
+            'slug' => Location::normalizeName($name),
+            'lat' => $lat,
+            'lng' => $lng,
+        ];
+
         $place = $externalId
             ? Place::firstOrNew(['source' => 'osm', 'external_id' => $externalId])
-            : Place::firstOrNew([
-                'country_code' => $country,
-                'slug' => Location::normalizeName($name),
-                'lat' => $lat,
-                'lng' => $lng,
-            ]);
+            : Place::firstOrNew($fallback);
+
+        if (! $place->exists && $externalId) {
+            $place = Place::firstOrNew($fallback);
+        }
 
         $place->fill([
             'name' => $name,
@@ -318,14 +330,20 @@ class LocationEnrichmentService
         $parent = $type === 'district' ? $this->resolveParentCityFromMapbox($properties, $country) : null;
         $externalId = $properties['mapbox_id'] ?? $feature['id'] ?? null;
 
+        $hierarchy = [
+            'type' => $type,
+            'parent_id' => $parent?->id,
+            'country_code' => $country,
+            'slug' => Location::normalizeName($name),
+        ];
+
         $location = $externalId
             ? Location::firstOrNew(['source' => 'mapbox', 'external_id' => $externalId])
-            : Location::firstOrNew([
-                'type' => $type,
-                'parent_id' => $parent?->id,
-                'country_code' => $country,
-                'slug' => Location::normalizeName($name),
-            ]);
+            : Location::firstOrNew($hierarchy);
+
+        if (! $location->exists && $externalId) {
+            $location = Location::firstOrNew($hierarchy);
+        }
 
         $location->fill([
             'name' => $name,
@@ -357,14 +375,20 @@ class LocationEnrichmentService
         $location = $this->resolveParentCityFromMapbox($properties, $country);
         $category = $forcedCategory ?: ($properties['poi_category'][0] ?? $properties['feature_type'] ?? 'place');
 
+        $fallback = [
+            'country_code' => $country,
+            'slug' => Location::normalizeName($name),
+            'lat' => $coordinates['lat'],
+            'lng' => $coordinates['lng'],
+        ];
+
         $place = $externalId
             ? Place::firstOrNew(['source' => 'mapbox', 'external_id' => $externalId])
-            : Place::firstOrNew([
-                'country_code' => $country,
-                'slug' => Location::normalizeName($name),
-                'lat' => $coordinates['lat'],
-                'lng' => $coordinates['lng'],
-            ]);
+            : Place::firstOrNew($fallback);
+
+        if (! $place->exists && $externalId) {
+            $place = Place::firstOrNew($fallback);
+        }
 
         $place->fill([
             'name' => $name,
