@@ -9,6 +9,9 @@ export type DetailProduct = {
   price: string;
   location: string;
   city: string;
+  displayLat?: number | null;
+  displayLng?: number | null;
+  locationAccuracy?: "exact" | "district" | "city" | null;
   image: string;
   photos?: string[];
   type?: "VENTE" | "TROC" | "TROC_CASH";
@@ -51,6 +54,9 @@ export const detailProducts: Record<string, DetailProduct> = {
     price: "$8,000",
     location: "New York",
     city: "New York",
+    displayLat: 40.7128,
+    displayLng: -74.006,
+    locationAccuracy: "city",
     image: listingById["honda-jazz"].image,
     badge: "Boost",
     stats: ["2020", "Automatic", "48.500 km"],
@@ -76,6 +82,9 @@ export const detailProducts: Record<string, DetailProduct> = {
     price: "$202,5k",
     location: "Silver Lake, Los Angeles",
     city: "Los Angeles",
+    displayLat: 34.0867,
+    displayLng: -118.2702,
+    locationAccuracy: "district",
     image: listingById["macbook-pro-m1"].image,
     badge: "Urgent",
     stats: ['14"', "512 GB", "Like new"],
@@ -101,6 +110,9 @@ export const detailProducts: Record<string, DetailProduct> = {
     price: "$202,5k",
     location: "Fishtown, Philadelphia",
     city: "Philadelphia",
+    displayLat: 39.9697,
+    displayLng: -75.1355,
+    locationAccuracy: "district",
     image: listingById["willow-creek"].image,
     badge: "Boost",
     stats: ["3 Beds", "2 Baths", "1.980 sqft"],

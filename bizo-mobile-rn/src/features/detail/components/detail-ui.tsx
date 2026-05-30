@@ -1,4 +1,5 @@
 import { Image } from "expo-image";
+import { Camera as MapLibreCamera, Map as MapLibreMap, Marker as MapLibreMarker, type StyleSpecification } from "@maplibre/maplibre-react-native";
 import {
   ArrowRight,
   BadgeCheck,
@@ -23,7 +24,7 @@ import {
   X,
 } from "lucide-react-native";
 import * as React from "react";
-import { NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
+import { Modal, NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, Text, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { DetailProduct } from "@/src/features/detail/mocks/detail-mocks";
@@ -34,10 +35,52 @@ const productImage =
 const galleryImage =
   "https://lh3.googleusercontent.com/aida/ADBb0uhLj9_1z6foyBmwNcGrpeb4cPFo3eLSaOIdxrmKu_ON0cVyF2tpJGUB3O0RaEfZ4zX_q8SUJLagVZdb5AfFJevg3TI_WDq_U2hfZvVrwYBRhTLTZ5gnJk0rKpPRGfRHcP-afnMsr0SvU26aBxgNCOfH5wFIMQiSA8sayT6kWKIxvsCZU0mw6m2_A-PCA-yomZlWdOxlQ-qKKzO-5hPZxXytJIWRJT4CI7_J8yMGZHX1jH0eh0jTyIoaURk";
 
-const mapImage =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuC52uFb76YlL6UgcoEgSPLn8MOQRz4OKF4JLjn86F3FflNmlmd90IiLD8IZ_fGXRol7wSBK9JSqL-3ALwWw9NMR3Ylu4J2_N8MW9BeW_asaPljnR2frFmId6Htx95hXGodBRQvRMkJLqBzYn3-mlHRiUNGgEUSM2RCyTUvOAkAe5lSPx4fJY8GuxEM0foNHiXPH53rID3ca76tOQm00Cqdfg4GE2oefdxFwMUApfNSm2PJSF-v0f1lXN3bvsF6Sw7FwYX_hJK1G0eM";
-
 const sellerAvatar = "https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg";
+
+const detailMapStyle: StyleSpecification = {
+  glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+  layers: [{ id: "osm-raster", source: "osm", type: "raster" }],
+  sources: {
+    osm: {
+      attribution: "© OpenStreetMap contributors",
+      tileSize: 256,
+      tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+      type: "raster",
+    },
+  },
+  version: 8,
+};
+
+function getProductCoordinate(product: DetailProduct): [number, number] | null {
+  if (typeof product.displayLat !== "number" || typeof product.displayLng !== "number") {
+    return null;
+  }
+
+  return [product.displayLng, product.displayLat];
+}
+
+function getLocationZoom(product: DetailProduct): number {
+  if (product.locationAccuracy === "city") {
+    return 12;
+  }
+
+  if (product.locationAccuracy === "exact") {
+    return 15;
+  }
+
+  return 14;
+}
+
+function ListingMapMarker() {
+  return (
+    <View className="items-center">
+      <View className="h-11 w-11 items-center justify-center rounded-full bg-[#F5C518] shadow-soft">
+        <MapPin color="#191C1D" fill="#191C1D" size={24} />
+      </View>
+      <View className="-mt-1 h-3 w-3 rotate-45 bg-[#F5C518]" />
+    </View>
+  );
+}
 
 function getProductPhotos(product: DetailProduct): string[] {
   if (product.photos?.length) {
@@ -366,27 +409,96 @@ function CharacteristicsGrid({ product }: { product: DetailProduct }) {
 }
 
 function LocationBlock({ product }: { product: DetailProduct }) {
+  const [mapOpen, setMapOpen] = React.useState(false);
+  const coordinate = getProductCoordinate(product);
+  const zoom = getLocationZoom(product);
+
   return (
     <View className="mb-10">
       <Text className="mb-3 text-[16px] font-bold text-[#1A1A1A]">Localisation</Text>
-      <View className="mb-3 h-40 overflow-hidden rounded-2xl bg-[#EFF6FF]">
-        <Image source={mapImage} style={{ width: "100%", height: "100%" }} contentFit="cover" />
-        <View className="absolute inset-0 items-center justify-center">
-          <View className="h-12 w-12 items-center justify-center rounded-full bg-[#F5C518]/30">
-            <View className="h-4 w-4 rounded-full border-2 border-white bg-[#F5C518] shadow-soft" />
+      <Pressable className="mb-3 h-40 overflow-hidden rounded-2xl bg-[#EFF6FF]" disabled={!coordinate} onPress={() => setMapOpen(true)}>
+        {coordinate ? (
+          <MapLibreMap
+            attribution
+            compass={false}
+            doubleTapZoom={false}
+            dragPan={false}
+            logo={false}
+            mapStyle={detailMapStyle}
+            scaleBar={false}
+            style={{ height: "100%", width: "100%" }}
+            touchPitch={false}
+            touchRotate={false}
+            touchZoom={false}
+          >
+            <MapLibreCamera center={coordinate} duration={0} zoom={zoom} />
+            <MapLibreMarker anchor="bottom" lngLat={coordinate}>
+              <ListingMapMarker />
+            </MapLibreMarker>
+          </MapLibreMap>
+        ) : (
+          <View className="h-full w-full items-center justify-center bg-[#F3F4F6] px-6">
+            <MapPin color="#6B7280" size={28} strokeWidth={2.2} />
+            <Text className="mt-2 text-center text-[13px] font-semibold text-[#6B7280]">Carte indisponible pour cette annonce</Text>
           </View>
-        </View>
-      </View>
+        )}
+        {coordinate ? (
+          <View className="absolute bottom-3 right-3 rounded-full bg-white/95 px-3 py-2 shadow-soft">
+            <Text className="text-[12px] font-black text-[#1A1A1A]">Agrandir</Text>
+          </View>
+        ) : null}
+      </Pressable>
       <View className="flex-row items-center justify-between">
-        <View>
+        <View className="min-w-0 flex-1 pr-3">
           <Text className="text-[16px] font-bold text-[#1A1A1A]">{product.location}</Text>
           <Text className="mt-1 text-[13px] text-[#6B7280]">{product.deliveryMode || "Mode de livraison à confirmer"}</Text>
         </View>
-        <View className="flex-row items-center opacity-60">
-          <Text className="text-[14px] font-bold text-[#5B5BD6]">Ouvrir dans Maps</Text>
+        <Pressable className="flex-row items-center opacity-70" disabled={!coordinate} onPress={() => setMapOpen(true)}>
+          <Text className="text-[14px] font-bold text-[#5B5BD6]">Voir la carte</Text>
           <ArrowRight color="#5B5BD6" size={16} strokeWidth={2} style={{ marginLeft: 4 }} />
-        </View>
+        </Pressable>
       </View>
+      <Modal animationType="slide" onRequestClose={() => setMapOpen(false)} visible={mapOpen && Boolean(coordinate)}>
+        <SafeAreaView className="flex-1 bg-[#F8F9FA]">
+          <View className="flex-1">
+            {coordinate ? (
+              <MapLibreMap
+                attribution
+                compass
+                doubleTapZoom
+                dragPan
+                logo={false}
+                mapStyle={detailMapStyle}
+                scaleBar={false}
+                style={{ height: "100%", width: "100%" }}
+                touchPitch={false}
+                touchRotate={false}
+                touchZoom
+              >
+                <MapLibreCamera center={coordinate} duration={0} zoom={zoom + 1} />
+                <MapLibreMarker anchor="bottom" lngLat={coordinate}>
+                  <ListingMapMarker />
+                </MapLibreMarker>
+              </MapLibreMap>
+            ) : null}
+            <View className="absolute left-4 right-4 top-4 flex-row items-center justify-between">
+              <Pressable className="h-12 w-12 items-center justify-center rounded-full bg-white shadow-soft" onPress={() => setMapOpen(false)}>
+                <ChevronLeft color="#191C1D" size={26} strokeWidth={2.2} />
+              </Pressable>
+              <View className="ml-3 min-w-0 flex-1 rounded-full bg-white/95 px-4 py-3 shadow-soft">
+                <Text className="text-[13px] font-black text-[#191C1D]" numberOfLines={1}>{product.location}</Text>
+              </View>
+            </View>
+            <View className="absolute bottom-0 left-0 right-0 rounded-t-3xl bg-white px-5 pb-6 pt-5 shadow-soft">
+              <Text className="text-[17px] font-black text-[#1A1A1A]">{product.location}</Text>
+              <Text className="mt-1 text-[13px] leading-5 text-[#6B7280]">Carte en lecture seule. Vous pouvez zoomer et déplacer la carte pour explorer les alentours.</Text>
+              <Pressable className="mt-4 h-12 items-center justify-center rounded-full bg-[#1A1A1A]" onPress={() => setMapOpen(false)}>
+                <Text className="text-[14px] font-bold text-white">Fermer</Text>
+              </Pressable>
+            </View>
+          </View>
+        </SafeAreaView>
+      </Modal>
     </View>
   );
 }

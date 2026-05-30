@@ -65,6 +65,13 @@ export type ListingResource = {
   country: string | null;
   city: string | null;
   neighborhood: string | null;
+  location_id: string | null;
+  place_id: string | null;
+  display_lat: number | null;
+  display_lng: number | null;
+  location_accuracy: "exact" | "district" | "city" | null;
+  exact_lat?: number | null;
+  exact_lng?: number | null;
   tags: string[];
   view_count: number;
   favorite_count: number;
