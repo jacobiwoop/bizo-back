@@ -46,6 +46,8 @@ return [
 
     'location' => [
         'osm_user_agent' => env('BIZO_OSM_USER_AGENT', 'BizoLocationResearch/1.0'),
+        'nominatim_url' => env('BIZO_NOMINATIM_URL', 'https://nominatim.openstreetmap.org'),
+        'overpass_url' => env('BIZO_OVERPASS_URL', 'https://overpass-api.de/api/interpreter'),
         'mapbox_token' => env('MAPBOX_TOKEN'),
     ],
 

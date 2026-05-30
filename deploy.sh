@@ -8,6 +8,7 @@ ENV_FILE="${ENV_FILE:-$APP_DIR/.env}"
 STORAGE_DIR="${STORAGE_DIR:-/home/admin/bizo-storage}"
 HOST_PORT="${HOST_PORT:-8080}"
 APP_PORT="${APP_PORT:-10000}"
+DOCKER_NETWORK="${DOCKER_NETWORK:-bizo-net}"
 HEALTH_URL="${HEALTH_URL:-http://127.0.0.1:${HOST_PORT}/api/v1/ping}"
 
 if [[ ! -f "$ENV_FILE" ]]; then
@@ -31,10 +32,14 @@ sudo docker rm -f "$CONTAINER_NAME" 2>/dev/null || true
 echo "==> Creation dossier storage..."
 mkdir -p "$STORAGE_DIR"
 
+echo "==> Verification reseau Docker..."
+sudo docker network create "$DOCKER_NETWORK" 2>/dev/null || true
+
 echo "==> Demarrage nouveau conteneur..."
 sudo docker run -d \
   --name "$CONTAINER_NAME" \
   --restart unless-stopped \
+  --network "$DOCKER_NETWORK" \
   --env-file "$ENV_FILE" \
   -e PORT="$APP_PORT" \
   -e RUN_MIGRATIONS=true \

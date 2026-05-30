@@ -10,10 +10,6 @@ use Illuminate\Support\Facades\Http;
 
 class LocationEnrichmentService
 {
-    private const NOMINATIM_SEARCH_URL = 'https://nominatim.openstreetmap.org/search';
-
-    private const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
-
     private const MAPBOX_FORWARD_URL = 'https://api.mapbox.com/search/geocode/v6/forward';
 
     public function enrichLocations(string $query, string $country = 'BJ', ?string $type = null, int $limit = 10): Collection
@@ -90,8 +86,9 @@ class LocationEnrichmentService
     private function searchOsm(string $query, string $country, int $limit): Collection
     {
         $userAgent = config('services.location.osm_user_agent');
+        $nominatimUrl = rtrim((string) config('services.location.nominatim_url'), '/');
 
-        if (! $userAgent) {
+        if (! $userAgent || $nominatimUrl === '') {
             return collect();
         }
 
@@ -100,7 +97,7 @@ class LocationEnrichmentService
                 ->withHeaders(['User-Agent' => $userAgent])
                 ->timeout(6)
                 ->retry(1, 200)
-                ->get(self::NOMINATIM_SEARCH_URL, [
+                ->get("{$nominatimUrl}/search", [
                     'q' => $query,
                     'format' => 'jsonv2',
                     'addressdetails' => 1,
@@ -121,8 +118,9 @@ class LocationEnrichmentService
     private function searchOsmNearby(float $lat, float $lng, float $radiusKm, ?string $category, int $limit): Collection
     {
         $userAgent = config('services.location.osm_user_agent');
+        $overpassUrl = config('services.location.overpass_url');
 
-        if (! $userAgent) {
+        if (! $userAgent || ! $overpassUrl) {
             return collect();
         }
 
@@ -144,7 +142,7 @@ class LocationEnrichmentService
                 ->timeout(10)
                 ->retry(1, 200)
                 ->asForm()
-                ->post(self::OVERPASS_URL, ['data' => $query]);
+                ->post($overpassUrl, ['data' => $query]);
         } catch (ConnectionException) {
             return collect();
         }
