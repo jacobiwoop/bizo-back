@@ -5,6 +5,8 @@ import { useState } from "react";
 import { PanResponder, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useSessionStore } from "@/src/store/session";
+
 const slides = [
   {
     id: "welcome",
@@ -28,6 +30,7 @@ const slides = [
 
 export function OnboardingScreen() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const setOnboardingSeen = useSessionStore((state) => state.setOnboardingSeen);
   const slide = slides[activeIndex] ?? slides[0];
   const isLastSlide = activeIndex === slides.length - 1;
   const panResponder = PanResponder.create({
@@ -44,7 +47,8 @@ export function OnboardingScreen() {
     },
   });
 
-  const continueToAuth = () => {
+  const continueToAuth = async () => {
+    await setOnboardingSeen(true);
     router.replace("/(auth)/sign-in");
   };
 

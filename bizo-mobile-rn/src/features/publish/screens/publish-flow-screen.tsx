@@ -37,12 +37,13 @@ import {
   Shirt,
   Smartphone,
   Sparkles,
+  LocateFixed,
   Truck,
   Wrench,
   X,
 } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, KeyboardAvoidingView, type NativeSyntheticEvent, Platform, Pressable, ScrollView, type DimensionValue, Text, TextInput, useWindowDimensions, View } from "react-native";
+import { ActivityIndicator, KeyboardAvoidingView, Modal, type NativeSyntheticEvent, Platform, Pressable, ScrollView, type DimensionValue, Text, TextInput, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type PublishMode = "sale" | "trade" | "trade-cash";
@@ -919,6 +920,7 @@ function StepSix({
   const [pendingMapPosition, setPendingMapPosition] = useState<PendingMapPosition | null>(null);
   const [isReverseSearching, setIsReverseSearching] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
+  const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const [reverseError, setReverseError] = useState<string | null>(null);
   const selectedFormCoordinate = form.displayLat !== null && form.displayLng !== null
     ? { latitude: form.displayLat, longitude: form.displayLng }
@@ -1034,16 +1036,33 @@ function StepSix({
 
   const handleMapPress = (event: NativeSyntheticEvent<MapLibrePressEvent>) => {
     const [longitude, latitude] = event.nativeEvent.lngLat;
+    setMapCenterCoordinate({ latitude, longitude });
     resolveMapPosition({ latitude, longitude });
   };
 
   const handleMapRegionDidChange = (event: NativeSyntheticEvent<MapLibreViewStateChangeEvent>) => {
     const [longitude, latitude] = event.nativeEvent.center;
     setMapCenterCoordinate({ latitude, longitude });
+
+    if (
+      pendingMapPosition
+      && (Math.abs(pendingMapPosition.coordinate.latitude - latitude) > 0.00001
+        || Math.abs(pendingMapPosition.coordinate.longitude - longitude) > 0.00001)
+    ) {
+      setPendingMapPosition(null);
+      setReverseError(null);
+    }
   };
 
   const handleUseMapCenter = () => {
     resolveMapPosition(mapCenterCoordinate);
+  };
+
+  const openFullscreenMap = () => {
+    if (selectedCoordinate) {
+      setMapCenterCoordinate(selectedCoordinate);
+    }
+    setIsMapFullscreen(true);
   };
 
   const handleUseCurrentPosition = async () => {
@@ -1073,6 +1092,35 @@ function StepSix({
     }
   };
 
+  const handleCenterOnCurrentPosition = async () => {
+    setIsLocating(true);
+    setReverseError(null);
+
+    try {
+      const permission = await ExpoLocation.requestForegroundPermissionsAsync();
+
+      if (permission.status !== "granted") {
+        setReverseError("Autorisez la localisation pour revenir à votre position actuelle.");
+        return;
+      }
+
+      const position = await ExpoLocation.getCurrentPositionAsync({
+        accuracy: ExpoLocation.Accuracy.Balanced,
+      });
+      const coordinate = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      };
+
+      setMapCenterCoordinate(coordinate);
+      await resolveMapPosition(coordinate);
+    } catch {
+      setReverseError("Impossible de récupérer votre position actuelle.");
+    } finally {
+      setIsLocating(false);
+    }
+  };
+
   const cancelPendingMapPosition = () => {
     setPendingMapPosition(null);
     setReverseError(null);
@@ -1081,34 +1129,38 @@ function StepSix({
   };
 
   const confirmPendingMapPosition = () => {
-    const reverseResult = pendingMapPosition?.reverseResult;
-
-    if (!reverseResult) {
+    if (!pendingMapPosition) {
       return;
     }
 
-    const location = reverseResult.location;
-    const place = reverseResult.place;
+    const reverseResult = pendingMapPosition.reverseResult;
+    const coordinate = pendingMapPosition.coordinate;
+    const location = reverseResult?.location ?? null;
+    const place = reverseResult?.place ?? null;
     const parent = location?.parent ?? place?.location?.parent ?? null;
     const baseLocation = location ?? place?.location ?? null;
+    const fallbackLabel = `${coordinate.latitude.toFixed(5)}, ${coordinate.longitude.toFixed(5)}`;
+    const label = reverseResult?.label ?? fallbackLabel;
 
-    setQuery(reverseResult.label);
+    setQuery(label);
     setForm({
       city: parent?.name ?? (baseLocation?.type === "city" ? baseLocation.name : ""),
       country: baseLocation?.country_code ?? place?.country_code ?? "BJ",
-      displayLat: reverseResult.display_lat,
-      displayLng: reverseResult.display_lng,
+      displayLat: reverseResult?.display_lat ?? coordinate.latitude,
+      displayLng: reverseResult?.display_lng ?? coordinate.longitude,
       locationAccuracy: "exact",
       locationId: baseLocation?.id ?? null,
-      locationLabel: reverseResult.label,
+      locationLabel: label,
       neighborhood: baseLocation?.type === "district" ? baseLocation.name : "",
       placeId: place?.id ?? null,
     });
     setPendingMapPosition(null);
     setReverseError(null);
+    setIsMapFullscreen(false);
   };
 
   return (
+    <>
     <StepShell>
       <InlineMessage message={errorMessage} />
       <Text className="text-[24px] font-black leading-8 text-[#191C1D]">Où se trouve votre article?</Text>
@@ -1211,17 +1263,15 @@ function StepSix({
         <MapLibreMap
           attribution
           compass={false}
-          doubleTapZoom
-          dragPan
+          doubleTapZoom={false}
+          dragPan={false}
           logo={false}
           mapStyle={publishMapStyle}
-          onPress={handleMapPress}
-          onRegionDidChange={handleMapRegionDidChange}
           scaleBar={false}
           style={{ height: "100%", width: "100%" }}
           touchPitch={false}
           touchRotate={false}
-          touchZoom
+          touchZoom={false}
         >
           <MapLibreCamera
             center={[mapCenterCoordinate.longitude, mapCenterCoordinate.latitude]}
@@ -1246,9 +1296,10 @@ function StepSix({
             </View>
           </View>
         )}
-        <Pressable className="absolute bottom-3 left-3 right-3 flex-row items-center justify-center rounded-2xl bg-white/95 px-4 py-3 shadow-soft" onPress={handleUseMapCenter}>
+        <Pressable className="absolute inset-0" onPress={openFullscreenMap} />
+        <Pressable className="absolute bottom-3 left-3 right-3 flex-row items-center justify-center rounded-2xl bg-white/95 px-4 py-3 shadow-soft" onPress={openFullscreenMap}>
           <MapPin color="#191C1D" size={17} />
-          <Text className="ml-2 text-[13px] font-black text-[#191C1D]">Utiliser le centre de la carte</Text>
+          <Text className="ml-2 text-[13px] font-black text-[#191C1D]">Agrandir la carte</Text>
         </Pressable>
       </View>
       {isReverseSearching ? (
@@ -1319,6 +1370,95 @@ function StepSix({
         </View>
       </View>
     </StepShell>
+    <Modal animationType="slide" onRequestClose={() => setIsMapFullscreen(false)} visible={isMapFullscreen}>
+      <SafeAreaView className="flex-1 bg-[#F8F9FA]">
+        <View className="flex-1">
+          <MapLibreMap
+            attribution
+            compass
+            doubleTapZoom
+            dragPan
+            logo={false}
+            mapStyle={publishMapStyle}
+            onPress={handleMapPress}
+            onRegionDidChange={handleMapRegionDidChange}
+            scaleBar={false}
+            style={{ height: "100%", width: "100%" }}
+            touchPitch={false}
+            touchRotate={false}
+            touchZoom
+          >
+            <MapLibreCamera
+              center={[mapCenterCoordinate.longitude, mapCenterCoordinate.latitude]}
+              duration={250}
+              zoom={15}
+            />
+          </MapLibreMap>
+          <View pointerEvents="none" style={{ left: "50%", marginLeft: -22, marginTop: -44, position: "absolute", top: "50%" }}>
+            <View className="items-center">
+              <View className="h-11 w-11 items-center justify-center rounded-full bg-[#F5C518] shadow-soft">
+                <MapPin color="#191C1D" fill="#191C1D" size={24} />
+              </View>
+              <View className="-mt-1 h-3 w-3 rotate-45 bg-[#F5C518]" />
+            </View>
+          </View>
+          <View className="absolute left-4 right-4 top-4 flex-row items-center justify-between">
+            <Pressable className="h-12 w-12 items-center justify-center rounded-full bg-white shadow-soft" onPress={() => setIsMapFullscreen(false)}>
+              <ChevronLeft color="#191C1D" size={26} />
+            </Pressable>
+            <View className="rounded-full bg-white/95 px-4 py-3 shadow-soft">
+              <Text className="text-[13px] font-black text-[#191C1D]">Choisir la position</Text>
+            </View>
+          </View>
+          <Pressable
+            className="absolute right-4 top-20 h-12 w-12 items-center justify-center rounded-full bg-white shadow-soft"
+            disabled={isLocating || isReverseSearching}
+            onPress={handleCenterOnCurrentPosition}
+          >
+            {isLocating ? <ActivityIndicator color="#5B5BD6" size="small" /> : <LocateFixed color="#191C1D" size={22} />}
+          </Pressable>
+          <View className="absolute bottom-0 left-0 right-0 rounded-t-3xl bg-white px-5 pb-6 pt-5 shadow-soft">
+            {isReverseSearching ? (
+              <View className="flex-row items-center">
+                <ActivityIndicator color="#5B5BD6" size="small" />
+                <Text className="ml-3 flex-1 text-[14px] font-semibold text-[#5F5E5E]">Identification de la position...</Text>
+              </View>
+            ) : pendingMapPosition?.reverseResult ? (
+              <View>
+                <Text className="text-[12px] font-bold uppercase tracking-[1px] text-[#745B00]">Position trouvée</Text>
+                <Text className="mt-1 text-[17px] font-black text-[#191C1D]">{pendingMapPosition.reverseResult.label}</Text>
+                <Text className="mt-1 text-[12px] leading-4 text-[#5F5E5E]">Confirmez pour utiliser ce point dans l’annonce.</Text>
+              </View>
+            ) : reverseError ? (
+              <View>
+                <Text className="text-[14px] font-bold text-[#9B1C1C]">{reverseError}</Text>
+                <Text className="mt-1 text-[12px] leading-4 text-[#5F5E5E]">Vous pouvez quand même utiliser les coordonnées GPS exactes.</Text>
+              </View>
+            ) : (
+              <View>
+                <Text className="text-[17px] font-black text-[#191C1D]">Placez le repère sur l’article</Text>
+                <Text className="mt-1 text-[12px] leading-4 text-[#5F5E5E]">Déplacez la carte, puis confirmez le point sélectionné.</Text>
+              </View>
+            )}
+            <View className="mt-4 flex-row gap-3">
+              <Pressable className="flex-1 items-center rounded-xl border border-[#D1C5AC] bg-white px-4 py-4" onPress={() => setIsMapFullscreen(false)}>
+                <Text className="text-[14px] font-bold text-[#5F5E5E]">Retour</Text>
+              </Pressable>
+              {pendingMapPosition?.reverseResult || reverseError ? (
+                <Pressable className="flex-1 items-center rounded-xl bg-[#191C1D] px-4 py-4" disabled={isReverseSearching} onPress={confirmPendingMapPosition}>
+                  <Text className="text-[14px] font-bold text-white">{reverseError ? "Utiliser GPS" : "Confirmer"}</Text>
+                </Pressable>
+              ) : (
+                <Pressable className="flex-1 items-center rounded-xl bg-[#191C1D] px-4 py-4" disabled={isReverseSearching} onPress={handleUseMapCenter}>
+                  <Text className="text-[14px] font-bold text-white">Utiliser cette position</Text>
+                </Pressable>
+              )}
+            </View>
+          </View>
+        </View>
+      </SafeAreaView>
+    </Modal>
+    </>
   );
 }
 
