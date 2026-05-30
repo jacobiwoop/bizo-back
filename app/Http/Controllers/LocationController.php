@@ -123,6 +123,38 @@ class LocationController extends Controller
         return LocationResource::collection($cities);
     }
 
+    public function reverse(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'lat' => ['required', 'numeric', 'between:-90,90'],
+            'lng' => ['required', 'numeric', 'between:-180,180'],
+            'country' => ['nullable', 'string', 'max:5'],
+        ]);
+
+        $result = $this->locationEnrichmentService->reverseGeocode(
+            (float) $validated['lat'],
+            (float) $validated['lng'],
+            strtoupper($validated['country'] ?? 'BJ')
+        );
+
+        if (! $result) {
+            return response()->json([
+                'message' => 'Aucune localisation trouvée pour cette position.',
+            ], 404);
+        }
+
+        return response()->json([
+            'data' => [
+                'label' => $result['label'],
+                'location' => $result['location'] ? new LocationResource($result['location']) : null,
+                'place' => $result['place'] ? new PlaceResource($result['place']) : null,
+                'display_lat' => $result['display_lat'],
+                'display_lng' => $result['display_lng'],
+                'location_accuracy' => 'exact',
+            ],
+        ]);
+    }
+
     public function districts(string $id): AnonymousResourceCollection
     {
         $districts = Location::query()

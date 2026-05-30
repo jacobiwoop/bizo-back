@@ -1,10 +1,11 @@
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
+import * as ExpoLocation from "expo-location";
 import { router } from "expo-router";
 import { useCreateListingMutation } from "@/src/features/publish/api/use-create-listing";
 import { normalizeApiError } from "@/src/lib/api/errors";
 import { type ListingPhotoUpload } from "@/src/lib/api/listings";
-import { searchLocations, type LocationResource, type PlaceResource } from "@/src/lib/api/locations";
+import { reverseLocation, searchLocations, type LocationResource, type PlaceResource, type ReverseLocationResponse } from "@/src/lib/api/locations";
 import { getListingCategory, listingCategories, type ListingAttributeField, type ListingCategoryDefinition, type ListingCategoryId, type ListingCategoryIcon } from "@/src/lib/categories/listing-categories";
 import { useSessionStore } from "@/src/store/session";
 import {
@@ -41,6 +42,7 @@ import {
 } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, type DimensionValue, Text, TextInput, useWindowDimensions, View } from "react-native";
+import MapView, { Marker, type MapPressEvent, type MarkerDragStartEndEvent, type Region } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type PublishMode = "sale" | "trade" | "trade-cash";
@@ -195,12 +197,25 @@ function buildPhotoUpload(asset: ImagePicker.ImagePickerAsset): PublishPhoto {
   };
 }
 
-const mapImage =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuAyRpQqK4fUNelktUs2pH4jNKU20tlGE_1xgGT_pt4jU-nh-yZKiJxvrCso7h63jXRwn7tpLa8OBUnZlntPMkYDT0oqpzmme3VHTrJ6flZAikh4poCM1Zag5lwzwq4WE59_OKBNR9eBfFNX98SmA-ebU7JC78RLWfdCsR3LKxmo5TSaD5dx0F8oAfv-jXkrZI8WEF54RnHwIzr22ECDtLQJo6q-M2xrs3Q-PDHhi74KPYLR-pa5UBk-cLiQlAXoQXA6nrYKm5RLKHs";
+const defaultPublishMapRegion: Region = {
+  latitude: 6.3676953,
+  latitudeDelta: 0.08,
+  longitude: 2.4252507,
+  longitudeDelta: 0.08,
+};
 
 type PublishLocationSuggestion =
   | { id: string; kind: "location"; label: string; subtitle: string; location: LocationResource }
   | { id: string; kind: "place"; label: string; subtitle: string; place: PlaceResource };
+type PublishLocationSuggestionGroup = {
+  items: PublishLocationSuggestion[];
+  key: "districts" | "cities" | "places" | "other";
+  title: string;
+};
+type PendingMapPosition = {
+  coordinate: { latitude: number; longitude: number };
+  reverseResult: ReverseLocationResponse["data"] | null;
+};
 
 function locationSuggestionLabel(location: LocationResource) {
   return [location.name, location.parent?.name].filter(Boolean).join(", ");
@@ -243,6 +258,22 @@ function buildLocationSuggestions(locations: LocationResource[], places: PlaceRe
     seen.add(key);
     return true;
   });
+}
+
+function groupLocationSuggestions(suggestions: PublishLocationSuggestion[]): PublishLocationSuggestionGroup[] {
+  const districts = suggestions.filter((suggestion) => suggestion.kind === "location" && suggestion.location.type === "district");
+  const cities = suggestions.filter((suggestion) => suggestion.kind === "location" && suggestion.location.type === "city");
+  const places = suggestions.filter((suggestion) => suggestion.kind === "place");
+  const other = suggestions.filter((suggestion) => suggestion.kind === "location" && suggestion.location.type !== "district" && suggestion.location.type !== "city");
+
+  const groups: PublishLocationSuggestionGroup[] = [
+    { items: districts, key: "districts", title: "Quartiers" },
+    { items: cities, key: "cities", title: "Villes" },
+    { items: places, key: "places", title: "Repères" },
+    { items: other, key: "other", title: "Autres" },
+  ];
+
+  return groups.filter((group) => group.items.length > 0);
 }
 
 function Header({
@@ -865,6 +896,25 @@ function StepSix({
   const [query, setQuery] = useState(form.locationLabel);
   const [suggestions, setSuggestions] = useState<PublishLocationSuggestion[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [pendingMapPosition, setPendingMapPosition] = useState<PendingMapPosition | null>(null);
+  const [isReverseSearching, setIsReverseSearching] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
+  const [reverseError, setReverseError] = useState<string | null>(null);
+  const selectedFormCoordinate = form.displayLat !== null && form.displayLng !== null
+    ? { latitude: form.displayLat, longitude: form.displayLng }
+    : null;
+  const selectedCoordinate = pendingMapPosition?.coordinate ?? selectedFormCoordinate;
+  const suggestionGroups = groupLocationSuggestions(suggestions).map((group) => ({
+    ...group,
+    items: group.items.slice(0, 4),
+  }));
+  const mapRegion: Region = selectedCoordinate
+    ? {
+        ...selectedCoordinate,
+        latitudeDelta: form.locationAccuracy === "city" ? 0.08 : 0.025,
+        longitudeDelta: form.locationAccuracy === "city" ? 0.08 : 0.025,
+      }
+    : defaultPublishMapRegion;
 
   useEffect(() => {
     setQuery(form.locationLabel);
@@ -941,6 +991,94 @@ function StepSix({
     }
 
     setSuggestions([]);
+    setPendingMapPosition(null);
+    setReverseError(null);
+  };
+
+  const resolveMapPosition = async (coordinate: { latitude: number; longitude: number }) => {
+    setPendingMapPosition({ coordinate, reverseResult: null });
+    setReverseError(null);
+    setIsReverseSearching(true);
+
+    try {
+      const reverseResult = await reverseLocation(coordinate.latitude, coordinate.longitude);
+      setPendingMapPosition({ coordinate, reverseResult });
+    } catch {
+      setReverseError("Impossible d’identifier cette position. Essayez un autre point.");
+      setPendingMapPosition({ coordinate, reverseResult: null });
+    } finally {
+      setIsReverseSearching(false);
+    }
+  };
+
+  const handleMapPress = (event: MapPressEvent) => {
+    resolveMapPosition(event.nativeEvent.coordinate);
+  };
+
+  const handleMarkerDragEnd = (event: MarkerDragStartEndEvent) => {
+    resolveMapPosition(event.nativeEvent.coordinate);
+  };
+
+  const handleUseCurrentPosition = async () => {
+    setIsLocating(true);
+    setReverseError(null);
+
+    try {
+      const permission = await ExpoLocation.requestForegroundPermissionsAsync();
+
+      if (permission.status !== "granted") {
+        setReverseError("Autorisez la localisation pour utiliser votre position actuelle.");
+        return;
+      }
+
+      const position = await ExpoLocation.getCurrentPositionAsync({
+        accuracy: ExpoLocation.Accuracy.Balanced,
+      });
+
+      await resolveMapPosition({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      });
+    } catch {
+      setReverseError("Impossible de récupérer votre position actuelle.");
+    } finally {
+      setIsLocating(false);
+    }
+  };
+
+  const cancelPendingMapPosition = () => {
+    setPendingMapPosition(null);
+    setReverseError(null);
+    setIsReverseSearching(false);
+    setIsLocating(false);
+  };
+
+  const confirmPendingMapPosition = () => {
+    const reverseResult = pendingMapPosition?.reverseResult;
+
+    if (!reverseResult) {
+      return;
+    }
+
+    const location = reverseResult.location;
+    const place = reverseResult.place;
+    const parent = location?.parent ?? place?.location?.parent ?? null;
+    const baseLocation = location ?? place?.location ?? null;
+
+    setQuery(reverseResult.label);
+    setForm({
+      city: parent?.name ?? (baseLocation?.type === "city" ? baseLocation.name : ""),
+      country: baseLocation?.country_code ?? place?.country_code ?? "BJ",
+      displayLat: reverseResult.display_lat,
+      displayLng: reverseResult.display_lng,
+      locationAccuracy: "exact",
+      locationId: baseLocation?.id ?? null,
+      locationLabel: reverseResult.label,
+      neighborhood: baseLocation?.type === "district" ? baseLocation.name : "",
+      placeId: place?.id ?? null,
+    });
+    setPendingMapPosition(null);
+    setReverseError(null);
   };
 
   return (
@@ -964,6 +1102,8 @@ function StepSix({
               neighborhood: "",
               placeId: null,
             });
+            setPendingMapPosition(null);
+            setReverseError(null);
           }}
           placeholder="Ex: Cadjéhoun, Cotonou"
           value={query}
@@ -975,17 +1115,41 @@ function StepSix({
         )}
       </View>
 
+      <Pressable
+        className="mt-3 flex-row items-center rounded-2xl border border-[#D1C5AC] bg-white px-4 py-3"
+        disabled={isLocating || isReverseSearching}
+        onPress={handleUseCurrentPosition}
+      >
+        <View className="h-9 w-9 items-center justify-center rounded-full bg-[#F3F7FF]">
+          {isLocating ? <ActivityIndicator color="#5B5BD6" size="small" /> : <MapPin color="#5B5BD6" size={19} />}
+        </View>
+        <View className="ml-3 flex-1">
+          <Text className="text-[14px] font-black text-[#191C1D]">Utiliser ma position actuelle</Text>
+          <Text className="mt-0.5 text-[12px] text-[#5F5E5E]">L’app identifiera le quartier avant confirmation.</Text>
+        </View>
+        <ChevronRight color="#C8C6C5" size={18} />
+      </Pressable>
+
       {suggestions.length > 0 ? (
         <View className="mt-3 overflow-hidden rounded-2xl border border-[#E1E3E4] bg-white">
-          {suggestions.slice(0, 6).map((suggestion) => (
-            <Pressable key={suggestion.id} className="flex-row items-center border-b border-[#F3F4F5] px-4 py-3" onPress={() => selectSuggestion(suggestion)}>
-              <MapPin color={suggestion.kind === "place" ? "#745B00" : "#5B5BD6"} size={18} />
-              <View className="ml-3 flex-1">
-                <Text className="text-[14px] font-bold text-[#191C1D]">{suggestion.label}</Text>
-                <Text className="mt-1 text-[12px] text-[#5F5E5E]">{suggestion.subtitle}</Text>
+          {suggestionGroups.map((group) => (
+            <View key={group.key}>
+              <View className="border-b border-[#F3F4F5] bg-[#F8F9FA] px-4 py-2">
+                <Text className="text-[11px] font-black uppercase tracking-[1px] text-[#5F5E5E]">{group.title}</Text>
               </View>
-              <ChevronRight color="#C8C6C5" size={18} />
-            </Pressable>
+              {group.items.map((suggestion) => (
+                <Pressable key={suggestion.id} className="flex-row items-center border-b border-[#F3F4F5] px-4 py-3" onPress={() => selectSuggestion(suggestion)}>
+                  <View className={`h-9 w-9 items-center justify-center rounded-full ${suggestion.kind === "place" ? "bg-[#FFFBEB]" : suggestion.location.type === "city" ? "bg-[#F3F7FF]" : "bg-[#F8F9FA]"}`}>
+                    <MapPin color={suggestion.kind === "place" ? "#745B00" : "#5B5BD6"} size={18} />
+                  </View>
+                  <View className="ml-3 flex-1">
+                    <Text className="text-[14px] font-bold text-[#191C1D]">{suggestion.label}</Text>
+                    <Text className="mt-1 text-[12px] text-[#5F5E5E]">{suggestion.subtitle}</Text>
+                  </View>
+                  <ChevronRight color="#C8C6C5" size={18} />
+                </Pressable>
+              ))}
+            </View>
           ))}
         </View>
       ) : form.locationId || form.placeId ? (
@@ -1017,15 +1181,74 @@ function StepSix({
       ) : null}
 
       <View className="mt-5 h-[220px] overflow-hidden rounded-3xl bg-white shadow-soft">
-        <Image source={mapImage} style={{ width: "100%", height: "100%" }} contentFit="cover" />
-        <View className="absolute inset-0 items-center justify-center">
-          <MapPin color="#F5C518" fill="#F5C518" size={44} />
-        </View>
-        <View className="absolute right-3 top-3 gap-2">
-          <View className="h-8 w-8 items-center justify-center rounded-lg bg-white shadow-soft"><Plus color="#191C1D" size={18} /></View>
-          <View className="h-8 w-8 items-center justify-center rounded-lg bg-white shadow-soft"><Minus color="#191C1D" size={18} /></View>
-        </View>
+        <MapView
+          key={`${mapRegion.latitude}-${mapRegion.longitude}-${mapRegion.latitudeDelta}`}
+          initialRegion={mapRegion}
+          loadingBackgroundColor="#FFFFFF"
+          loadingEnabled
+          onPress={handleMapPress}
+          pitchEnabled={false}
+          rotateEnabled={false}
+          showsCompass={false}
+          showsMyLocationButton={false}
+          style={{ height: "100%", width: "100%" }}
+          toolbarEnabled={false}
+          zoomControlEnabled={false}
+        >
+          {selectedCoordinate ? (
+            <Marker coordinate={selectedCoordinate} draggable onDragEnd={handleMarkerDragEnd} tracksViewChanges={false}>
+              <View className="items-center">
+                <View className="h-11 w-11 items-center justify-center rounded-full bg-[#F5C518] shadow-soft">
+                  <MapPin color="#191C1D" fill="#191C1D" size={24} />
+                </View>
+                <View className="-mt-1 h-3 w-3 rotate-45 bg-[#F5C518]" />
+              </View>
+            </Marker>
+          ) : null}
+        </MapView>
+        {selectedCoordinate ? null : (
+          <View className="absolute inset-0 items-center justify-center bg-white/55">
+            <View className="h-12 w-12 items-center justify-center rounded-full bg-white shadow-soft">
+              <MapPin color="#5B5BD6" size={24} />
+            </View>
+          </View>
+        )}
       </View>
+      {isReverseSearching ? (
+        <View className="mt-3 flex-row items-center rounded-2xl border border-[#E1E3E4] bg-white px-4 py-3">
+          <ActivityIndicator color="#5B5BD6" size="small" />
+          <Text className="ml-3 flex-1 text-[13px] font-semibold text-[#5F5E5E]">Identification de la position...</Text>
+        </View>
+      ) : pendingMapPosition?.reverseResult ? (
+        <View className="mt-3 rounded-2xl border border-[#F5C518] bg-[#FFFBEB] p-4">
+          <View className="flex-row items-start">
+            <View className="h-10 w-10 items-center justify-center rounded-full bg-[#F5C518]">
+              <MapPin color="#191C1D" fill="#191C1D" size={20} />
+            </View>
+            <View className="ml-3 flex-1">
+              <Text className="text-[12px] font-bold uppercase tracking-[1px] text-[#745B00]">Position trouvée</Text>
+              <Text className="mt-1 text-[15px] font-black text-[#191C1D]">{pendingMapPosition.reverseResult.label}</Text>
+              <Text className="mt-1 text-[12px] leading-4 text-[#5F5E5E]">Voulez-vous utiliser ce point comme position de l’article ?</Text>
+            </View>
+          </View>
+          <View className="mt-4 flex-row gap-3">
+            <Pressable className="flex-1 items-center rounded-xl border border-[#D1C5AC] bg-white px-4 py-3" onPress={cancelPendingMapPosition}>
+              <Text className="text-[14px] font-bold text-[#5F5E5E]">Annuler</Text>
+            </Pressable>
+            <Pressable className="flex-1 items-center rounded-xl bg-[#191C1D] px-4 py-3" onPress={confirmPendingMapPosition}>
+              <Text className="text-[14px] font-bold text-white">Utiliser</Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : reverseError ? (
+        <View className="mt-3 rounded-2xl border border-[#F2C7C7] bg-[#FFF7F7] p-4">
+          <Text className="text-[14px] font-bold text-[#9B1C1C]">{reverseError}</Text>
+          <Pressable className="mt-3 flex-row items-center" onPress={cancelPendingMapPosition}>
+            <CircleX color="#9B1C1C" size={18} />
+            <Text className="ml-2 text-[13px] font-bold text-[#9B1C1C]">Annuler ce point</Text>
+          </Pressable>
+        </View>
+      ) : null}
       <View className="mt-5 flex-row gap-2">
         {["Masquer rue", "Quartier", "Adresse exacte"].map((label, index) => (
           <View key={label} className={`flex-1 rounded-full border px-2 py-3 ${index === 1 ? "border-[#191C1D] bg-[#191C1D]" : "border-[#D1C5AC] bg-white"}`}>

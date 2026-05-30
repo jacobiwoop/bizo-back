@@ -285,6 +285,52 @@ class LocationTest extends TestCase
         ]);
     }
 
+    public function test_can_reverse_geocode_selected_map_position(): void
+    {
+        Http::fake([
+            'nominatim.openstreetmap.org/*' => Http::response([
+                'place_id' => 123,
+                'osm_type' => 'node',
+                'osm_id' => 3016019580,
+                'name' => 'Cadjéhoun',
+                'display_name' => 'Cadjéhoun, 12ᵉ Arrondissement, Cotonou, Littoral, Bénin',
+                'lat' => '6.3614375',
+                'lon' => '2.3994000',
+                'class' => 'place',
+                'type' => 'neighbourhood',
+                'addresstype' => 'neighbourhood',
+                'address' => [
+                    'neighbourhood' => 'Cadjéhoun',
+                    'city' => 'Cotonou',
+                    'country' => 'Bénin',
+                    'country_code' => 'bj',
+                ],
+            ]),
+        ]);
+
+        $response = $this->getJson('/api/v1/locations/reverse?lat=6.3614375&lng=2.3994&country=BJ');
+
+        $response->assertOk()
+            ->assertJsonPath('data.label', 'Cadjéhoun, Cotonou')
+            ->assertJsonPath('data.location.name', 'Cadjéhoun')
+            ->assertJsonPath('data.location.parent.name', 'Cotonou')
+            ->assertJsonPath('data.display_lat', 6.3614375)
+            ->assertJsonPath('data.display_lng', 2.3994)
+            ->assertJsonPath('data.location_accuracy', 'exact');
+
+        $this->assertDatabaseHas('locations', [
+            'name' => 'Cotonou',
+            'type' => 'city',
+            'country_code' => 'BJ',
+        ]);
+
+        $this->assertDatabaseHas('locations', [
+            'name' => 'Cadjéhoun',
+            'type' => 'district',
+            'country_code' => 'BJ',
+        ]);
+    }
+
     public function test_places_search_can_enrich_nearby_infrastructure_from_osm(): void
     {
         Http::fake([

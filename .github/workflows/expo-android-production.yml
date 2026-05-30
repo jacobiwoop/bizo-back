@@ -61,7 +61,7 @@ jobs:
           const fs = require("fs");
           const appPath = "app.json";
           const app = JSON.parse(fs.readFileSync(appPath, "utf8"));
-          const keepPlugins = new Set(["expo-router", "expo-image", "expo-secure-store", "expo-splash-screen", "expo-image-picker", "expo-notifications", "expo-location"]);
+          const keepPlugins = new Set(["expo-router", "expo-image", "expo-secure-store", "expo-splash-screen", "./plugins/with-native-startup-animation", "expo-image-picker", "expo-notifications", "expo-location"]);
           app.expo.plugins = (app.expo.plugins || []).filter((plugin) => keepPlugins.has(Array.isArray(plugin) ? plugin[0] : plugin));
           const keepPermissions = new Set(["android.permission.READ_MEDIA_IMAGES", "android.permission.POST_NOTIFICATIONS", "android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_FINE_LOCATION"]);
           app.expo.android.permissions = (app.expo.android.permissions || []).filter((permission) => keepPermissions.has(permission));

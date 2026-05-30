@@ -60,8 +60,6 @@ function injectMainActivityStartupAnimation(contents) {
     "import android.widget.FrameLayout",
     "import android.widget.LinearLayout",
     "import com.airbnb.lottie.LottieAnimationView",
-    "import com.facebook.react.ReactInstanceEventListener",
-    "import com.facebook.react.bridge.ReactContext",
   ];
 
   for (const importLine of imports) {
@@ -173,38 +171,28 @@ function injectMainActivityStartupAnimation(contents) {
       )
     )
 
-    var animationFinished = false
-    var reactReady = reactNativeHost.reactInstanceManager.currentReactContext != null
+    var overlayRemoved = false
 
-    fun maybeRemoveOverlay() {
-      if (animationFinished && reactReady) {
-        mainHandler.postDelayed({ removeStartupOverlay(overlay) }, 350)
+    fun scheduleOverlayRemoval(delayMs: Long) {
+      if (!overlayRemoved) {
+        overlayRemoved = true
+        mainHandler.postDelayed({ removeStartupOverlay(overlay) }, delayMs)
       }
     }
 
-    reactNativeHost.reactInstanceManager.addReactInstanceEventListener(object : ReactInstanceEventListener {
-      override fun onReactContextInitialized(context: ReactContext) {
-        reactReady = true
-        reactNativeHost.reactInstanceManager.removeReactInstanceEventListener(this)
-        maybeRemoveOverlay()
-      }
-    })
-
-    mainHandler.postDelayed({ removeStartupOverlay(overlay) }, 180000)
+    mainHandler.postDelayed({ scheduleOverlayRemoval(0) }, 180000)
 
     animationView.addAnimatorListener(object : Animator.AnimatorListener {
       override fun onAnimationStart(animation: Animator) = Unit
       override fun onAnimationRepeat(animation: Animator) = Unit
       override fun onAnimationCancel(animation: Animator) {
-        animationFinished = true
         dotRow.animate().alpha(1f).setDuration(180).start()
-        maybeRemoveOverlay()
+        scheduleOverlayRemoval(1600)
       }
 
       override fun onAnimationEnd(animation: Animator) {
-        animationFinished = true
         dotRow.animate().alpha(1f).setDuration(180).start()
-        maybeRemoveOverlay()
+        scheduleOverlayRemoval(1600)
       }
     })
   }

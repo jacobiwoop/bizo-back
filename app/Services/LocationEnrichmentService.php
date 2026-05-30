@@ -83,6 +83,28 @@ class LocationEnrichmentService
         return $places->unique('id')->values();
     }
 
+    public function reverseGeocode(float $lat, float $lng, string $country = 'BJ'): ?array
+    {
+        $country = strtoupper($country);
+        $item = $this->searchOsmReverse($lat, $lng, $country);
+
+        if (! $item) {
+            return null;
+        }
+
+        $address = $item['address'] ?? [];
+        $location = $this->resolveBestLocationFromAddress($address, $country)?->load('parent');
+        $place = $this->isSpecificPlace($item) ? $this->storePlaceFromOsm($item, $country)?->load('location') : null;
+
+        return [
+            'label' => $this->reverseLabel($location, $place, $item),
+            'location' => $location,
+            'place' => $place,
+            'display_lat' => $lat,
+            'display_lng' => $lng,
+        ];
+    }
+
     private function searchOsm(string $query, string $country, int $limit): Collection
     {
         $userAgent = config('services.location.osm_user_agent');
@@ -113,6 +135,44 @@ class LocationEnrichmentService
         }
 
         return collect($response->json());
+    }
+
+    private function searchOsmReverse(float $lat, float $lng, string $country): ?array
+    {
+        $userAgent = config('services.location.osm_user_agent');
+        $nominatimUrl = rtrim((string) config('services.location.nominatim_url'), '/');
+
+        if (! $userAgent || $nominatimUrl === '') {
+            return null;
+        }
+
+        try {
+            $response = Http::acceptJson()
+                ->withHeaders(['User-Agent' => $userAgent])
+                ->timeout(6)
+                ->retry(1, 200)
+                ->get("{$nominatimUrl}/reverse", [
+                    'lat' => $lat,
+                    'lon' => $lng,
+                    'format' => 'jsonv2',
+                    'addressdetails' => 1,
+                    'zoom' => 18,
+                ]);
+        } catch (ConnectionException) {
+            return null;
+        }
+
+        if (! $response->ok() || ! is_array($response->json())) {
+            return null;
+        }
+
+        $json = $response->json();
+
+        if (($json['error'] ?? null) || strtolower($json['address']['country_code'] ?? '') !== strtolower($country)) {
+            return null;
+        }
+
+        return $json;
     }
 
     private function searchOsmNearby(float $lat, float $lng, float $radiusKm, ?string $category, int $limit): Collection
@@ -498,6 +558,54 @@ class LocationEnrichmentService
     private function categoryFromOsm(array $item): string
     {
         return $item['type'] ?? $item['class'] ?? 'place';
+    }
+
+    private function isSpecificPlace(array $item): bool
+    {
+        $class = $item['class'] ?? $item['category'] ?? null;
+        $type = $item['type'] ?? null;
+
+        if (in_array($class, ['amenity', 'shop', 'office', 'tourism', 'leisure', 'healthcare'], true)) {
+            return true;
+        }
+
+        return $type && ! in_array($type, [
+            'city',
+            'town',
+            'village',
+            'municipality',
+            'administrative',
+            'suburb',
+            'neighbourhood',
+            'quarter',
+            'city_district',
+            'district',
+            'residential',
+            'road',
+            'street',
+        ], true);
+    }
+
+    private function reverseLabel(?Location $location, ?Place $place, array $item): string
+    {
+        if ($place) {
+            $locationName = $place->location?->name;
+            $cityName = $place->location?->parent?->name;
+
+            return collect([$place->name, $locationName, $cityName])
+                ->filter()
+                ->unique()
+                ->implode(', ');
+        }
+
+        if ($location) {
+            return collect([$location->name, $location->parent?->name])
+                ->filter()
+                ->unique()
+                ->implode(', ');
+        }
+
+        return $item['display_name'] ?? 'Position sélectionnée';
     }
 
     private function osmExternalId(array $item): ?string

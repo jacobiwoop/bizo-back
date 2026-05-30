@@ -41,6 +41,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/listings/{id}/similar', [ListingController::class, 'similar']);
     Route::get('/search', [SearchController::class, 'index']);
     Route::get('/locations/search', [LocationController::class, 'search']);
+    Route::get('/locations/reverse', [LocationController::class, 'reverse']);
     Route::get('/locations/cities', [LocationController::class, 'cities']);
     Route::get('/locations/{id}/districts', [LocationController::class, 'districts']);
     Route::get('/places/search', [LocationController::class, 'places']);
