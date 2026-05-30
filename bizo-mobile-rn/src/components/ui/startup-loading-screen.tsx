@@ -59,13 +59,14 @@ function LoadingDot({ delay }: { delay: number }) {
   );
 }
 
-export function StartupLoadingScreen() {
+export function StartupLoadingScreen({ onAnimationFinish }: { onAnimationFinish?: () => void }) {
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top", "bottom"]}>
       <View className="flex-1 items-center justify-center px-8">
         <LottieView
           autoPlay
-          loop
+          loop={false}
+          onAnimationFinish={onAnimationFinish}
           source={bizoLogoIntro}
           style={{ height: 260, width: 260 }}
         />

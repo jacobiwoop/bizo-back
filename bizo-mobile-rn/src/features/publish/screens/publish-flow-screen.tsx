@@ -212,7 +212,7 @@ function placeSuggestionLabel(place: PlaceResource) {
 }
 
 function buildLocationSuggestions(locations: LocationResource[], places: PlaceResource[]): PublishLocationSuggestion[] {
-  return [
+  const suggestions = [
     ...locations.map((location) => ({
       id: `location-${location.id}`,
       kind: "location" as const,
@@ -228,6 +228,21 @@ function buildLocationSuggestions(locations: LocationResource[], places: PlaceRe
       subtitle: "Repère proche",
     })),
   ];
+
+  const seen = new Set<string>();
+
+  return suggestions.filter((suggestion) => {
+    const key = suggestion.kind === "location"
+      ? `${suggestion.kind}-${suggestion.label.toLowerCase()}`
+      : `${suggestion.kind}-${suggestion.label.toLowerCase()}-${suggestion.place.lat ?? ""}-${suggestion.place.lng ?? ""}`;
+
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
 }
 
 function Header({
@@ -857,8 +872,9 @@ function StepSix({
 
   useEffect(() => {
     const trimmedQuery = query.trim();
+    const selectedCurrentValue = (form.locationId || form.placeId) && trimmedQuery === form.locationLabel.trim();
 
-    if (trimmedQuery.length < 2 || trimmedQuery === form.locationLabel) {
+    if (trimmedQuery.length < 2 || selectedCurrentValue) {
       setSuggestions([]);
       setIsSearching(false);
       return;
@@ -942,6 +958,7 @@ function StepSix({
               city: "",
               displayLat: null,
               displayLng: null,
+              locationAccuracy: "district",
               locationId: null,
               locationLabel: value,
               neighborhood: "",

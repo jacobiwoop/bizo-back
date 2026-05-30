@@ -2,17 +2,30 @@ import "../global.css";
 
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useRef } from "react";
-import { View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Platform, View } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 
 import { StartupLoadingScreen } from "@/src/components/ui/startup-loading-screen";
 import { AppProviders } from "@/src/providers/app-providers";
 import { useSessionStore } from "@/src/store/session";
 
+const STARTUP_ANIMATION_FALLBACK_MS = 4500;
+
 export default function RootLayout() {
   const hydrated = useSessionStore((state) => state.hydrated);
+  const [startupAnimationDone, setStartupAnimationDone] = useState(false);
   const splashPreparedRef = useRef(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setStartupAnimationDone(true);
+    }, STARTUP_ANIMATION_FALLBACK_MS);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, []);
 
   useEffect(() => {
     if (splashPreparedRef.current) {
@@ -24,10 +37,12 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (hydrated) {
+    if (Platform.OS === "android" || hydrated) {
       SplashScreen.hideAsync().catch(() => undefined);
     }
   }, [hydrated]);
+
+  const showStartupScreen = Platform.OS !== "android" && (!hydrated || !startupAnimationDone);
 
   return (
     <AppProviders>
@@ -51,7 +66,7 @@ export default function RootLayout() {
           <Stack.Screen name="seller-annonces" />
           <Stack.Screen name="chat/[id]" />
         </Stack>
-        {!hydrated ? (
+        {showStartupScreen ? (
           <View
             pointerEvents="auto"
             style={{
@@ -62,7 +77,7 @@ export default function RootLayout() {
               left: 0,
             }}
           >
-            <StartupLoadingScreen />
+            <StartupLoadingScreen onAnimationFinish={() => setStartupAnimationDone(true)} />
           </View>
         ) : null}
       </View>

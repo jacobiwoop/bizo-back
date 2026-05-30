@@ -50,6 +50,7 @@
           "resizeMode": "contain"
         }
       ],
+      "./plugins/with-native-startup-animation",
       [
         "expo-notifications",
         {
