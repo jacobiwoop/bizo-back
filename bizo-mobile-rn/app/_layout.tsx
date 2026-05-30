@@ -42,7 +42,9 @@ export default function RootLayout() {
     }
   }, [hydrated]);
 
-  const showStartupScreen = Platform.OS !== "android" && (!hydrated || !startupAnimationDone);
+  const showStartupScreen = Platform.OS === "android"
+    ? !hydrated
+    : !hydrated || !startupAnimationDone;
 
   return (
     <AppProviders>
@@ -77,7 +79,10 @@ export default function RootLayout() {
               left: 0,
             }}
           >
-            <StartupLoadingScreen onAnimationFinish={() => setStartupAnimationDone(true)} />
+            <StartupLoadingScreen
+              onAnimationFinish={() => setStartupAnimationDone(true)}
+              showLogoAnimation={Platform.OS !== "android"}
+            />
           </View>
         ) : null}
       </View>

@@ -51,11 +51,17 @@ function injectMainActivityStartupAnimation(contents) {
 
   const imports = [
     "import android.animation.Animator",
+    "import android.animation.ValueAnimator",
+    "import android.os.Handler",
+    "import android.os.Looper",
     "import android.view.Gravity",
     "import android.view.View",
     "import android.view.ViewGroup",
     "import android.widget.FrameLayout",
+    "import android.widget.LinearLayout",
     "import com.airbnb.lottie.LottieAnimationView",
+    "import com.facebook.react.ReactInstanceEventListener",
+    "import com.facebook.react.bridge.ReactContext",
   ];
 
   for (const importLine of imports) {
@@ -74,10 +80,16 @@ function injectMainActivityStartupAnimation(contents) {
 
   const methods = `
   private fun showNativeStartupAnimation() {
+    val mainHandler = Handler(Looper.getMainLooper())
     val overlay = FrameLayout(this).apply {
       setBackgroundColor(0xFFFFFFFF.toInt())
       isClickable = true
       isFocusable = true
+    }
+
+    val content = LinearLayout(this).apply {
+      orientation = LinearLayout.VERTICAL
+      gravity = Gravity.CENTER
     }
 
     val animationView = LottieAnimationView(this).apply {
@@ -87,11 +99,71 @@ function injectMainActivityStartupAnimation(contents) {
     }
 
     val animationSize = (260 * resources.displayMetrics.density).toInt()
-    val animationLayoutParams = FrameLayout.LayoutParams(animationSize, animationSize).apply {
+    content.addView(
+      animationView,
+      LinearLayout.LayoutParams(animationSize, animationSize)
+    )
+
+    val dotRow = LinearLayout(this).apply {
+      orientation = LinearLayout.HORIZONTAL
       gravity = Gravity.CENTER
+      alpha = 0f
     }
 
-    overlay.addView(animationView, animationLayoutParams)
+    val dotSize = (12 * resources.displayMetrics.density).toInt()
+    val dotGap = (6 * resources.displayMetrics.density).toInt()
+    val dotViews = (0 until 3).map {
+      View(this).apply {
+        background = android.graphics.drawable.GradientDrawable().apply {
+          shape = android.graphics.drawable.GradientDrawable.OVAL
+          setColor(0xFFF5C518.toInt())
+        }
+        alpha = 0.25f
+      }
+    }
+
+    dotViews.forEachIndexed { index, dot ->
+      val params = LinearLayout.LayoutParams(dotSize, dotSize).apply {
+        leftMargin = dotGap
+        rightMargin = dotGap
+        topMargin = (32 * resources.displayMetrics.density).toInt()
+      }
+      dotRow.addView(dot, params)
+
+      ValueAnimator.ofFloat(0.25f, 1f, 0.25f).apply {
+        duration = 1080
+        startDelay = (index * 120).toLong()
+        repeatCount = ValueAnimator.INFINITE
+        addUpdateListener { animator ->
+          dot.alpha = animator.animatedValue as Float
+          val progress = animator.animatedFraction
+          dot.translationY = if (progress < 0.5f) {
+            -4 * resources.displayMetrics.density * (progress / 0.5f)
+          } else {
+            -4 * resources.displayMetrics.density * ((1f - progress) / 0.5f)
+          }
+        }
+        start()
+      }
+    }
+
+    content.addView(
+      dotRow,
+      LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.WRAP_CONTENT,
+        ViewGroup.LayoutParams.WRAP_CONTENT
+      )
+    )
+
+    overlay.addView(
+      content,
+      FrameLayout.LayoutParams(
+        ViewGroup.LayoutParams.WRAP_CONTENT,
+        ViewGroup.LayoutParams.WRAP_CONTENT
+      ).apply {
+        gravity = Gravity.CENTER
+      }
+    )
 
     addContentView(
       overlay,
@@ -101,15 +173,38 @@ function injectMainActivityStartupAnimation(contents) {
       )
     )
 
+    var animationFinished = false
+    var reactReady = reactNativeHost.reactInstanceManager.currentReactContext != null
+
+    fun maybeRemoveOverlay() {
+      if (animationFinished && reactReady) {
+        mainHandler.postDelayed({ removeStartupOverlay(overlay) }, 350)
+      }
+    }
+
+    reactNativeHost.reactInstanceManager.addReactInstanceEventListener(object : ReactInstanceEventListener {
+      override fun onReactContextInitialized(context: ReactContext) {
+        reactReady = true
+        reactNativeHost.reactInstanceManager.removeReactInstanceEventListener(this)
+        maybeRemoveOverlay()
+      }
+    })
+
+    mainHandler.postDelayed({ removeStartupOverlay(overlay) }, 180000)
+
     animationView.addAnimatorListener(object : Animator.AnimatorListener {
       override fun onAnimationStart(animation: Animator) = Unit
       override fun onAnimationRepeat(animation: Animator) = Unit
       override fun onAnimationCancel(animation: Animator) {
-        removeStartupOverlay(overlay)
+        animationFinished = true
+        dotRow.animate().alpha(1f).setDuration(180).start()
+        maybeRemoveOverlay()
       }
 
       override fun onAnimationEnd(animation: Animator) {
-        removeStartupOverlay(overlay)
+        animationFinished = true
+        dotRow.animate().alpha(1f).setDuration(180).start()
+        maybeRemoveOverlay()
       }
     })
   }

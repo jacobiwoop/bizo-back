@@ -1,6 +1,6 @@
 import LottieView from "lottie-react-native";
 import { useEffect, useRef } from "react";
-import { Animated, Easing, Text, View } from "react-native";
+import { Animated, Easing, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const bizoLogoIntro = require("../../../assets/animations/bizo-logo-intro-vector.json");
@@ -59,20 +59,31 @@ function LoadingDot({ delay }: { delay: number }) {
   );
 }
 
-export function StartupLoadingScreen({ onAnimationFinish }: { onAnimationFinish?: () => void }) {
+export function StartupLoadingScreen({
+  onAnimationFinish,
+  showLogoAnimation = true,
+}: {
+  onAnimationFinish?: () => void;
+  showLogoAnimation?: boolean;
+}) {
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top", "bottom"]}>
       <View className="flex-1 items-center justify-center px-8">
-        <LottieView
-          autoPlay
-          loop={false}
-          onAnimationFinish={onAnimationFinish}
-          source={bizoLogoIntro}
-          style={{ height: 260, width: 260 }}
-        />
-        <Text className="mt-5 text-center text-[14px] text-[#7E7E7E]">
-          Loading your marketplace
-        </Text>
+        {showLogoAnimation ? (
+          <LottieView
+            autoPlay
+            loop={false}
+            onAnimationFinish={onAnimationFinish}
+            source={bizoLogoIntro}
+            style={{ height: 260, width: 260 }}
+          />
+        ) : (
+          <LottieView
+            progress={1}
+            source={bizoLogoIntro}
+            style={{ height: 260, width: 260 }}
+          />
+        )}
         <View className="mt-8 flex-row items-center gap-3">
           <LoadingDot delay={0} />
           <LoadingDot delay={120} />
