@@ -67,6 +67,7 @@ Route::prefix('v1')->group(function () {
         Route::put('/listings/{id}', [ListingController::class, 'update']);
         Route::delete('/listings/{id}', [ListingController::class, 'destroy']);
         Route::post('/listings/{id}/photos', [ListingController::class, 'uploadPhotos']);
+        Route::put('/listings/{id}/photos/reorder', [ListingController::class, 'reorderPhotos']);
         Route::delete('/listings/{id}/photos/{idx}', [ListingController::class, 'deletePhoto']);
         Route::post('/listings/{id}/boost', [ListingController::class, 'boost']);
         Route::post('/listings/{id}/renew', [ListingController::class, 'renew']);

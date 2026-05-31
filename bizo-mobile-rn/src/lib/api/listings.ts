@@ -41,6 +41,8 @@ export type CreateListingPayload = {
   photos: ListingPhotoUpload[];
 };
 
+export type UpdateListingPayload = Omit<CreateListingPayload, "photos">;
+
 export async function getListings(params: ListingsQueryParams = {}): Promise<PaginatedApiResponse<ListingResource>> {
   const response = await api.get<PaginatedApiResponse<ListingResource>>("/listings", { params });
   return response.data;
@@ -48,6 +50,41 @@ export async function getListings(params: ListingsQueryParams = {}): Promise<Pag
 
 export async function getListing(id: string): Promise<ListingResource> {
   const response = await api.get<ApiResourceResponse<ListingResource>>(`/listings/${id}`);
+  return response.data.data;
+}
+
+export async function updateListing(id: string, payload: UpdateListingPayload): Promise<ListingResource> {
+  const response = await api.put<ApiResourceResponse<ListingResource>>(`/listings/${id}`, payload);
+  return response.data.data;
+}
+
+export async function deleteListing(id: string): Promise<void> {
+  await api.delete(`/listings/${id}`);
+}
+
+export async function uploadListingPhotos(id: string, photos: ListingPhotoUpload[]): Promise<ListingResource> {
+  const formData = new FormData();
+
+  photos.forEach((photo) => {
+    formData.append("photos[]", photo as unknown as Blob);
+  });
+
+  const response = await api.post<ApiResourceResponse<ListingResource>>(`/listings/${id}/photos`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return response.data.data;
+}
+
+export async function deleteListingPhoto(id: string, index: number): Promise<ListingResource> {
+  const response = await api.delete<ApiResourceResponse<ListingResource>>(`/listings/${id}/photos/${index}`);
+  return response.data.data;
+}
+
+export async function reorderListingPhotos(id: string, photos: string[]): Promise<ListingResource> {
+  const response = await api.put<ApiResourceResponse<ListingResource>>(`/listings/${id}/photos/reorder`, { photos });
   return response.data.data;
 }
 

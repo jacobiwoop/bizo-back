@@ -15,12 +15,14 @@ import {
   MessageCircle,
   Palette,
   Package,
+  Pencil,
   Share2,
   ShieldCheck,
   Smartphone,
   Star,
   Tag,
   Truck,
+  Trash2,
   X,
 } from "lucide-react-native";
 import * as React from "react";
@@ -170,7 +172,15 @@ function getPageIndex(event: NativeSyntheticEvent<NativeScrollEvent>, width: num
   return Math.round(event.nativeEvent.contentOffset.x / width);
 }
 
-function FloatingHeader({ onBack }: { onBack: () => void }) {
+function FloatingHeader({
+  isFavorite,
+  onBack,
+  onFavoritePress,
+}: {
+  isFavorite?: boolean;
+  onBack: () => void;
+  onFavoritePress?: () => void;
+}) {
   return (
     <SafeAreaView edges={["top"]} className="absolute left-0 right-0 top-0 z-20">
       <View className="h-16 flex-row items-center justify-between px-4">
@@ -178,8 +188,8 @@ function FloatingHeader({ onBack }: { onBack: () => void }) {
           <ChevronLeft color="#1F1B11" size={24} strokeWidth={2} />
         </Pressable>
         <View className="flex-row gap-3">
-          <Pressable className="h-10 w-10 items-center justify-center rounded-full bg-white/80 shadow-soft">
-            <Heart color="#1F1B11" size={22} strokeWidth={2} />
+          <Pressable className="h-10 w-10 items-center justify-center rounded-full bg-white/80 shadow-soft" onPress={onFavoritePress}>
+            <Heart color={isFavorite ? "#D92D20" : "#1F1B11"} fill={isFavorite ? "#D92D20" : "transparent"} size={22} strokeWidth={2} />
           </Pressable>
           <Pressable className="h-10 w-10 items-center justify-center rounded-full bg-white/80 shadow-soft">
             <Share2 color="#1F1B11" size={21} strokeWidth={2} />
@@ -503,17 +513,46 @@ function LocationBlock({ product }: { product: DetailProduct }) {
   );
 }
 
-function DetailBottomBar({ product }: { product: DetailProduct }) {
+function DetailBottomBar({
+  isOwner,
+  onContactPress,
+  onDeletePress,
+  onEditPress,
+  onOfferPress,
+  product,
+}: {
+  isOwner?: boolean;
+  onContactPress?: () => void;
+  onDeletePress?: () => void;
+  onEditPress?: () => void;
+  onOfferPress?: () => void;
+  product: DetailProduct;
+}) {
   const offerLabel = getPrimaryActionLabel(product);
   const theme = getModeTheme(product);
 
+  if (isOwner) {
+    return (
+      <View className="absolute bottom-0 left-0 right-0 flex-row gap-3 border-t border-[#EDEEEF] bg-white px-4 pb-5 pt-3 shadow-soft">
+        <Pressable className="h-12 flex-1 flex-row items-center justify-center rounded-full border border-[#F2C7C7] bg-white px-3" onPress={onDeletePress}>
+          <Trash2 color="#B42318" size={19} strokeWidth={2.2} />
+          <Text className="ml-2 text-[13px] font-bold text-[#B42318]">Supprimer</Text>
+        </Pressable>
+        <Pressable className="h-12 flex-1 flex-row items-center justify-center rounded-full bg-[#1A1A1A] px-4" onPress={onEditPress}>
+          <Pencil color="#FFFFFF" size={18} strokeWidth={2.2} />
+          <Text className="ml-2 text-[14px] font-bold text-white">Modifier</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
   return (
     <View className="absolute bottom-0 left-0 right-0 flex-row gap-3 border-t border-[#EDEEEF] bg-white px-4 pb-5 pt-3 shadow-soft">
-      <Pressable className="h-12 flex-1 flex-row items-center justify-center rounded-full border-2 px-3" style={{ borderColor: theme.badgeBackground }}>
+      <Pressable className="h-12 flex-1 flex-row items-center justify-center rounded-full border-2 px-3" onPress={onOfferPress} style={{ borderColor: theme.badgeBackground }}>
         <Tag color={theme.badgeBackground} size={20} strokeWidth={2} />
         <Text className="ml-2 text-[13px] font-bold" numberOfLines={1} style={{ color: theme.badgeBackground }}>{offerLabel}</Text>
       </Pressable>
-      <Pressable className="h-12 flex-[1.35] flex-row items-center justify-center rounded-full bg-[#1A1A1A] px-4">
+      <Pressable className="h-12 flex-[1.35] flex-row items-center justify-center rounded-full bg-[#1A1A1A] px-4" onPress={onContactPress}>
         <MessageCircle color="#FFFFFF" fill="#FFFFFF" size={20} strokeWidth={2} />
         <Text className="ml-2 text-[14px] font-bold text-white">Contacter</Text>
       </Pressable>
@@ -598,10 +637,24 @@ function FullscreenGallery({ product, onClose }: { product: DetailProduct; onClo
 }
 
 export function DetailProductScreen({
+  isFavorite,
+  isOwner,
+  onContactPress,
+  onDeletePress,
+  onEditPress,
+  onFavoritePress,
+  onOfferPress,
   product,
   onBack,
   onSellerPress,
 }: {
+  isFavorite?: boolean;
+  isOwner?: boolean;
+  onContactPress?: () => void;
+  onDeletePress?: () => void;
+  onEditPress?: () => void;
+  onFavoritePress?: () => void;
+  onOfferPress?: () => void;
   product: DetailProduct;
   onBack: () => void;
   onSellerPress: () => void;
@@ -625,7 +678,7 @@ export function DetailProductScreen({
       >
         <View>
           <GalleryHero product={product} onOpen={() => setGalleryOpen(true)} />
-          <FloatingHeader onBack={onBack} />
+          <FloatingHeader isFavorite={isFavorite} onBack={onBack} onFavoritePress={onFavoritePress} />
         </View>
         <ProductContentCard product={product} />
         <View className="bg-white px-4">
@@ -636,7 +689,14 @@ export function DetailProductScreen({
         </View>
       </ScrollView>
       {showMiniHeader ? <MiniListingHeader product={product} onBack={onBack} /> : null}
-      <DetailBottomBar product={product} />
+      <DetailBottomBar
+        isOwner={isOwner}
+        onContactPress={onContactPress}
+        onDeletePress={onDeletePress}
+        onEditPress={onEditPress}
+        onOfferPress={onOfferPress}
+        product={product}
+      />
       {galleryOpen ? <FullscreenGallery product={product} onClose={() => setGalleryOpen(false)} /> : null}
     </View>
   );

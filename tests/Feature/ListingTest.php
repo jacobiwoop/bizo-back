@@ -431,4 +431,38 @@ class ListingTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['photos']);
     }
+
+    public function test_can_reorder_own_listing_photos(): void
+    {
+        $listing = Listing::factory()->create([
+            'owner_id' => $this->user->id,
+            'photos' => ['photo-a.jpg', 'photo-b.jpg', 'photo-c.jpg'],
+        ]);
+
+        $response = $this->actingAs($this->user)
+            ->putJson("/api/v1/listings/{$listing->id}/photos/reorder", [
+                'photos' => ['photo-c.jpg', 'photo-a.jpg', 'photo-b.jpg'],
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.photos.0', 'photo-c.jpg');
+
+        $this->assertSame(['photo-c.jpg', 'photo-a.jpg', 'photo-b.jpg'], $listing->fresh()->photos);
+    }
+
+    public function test_reorder_photos_rejects_unknown_photo(): void
+    {
+        $listing = Listing::factory()->create([
+            'owner_id' => $this->user->id,
+            'photos' => ['photo-a.jpg', 'photo-b.jpg'],
+        ]);
+
+        $response = $this->actingAs($this->user)
+            ->putJson("/api/v1/listings/{$listing->id}/photos/reorder", [
+                'photos' => ['photo-a.jpg', 'other.jpg'],
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['photos']);
+    }
 }

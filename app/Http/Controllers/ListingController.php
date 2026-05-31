@@ -319,6 +319,45 @@ class ListingController extends Controller
     }
 
     /**
+     * Réordonner les photos existantes.
+     */
+    public function reorderPhotos(Request $request, string $id): JsonResponse
+    {
+        $listing = Listing::findOrFail($id);
+
+        if ($request->user()->id !== $listing->owner_id) {
+            throw new AuthorizationException();
+        }
+
+        $validated = $request->validate([
+            'photos' => ['required', 'array', 'min:1', 'max:10'],
+            'photos.*' => ['required', 'string'],
+        ]);
+
+        $currentPhotos = array_values($listing->photos ?? []);
+        $nextPhotos = array_values($validated['photos']);
+
+        sort($currentPhotos);
+        $sortedNextPhotos = $nextPhotos;
+        sort($sortedNextPhotos);
+
+        if ($currentPhotos !== $sortedNextPhotos) {
+            return response()->json([
+                'message' => 'La liste des photos ne correspond pas aux photos de cette annonce.',
+                'errors' => [
+                    'photos' => ['La liste des photos ne correspond pas aux photos de cette annonce.'],
+                ],
+            ], 422);
+        }
+
+        $listing->update(['photos' => $nextPhotos]);
+
+        return response()->json([
+            'data' => new ListingResource($listing->fresh()->load(['owner', 'location', 'place'])),
+        ]);
+    }
+
+    /**
      * Mes annonces.
      */
     public function myListings(Request $request): AnonymousResourceCollection

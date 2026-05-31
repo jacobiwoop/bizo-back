@@ -1,12 +1,17 @@
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import * as ExpoLocation from "expo-location";
+import * as SecureStore from "expo-secure-store";
 import { router } from "expo-router";
 import { Camera as MapLibreCamera, Map as MapLibreMap, Marker as MapLibreMarker, type PressEvent as MapLibrePressEvent, type StyleSpecification, type ViewStateChangeEvent as MapLibreViewStateChangeEvent } from "@maplibre/maplibre-react-native";
-import { useCreateListingMutation } from "@/src/features/publish/api/use-create-listing";
+import { useQuery } from "@tanstack/react-query";
+import { useCreateListingMutation, useUpdateListingMutation } from "@/src/features/publish/api/use-create-listing";
 import { normalizeApiError } from "@/src/lib/api/errors";
-import { type ListingPhotoUpload } from "@/src/lib/api/listings";
+import { deleteListingPhoto, getListing, reorderListingPhotos, type ListingPhotoUpload, type UpdateListingPayload, uploadListingPhotos } from "@/src/lib/api/listings";
 import { reverseLocation, searchLocations, type LocationResource, type PlaceResource, type ReverseLocationResponse } from "@/src/lib/api/locations";
+import { resolveMediaUrl } from "@/src/lib/api/media";
+import { ListingAttributes, ListingResource, ListingType } from "@/src/lib/api/types";
+import { queryClient } from "@/src/lib/query-client";
 import { getListingCategory, listingCategories, type ListingAttributeField, type ListingCategoryDefinition, type ListingCategoryId, type ListingCategoryIcon } from "@/src/lib/categories/listing-categories";
 import { useSessionStore } from "@/src/store/session";
 import {
@@ -50,7 +55,7 @@ type PublishMode = "sale" | "trade" | "trade-cash";
 type PublishStep = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 type PublishAttributeValue = string | string[];
 type PublishAttributes = Record<string, PublishAttributeValue>;
-type PublishPhoto = ListingPhotoUpload & { id: string };
+type PublishPhoto = ListingPhotoUpload & { id: string; serverPath?: string };
 type PublishCondition = "neuf" | "excellent" | "bon" | "correct";
 type DeliveryMode = "main_propre" | "livraison" | "les_deux";
 
@@ -118,6 +123,83 @@ const initialForm: PublishForm = {
   price: "",
   title: "",
 };
+
+const publishDraftStorageKey = "bizo.publish.draft.v1";
+
+type PublishDraft = {
+  attributes: PublishAttributes;
+  form: PublishForm;
+  mode: PublishMode;
+  photos: PublishPhoto[];
+  selectedCategoryId: ListingCategoryId;
+  step: PublishStep;
+  updatedAt: string;
+};
+
+function getModeFromListingType(type: ListingType): PublishMode {
+  if (type === "TROC") return "trade";
+  if (type === "TROC_CASH") return "trade-cash";
+  return "sale";
+}
+
+function mapListingToPublishForm(listing: ListingResource): PublishForm {
+  const locationLabel = [listing.neighborhood, listing.city].filter(Boolean).join(", ") || listing.city || "";
+
+  return {
+    cashComplement: listing.cash_complement ? String(listing.cash_complement) : "",
+    city: listing.city ?? "",
+    condition: (["neuf", "excellent", "bon", "correct"].includes(listing.condition) ? listing.condition : "excellent") as PublishCondition,
+    country: listing.country ?? "BJ",
+    deliveryMode: (["main_propre", "livraison", "les_deux"].includes(listing.delivery_mode) ? listing.delivery_mode : "main_propre") as DeliveryMode,
+    description: listing.description,
+    displayLat: listing.display_lat,
+    displayLng: listing.display_lng,
+    exchangeFor: listing.exchange_for ?? "",
+    locationAccuracy: listing.location_accuracy ?? "district",
+    locationId: listing.location_id,
+    locationLabel,
+    neighborhood: listing.neighborhood ?? "",
+    placeId: listing.place_id,
+    price: listing.price ? String(listing.price) : "",
+    title: listing.title,
+  };
+}
+
+function mapListingToPublishPhotos(listing: ListingResource): PublishPhoto[] {
+  const photos: PublishPhoto[] = [];
+
+  listing.photos.forEach((photo, index) => {
+    const uri = resolveMediaUrl(photo);
+
+    if (!uri) {
+      return;
+    }
+
+    photos.push({
+      id: `existing-${index}-${uri}`,
+      name: `photo-${index + 1}.jpg`,
+      serverPath: photo,
+      type: "image/jpeg",
+      uri,
+    });
+  });
+
+  return photos;
+}
+
+function mapListingAttributesToPublish(attributes: ListingAttributes): PublishAttributes {
+  const publishAttributes: PublishAttributes = {};
+
+  Object.entries(attributes).forEach(([key, value]) => {
+    if (value === null || value === undefined) {
+      return;
+    }
+
+    publishAttributes[key] = Array.isArray(value) ? value.map(String) : String(value);
+  });
+
+  return publishAttributes;
+}
 
 const deliveryModeOptions: Array<{
   description: string;
@@ -332,12 +414,14 @@ function Footer({
   label = "Continuer",
   onBack,
   onNext,
+  onSecondary,
   secondary,
 }: {
   disabled?: boolean;
   label?: string;
   onBack?: () => void;
   onNext: () => void;
+  onSecondary?: () => void;
   secondary?: string;
 }) {
   return (
@@ -358,7 +442,11 @@ function Footer({
           {disabled ? null : <ArrowRight color="#FFFFFF" size={20} strokeWidth={2.4} style={{ marginLeft: 8 }} />}
         </Pressable>
       </View>
-      {secondary ? <Text className="text-center text-[14px] font-bold text-[#5F5E5E]">{secondary}</Text> : null}
+      {secondary ? (
+        <Pressable disabled={disabled || !onSecondary} onPress={onSecondary}>
+          <Text className="text-center text-[14px] font-bold text-[#5F5E5E]">{secondary}</Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -488,6 +576,7 @@ function PhotoTile({
   onMoveLeft,
   onMoveRight,
   onRemove,
+  disabled = false,
   url,
 }: {
   canMoveLeft?: boolean;
@@ -498,11 +587,16 @@ function PhotoTile({
   onMoveLeft?: () => void;
   onMoveRight?: () => void;
   onRemove?: () => void;
+  disabled?: boolean;
   url?: string;
 }) {
   if (!url) {
+    if (disabled) {
+      return <View className="aspect-square rounded-xl border border-[#E1E3E4] bg-[#F3F4F5]" />;
+    }
+
     return (
-      <Pressable className="aspect-square items-center justify-center rounded-xl border-2 border-dashed border-[#D1C5AC] bg-white" onPress={onAdd}>
+      <Pressable className="aspect-square items-center justify-center rounded-xl border-2 border-dashed border-[#D1C5AC] bg-white" disabled={disabled} onPress={onAdd}>
         {index === 0 ? <Camera color="#807660" size={26} /> : <Plus color="#D1C5AC" size={24} />}
         {index === 0 ? <Text className="mt-1 text-[11px] font-bold text-[#807660]">Ajouter</Text> : null}
       </Pressable>
@@ -512,26 +606,26 @@ function PhotoTile({
   return (
     <View className="aspect-square overflow-hidden rounded-xl bg-white">
       <Image source={url} style={{ width: "100%", height: "100%" }} contentFit="cover" />
-      <Pressable className="absolute right-1 top-1 h-7 w-7 items-center justify-center rounded-full bg-black/60" onPress={onRemove}>
-        <CircleX color="#FFFFFF" size={18} />
+      <Pressable className="absolute right-1 top-1 h-7 w-7 items-center justify-center rounded-full bg-black/60" disabled={disabled} onPress={onRemove}>
+          <CircleX color="#FFFFFF" size={18} />
       </Pressable>
       {index === 0 ? (
         <View className="absolute bottom-1 left-1 rounded bg-black/65 px-2 py-[2px]">
           <Text className="text-[10px] font-bold text-white">Photo principale</Text>
         </View>
       ) : (
-        <Pressable className="absolute bottom-1 left-1 rounded bg-black/65 px-2 py-[2px]" onPress={onMakeMain}>
+        <Pressable className="absolute bottom-1 left-1 rounded bg-black/65 px-2 py-[2px]" disabled={disabled} onPress={onMakeMain}>
           <Text className="text-[10px] font-bold text-white">Principal</Text>
         </Pressable>
       )}
       <View className="absolute bottom-1 right-1 flex-row gap-1">
         {canMoveLeft ? (
-          <Pressable className="h-7 w-7 items-center justify-center rounded-full bg-white/90" onPress={onMoveLeft}>
+          <Pressable className="h-7 w-7 items-center justify-center rounded-full bg-white/90" disabled={disabled} onPress={onMoveLeft}>
             <ArrowLeft color="#191C1D" size={15} strokeWidth={2.4} />
           </Pressable>
         ) : null}
         {canMoveRight ? (
-          <Pressable className="h-7 w-7 items-center justify-center rounded-full bg-white/90" onPress={onMoveRight}>
+          <Pressable className="h-7 w-7 items-center justify-center rounded-full bg-white/90" disabled={disabled} onPress={onMoveRight}>
             <ArrowRight color="#191C1D" size={15} strokeWidth={2.4} />
           </Pressable>
         ) : null}
@@ -541,6 +635,7 @@ function PhotoTile({
 }
 
 function StepThree({
+  disabled = false,
   errorMessage,
   onMakeMainPhoto,
   onMovePhoto,
@@ -548,11 +643,12 @@ function StepThree({
   onRemovePhoto,
   photos,
 }: {
+  disabled?: boolean;
   errorMessage: string | null;
-  onMakeMainPhoto: (index: number) => void;
-  onMovePhoto: (fromIndex: number, toIndex: number) => void;
+  onMakeMainPhoto: (index: number) => void | Promise<void>;
+  onMovePhoto: (fromIndex: number, toIndex: number) => void | Promise<void>;
   onPickPhotos: () => void;
-  onRemovePhoto: (id: string) => void;
+  onRemovePhoto: (id: string) => void | Promise<void>;
   photos: PublishPhoto[];
 }) {
   return (
@@ -574,6 +670,7 @@ function StepThree({
               onMoveLeft={photo ? () => onMovePhoto(index, index - 1) : undefined}
               onMoveRight={photo ? () => onMovePhoto(index, index + 1) : undefined}
               onRemove={photo ? () => onRemovePhoto(photo.id) : undefined}
+              disabled={disabled}
               url={photo?.uri}
             />
           </View>
@@ -582,7 +679,7 @@ function StepThree({
       </View>
       <View className="mt-6 flex-row items-center rounded-2xl bg-[#EEF0FF] p-4">
         <Info color="#5B5BD6" size={22} fill="#5B5BD6" />
-        <Text className="ml-3 flex-1 text-[13px] leading-5 text-[#5B5BD6]">Déplacez les photos avec les flèches. La première photo sera la couverture.</Text>
+        <Text className="ml-3 flex-1 text-[13px] leading-5 text-[#5B5BD6]">{disabled ? "Mise à jour des photos en cours..." : "Déplacez les photos avec les flèches. La première photo sera la couverture."}</Text>
       </View>
     </StepShell>
   );
@@ -1027,7 +1124,7 @@ function StepSix({
       const reverseResult = await reverseLocation(coordinate.latitude, coordinate.longitude);
       setPendingMapPosition({ coordinate, reverseResult });
     } catch {
-      setReverseError("Impossible d’identifier cette position. Essayez un autre point.");
+      setReverseError("Adresse non reconnue à ce point.");
       setPendingMapPosition({ coordinate, reverseResult: null });
     } finally {
       setIsReverseSearching(false);
@@ -1329,12 +1426,25 @@ function StepSix({
           </View>
         </View>
       ) : reverseError ? (
-        <View className="mt-3 rounded-2xl border border-[#F2C7C7] bg-[#FFF7F7] p-4">
-          <Text className="text-[14px] font-bold text-[#9B1C1C]">{reverseError}</Text>
-          <Pressable className="mt-3 flex-row items-center" onPress={cancelPendingMapPosition}>
-            <CircleX color="#9B1C1C" size={18} />
-            <Text className="ml-2 text-[13px] font-bold text-[#9B1C1C]">Annuler ce point</Text>
-          </Pressable>
+        <View className="mt-3 rounded-2xl border border-[#F5C518] bg-[#FFFBEB] p-4">
+          <View className="flex-row items-start">
+            <View className="h-10 w-10 items-center justify-center rounded-full bg-[#F5C518]">
+              <MapPin color="#191C1D" fill="#191C1D" size={20} />
+            </View>
+            <View className="ml-3 flex-1">
+              <Text className="text-[12px] font-bold uppercase tracking-[1px] text-[#745B00]">Position GPS sélectionnée</Text>
+              <Text className="mt-1 text-[14px] font-bold text-[#191C1D]">{reverseError}</Text>
+              <Text className="mt-1 text-[12px] leading-4 text-[#5F5E5E]">Vous pouvez quand même utiliser ce point exact; l’annonce affichera une localisation approximative.</Text>
+            </View>
+          </View>
+          <View className="mt-4 flex-row gap-3">
+            <Pressable className="flex-1 items-center rounded-xl border border-[#D1C5AC] bg-white px-4 py-3" onPress={cancelPendingMapPosition}>
+              <Text className="text-[14px] font-bold text-[#5F5E5E]">Annuler</Text>
+            </Pressable>
+            <Pressable className="flex-1 items-center rounded-xl bg-[#191C1D] px-4 py-3" onPress={confirmPendingMapPosition}>
+              <Text className="text-[14px] font-bold text-white">Utiliser GPS</Text>
+            </Pressable>
+          </View>
         </View>
       ) : null}
       <View className="mt-5 flex-row gap-2">
@@ -1547,7 +1657,7 @@ function StepSeven({
   );
 }
 
-export function PublishFlowScreen() {
+export function PublishFlowScreen({ editId }: { editId?: string }) {
   const [step, setStep] = useState<PublishStep>(1);
   const [mode, setMode] = useState<PublishMode>("sale");
   const [selectedCategoryId, setSelectedCategoryId] = useState<ListingCategoryId>("telephones");
@@ -1555,9 +1665,21 @@ export function PublishFlowScreen() {
   const [form, setFormState] = useState<PublishForm>(initialForm);
   const [formError, setFormError] = useState<string | null>(null);
   const [pickedPhotos, setPickedPhotos] = useState<PublishPhoto[]>([]);
+  const [isPhotoUpdating, setIsPhotoUpdating] = useState(false);
+  const [draftPrompt, setDraftPrompt] = useState<PublishDraft | null>(null);
+  const [draftLoaded, setDraftLoaded] = useState(Boolean(editId));
   const token = useSessionStore((state) => state.token);
   const createListingMutation = useCreateListingMutation();
+  const updateListingMutation = useUpdateListingMutation(editId ?? "");
+  const editListingQuery = useQuery({
+    enabled: Boolean(editId && token),
+    queryFn: () => getListing(editId as string),
+    queryKey: ["listing-detail", editId],
+    staleTime: 30_000,
+  });
   const selectedCategory = getListingCategory(selectedCategoryId);
+  const isEditing = Boolean(editId);
+  const isSubmitting = createListingMutation.isPending || updateListingMutation.isPending;
 
   const setForm = (patch: Partial<PublishForm>) => {
     setFormError(null);
@@ -1573,6 +1695,114 @@ export function PublishFlowScreen() {
   const setAttribute = (key: string, value: PublishAttributeValue) => {
     setFormError(null);
     setAttributes((current) => ({ ...current, [key]: value }));
+  };
+
+  useEffect(() => {
+    if (isEditing) {
+      return;
+    }
+
+    let cancelled = false;
+
+    SecureStore.getItemAsync(publishDraftStorageKey)
+      .then((storedDraft) => {
+        if (cancelled || !storedDraft) {
+          setDraftLoaded(true);
+          return;
+        }
+
+        try {
+          const draft = JSON.parse(storedDraft) as PublishDraft;
+          setDraftPrompt(draft);
+        } catch {
+          SecureStore.deleteItemAsync(publishDraftStorageKey).catch(() => undefined);
+          setDraftLoaded(true);
+        }
+      })
+      .catch(() => setDraftLoaded(true));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isEditing]);
+
+  useEffect(() => {
+    if (!isEditing || !editListingQuery.data) {
+      return;
+    }
+
+    const listing = editListingQuery.data;
+    const normalizedCategory = getListingCategory(listing.category as ListingCategoryId)?.id ?? "telephones";
+    setMode(getModeFromListingType(listing.type));
+    setSelectedCategoryId(normalizedCategory);
+    setAttributes(mapListingAttributesToPublish(listing.attributes ?? {}));
+    setFormState(mapListingToPublishForm(listing));
+    setPickedPhotos(mapListingToPublishPhotos(listing));
+    setDraftLoaded(true);
+  }, [editListingQuery.data, isEditing]);
+
+  useEffect(() => {
+    if (isEditing || !draftLoaded || draftPrompt) {
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      const draft: PublishDraft = {
+        attributes,
+        form,
+        mode,
+        photos: pickedPhotos,
+        selectedCategoryId,
+        step,
+        updatedAt: new Date().toISOString(),
+      };
+
+      SecureStore.setItemAsync(publishDraftStorageKey, JSON.stringify(draft)).catch(() => undefined);
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [attributes, draftLoaded, draftPrompt, form, isEditing, mode, pickedPhotos, selectedCategoryId, step]);
+
+  const resumeDraft = () => {
+    if (!draftPrompt) {
+      return;
+    }
+
+    setMode(draftPrompt.mode);
+    setSelectedCategoryId(draftPrompt.selectedCategoryId);
+    setAttributes(draftPrompt.attributes);
+    setFormState(draftPrompt.form);
+    setPickedPhotos(draftPrompt.photos);
+    setStep(draftPrompt.step);
+    setDraftPrompt(null);
+    setDraftLoaded(true);
+  };
+
+  const startFreshDraft = async () => {
+    await SecureStore.deleteItemAsync(publishDraftStorageKey);
+    setDraftPrompt(null);
+    setDraftLoaded(true);
+  };
+
+  const saveDraftNow = async () => {
+    const draft: PublishDraft = {
+      attributes,
+      form,
+      mode,
+      photos: pickedPhotos,
+      selectedCategoryId,
+      step,
+      updatedAt: new Date().toISOString(),
+    };
+
+    await SecureStore.setItemAsync(publishDraftStorageKey, JSON.stringify(draft));
+    router.replace("/(tabs)/home");
+  };
+
+  const refreshEditedPhotos = async (listing: ListingResource) => {
+    setPickedPhotos(mapListingToPublishPhotos(listing));
+    await queryClient.setQueryData(["listing-detail", listing.id], listing);
+    await queryClient.invalidateQueries({ queryKey: ["my-listings"] });
   };
 
   const pickPhotos = async () => {
@@ -1601,28 +1831,97 @@ export function PublishFlowScreen() {
       return;
     }
 
-    setPickedPhotos((current) => [...current, ...result.assets.slice(0, remainingSlots).map(buildPhotoUpload)]);
+    const nextPhotos = result.assets.slice(0, remainingSlots).map(buildPhotoUpload);
+
+    if (isEditing && editId) {
+      setIsPhotoUpdating(true);
+      try {
+        const listing = await uploadListingPhotos(editId, nextPhotos);
+        await refreshEditedPhotos(listing);
+      } catch (error) {
+        const normalizedError = normalizeApiError(error);
+        setFormError(normalizedError.message);
+      } finally {
+        setIsPhotoUpdating(false);
+      }
+      return;
+    }
+
+    setPickedPhotos((current) => [...current, ...nextPhotos]);
   };
 
-  const removePhoto = (id: string) => {
+  const removePhoto = async (id: string) => {
     setFormError(null);
+
+    if (isEditing && editId) {
+      const index = pickedPhotos.findIndex((photo) => photo.id === id);
+
+      if (index < 0) {
+        return;
+      }
+
+      if (pickedPhotos.length <= 1) {
+        setFormError("Gardez au moins une photo sur l’annonce.");
+        return;
+      }
+
+      setIsPhotoUpdating(true);
+      try {
+        const listing = await deleteListingPhoto(editId, index);
+        await refreshEditedPhotos(listing);
+      } catch (error) {
+        const normalizedError = normalizeApiError(error);
+        setFormError(normalizedError.message);
+      } finally {
+        setIsPhotoUpdating(false);
+      }
+      return;
+    }
+
     setPickedPhotos((current) => current.filter((photo) => photo.id !== id));
   };
 
-  const movePhoto = (fromIndex: number, toIndex: number) => {
+  const movePhoto = async (fromIndex: number, toIndex: number) => {
     setFormError(null);
-    setPickedPhotos((current) => {
+
+    const reorder = (current: PublishPhoto[]) => {
       if (toIndex < 0 || toIndex >= current.length) return current;
       const next = [...current];
       const [photo] = next.splice(fromIndex, 1);
       if (!photo) return current;
       next.splice(toIndex, 0, photo);
       return next;
-    });
+    };
+
+    if (isEditing && editId) {
+      const nextPhotos = reorder(pickedPhotos);
+      const serverPhotos = nextPhotos.map((photo) => photo.serverPath).filter((photo): photo is string => Boolean(photo));
+
+      if (serverPhotos.length !== nextPhotos.length) {
+        setFormError("Impossible de réordonner les photos pour le moment.");
+        return;
+      }
+
+      setPickedPhotos(nextPhotos);
+      setIsPhotoUpdating(true);
+      try {
+        const listing = await reorderListingPhotos(editId, serverPhotos);
+        await refreshEditedPhotos(listing);
+      } catch (error) {
+        const normalizedError = normalizeApiError(error);
+        setFormError(normalizedError.message);
+        setPickedPhotos(pickedPhotos);
+      } finally {
+        setIsPhotoUpdating(false);
+      }
+      return;
+    }
+
+    setPickedPhotos(reorder);
   };
 
-  const makeMainPhoto = (index: number) => {
-    movePhoto(index, 0);
+  const makeMainPhoto = async (index: number) => {
+    await movePhoto(index, 0);
   };
 
   const validateCurrentStep = () => {
@@ -1673,7 +1972,7 @@ export function PublishFlowScreen() {
     }
 
     try {
-      const listing = await createListingMutation.mutateAsync({
+      const listingPayload: UpdateListingPayload = {
         attributes,
         cash_complement: mode === "trade-cash" ? parseAmount(form.cashComplement) : null,
         category: selectedCategory.id,
@@ -1689,13 +1988,21 @@ export function PublishFlowScreen() {
         location_id: form.locationId,
         neighborhood: form.neighborhood.trim() || null,
         place_id: form.placeId,
-        photos: pickedPhotos,
         price: mode === "sale" ? parseAmount(form.price) : null,
         tags: [],
         title: form.title.trim(),
         type: toListingType(mode),
-      });
+      };
+      const listing = isEditing && editId
+        ? await updateListingMutation.mutateAsync(listingPayload)
+        : await createListingMutation.mutateAsync({
+            ...listingPayload,
+            photos: pickedPhotos,
+          });
 
+      if (!isEditing) {
+        await SecureStore.deleteItemAsync(publishDraftStorageKey);
+      }
       router.replace(`/listing/${listing.id}`);
     } catch (error) {
       const normalizedError = normalizeApiError(error);
@@ -1711,14 +2018,14 @@ export function PublishFlowScreen() {
   const content = useMemo(() => {
     if (step === 1) return <StepOne mode={mode} setMode={setMode} />;
     if (step === 2) return <StepTwo selectedCategory={selectedCategory} setSelectedCategory={selectCategory} />;
-    if (step === 3) return <StepThree errorMessage={formError} onMakeMainPhoto={makeMainPhoto} onMovePhoto={movePhoto} onPickPhotos={pickPhotos} onRemovePhoto={removePhoto} photos={pickedPhotos} />;
+    if (step === 3) return <StepThree disabled={isPhotoUpdating} errorMessage={formError} onMakeMainPhoto={makeMainPhoto} onMovePhoto={movePhoto} onPickPhotos={pickPhotos} onRemovePhoto={removePhoto} photos={pickedPhotos} />;
     if (step === 4) return <StepFour attributes={attributes} category={selectedCategory} errorMessage={formError} form={form} setAttribute={setAttribute} setForm={setForm} />;
     if (step === 5 && mode === "sale") return <StepFiveSale errorMessage={formError} form={form} setForm={setForm} />;
     if (step === 5 && mode === "trade") return <StepFiveTrade errorMessage={formError} form={form} setForm={setForm} />;
     if (step === 5) return <StepFiveTradeCash errorMessage={formError} form={form} setForm={setForm} />;
     if (step === 6) return <StepSix errorMessage={formError} form={form} setForm={setForm} />;
     return <StepSeven category={selectedCategory} errorMessage={formError} form={form} mode={mode} onEditStep={goToStep} photos={pickedPhotos} />;
-  }, [attributes, form, formError, mode, pickedPhotos, selectedCategory, step]);
+  }, [attributes, form, formError, isPhotoUpdating, mode, pickedPhotos, selectedCategory, step]);
 
   const next = async () => {
     setFormError(null);
@@ -1742,18 +2049,50 @@ export function PublishFlowScreen() {
     setStep((current) => (Math.max(current - 1, 1) as PublishStep));
   };
   const close = () => router.replace("/(tabs)/home");
-  const footerLabel = createListingMutation.isPending ? "Publication..." : step === 7 ? "Publier maintenant" : "Continuer";
+  const footerLabel = isSubmitting ? (isEditing ? "Mise à jour..." : "Publication...") : step === 7 ? (isEditing ? "Mettre à jour" : "Publier maintenant") : "Continuer";
+
+  if (!draftLoaded || (isEditing && editListingQuery.isLoading)) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-[#F8F9FA] px-6">
+        <ActivityIndicator color="#F5C518" size="large" />
+        <Text className="mt-4 text-center text-[14px] font-semibold text-[#5F5E5E]">{isEditing ? "Chargement de l’annonce..." : "Préparation du brouillon..."}</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (draftPrompt) {
+    return (
+      <SafeAreaView className="flex-1 bg-[#F8F9FA]">
+        <View className="flex-1 justify-center px-5">
+          <View className="rounded-3xl bg-white p-5 shadow-soft">
+            <View className="h-12 w-12 items-center justify-center rounded-full bg-[#FFFBEB]">
+              <Save color="#745B00" size={22} />
+            </View>
+            <Text className="mt-5 text-[24px] font-black text-[#191C1D]">Reprendre votre brouillon ?</Text>
+            <Text className="mt-2 text-[14px] leading-6 text-[#5F5E5E]">Une annonce non publiée est disponible. Vous pouvez continuer où vous vous êtes arrêté ou repartir de zéro.</Text>
+            <Pressable className="mt-6 h-14 items-center justify-center rounded-full bg-[#191C1D]" onPress={resumeDraft}>
+              <Text className="text-[16px] font-bold text-white">Continuer le brouillon</Text>
+            </Pressable>
+            <Pressable className="mt-3 h-14 items-center justify-center rounded-full border border-[#D1C5AC] bg-white" onPress={startFreshDraft}>
+              <Text className="text-[16px] font-bold text-[#191C1D]">Nouvelle annonce</Text>
+            </Pressable>
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <KeyboardAvoidingView className="flex-1 bg-[#F8F9FA]" behavior={Platform.OS === "ios" ? "padding" : "height"}>
       <Header step={step} onClose={close} />
       {content}
       <Footer
-        disabled={createListingMutation.isPending}
+        disabled={isSubmitting}
         label={footerLabel}
         onBack={step > 1 ? back : undefined}
         onNext={next}
-        secondary={step === 7 ? "Enregistrer comme brouillon" : undefined}
+        onSecondary={!isEditing ? saveDraftNow : undefined}
+        secondary={step === 7 && !isEditing ? "Enregistrer comme brouillon" : undefined}
       />
     </KeyboardAvoidingView>
   );
