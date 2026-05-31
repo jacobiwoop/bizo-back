@@ -62,6 +62,20 @@ class ListingController extends Controller
     {
         $query = Listing::active()
             ->with(['owner', 'location', 'place'])
+            ->when($request->q, function ($q, $value) {
+                $term = mb_strtolower(trim($value));
+                $like = "%{$term}%";
+
+                $q->where(function ($subQuery) use ($like) {
+                    $subQuery
+                        ->where('title_search', 'like', $like)
+                        ->orWhere('title', 'like', $like)
+                        ->orWhere('description', 'like', $like)
+                        ->orWhere('city', 'like', $like)
+                        ->orWhere('neighborhood', 'like', $like)
+                        ->orWhere('category', 'like', $like);
+                });
+            })
             ->when(ListingCategory::normalize($request->category), fn ($q, $v) => $q->where('category', $v))
             ->when($request->type, fn ($q, $v) => $q->where('type', $v))
             ->when($request->condition, fn ($q, $v) => $q->where('condition', $v))
@@ -83,9 +97,15 @@ class ListingController extends Controller
                 ->orderBy('distance_km');
         }
 
-        $listings = $query->orderBy('is_boosted', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->paginate(min($request->integer('per_page', 20), 50));
+        $query->orderBy('is_boosted', 'desc');
+
+        match ($request->query('sort')) {
+            'price_asc' => $query->orderByRaw('price IS NULL')->orderBy('price'),
+            'price_desc' => $query->orderByRaw('price IS NULL')->orderByDesc('price'),
+            default => $query->orderBy('created_at', 'desc'),
+        };
+
+        $listings = $query->paginate(min($request->integer('per_page', 20), 50));
 
         return ListingResource::collection($listings);
     }

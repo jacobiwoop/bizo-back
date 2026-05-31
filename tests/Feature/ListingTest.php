@@ -93,6 +93,36 @@ class ListingTest extends TestCase
         $this->assertCount(1, $response->json('data'));
     }
 
+    public function test_feed_can_search_by_text(): void
+    {
+        Listing::factory()->create([
+            'status' => 'active',
+            'title' => 'iPhone 13 Pro Cotonou',
+            'description' => 'Telephone Apple propre',
+        ]);
+        Listing::factory()->create([
+            'status' => 'active',
+            'title' => 'Canape salon',
+            'description' => 'Meuble propre',
+        ]);
+
+        $response = $this->getJson('/api/v1/listings?q=iphone');
+
+        $this->assertCount(1, $response->json('data'));
+        $response->assertJsonPath('data.0.title', 'iPhone 13 Pro Cotonou');
+    }
+
+    public function test_feed_can_sort_by_price(): void
+    {
+        Listing::factory()->create(['status' => 'active', 'title' => 'Produit A', 'price' => 20000, 'type' => 'VENTE']);
+        Listing::factory()->create(['status' => 'active', 'title' => 'Produit B', 'price' => 5000, 'type' => 'VENTE']);
+
+        $response = $this->getJson('/api/v1/listings?sort=price_asc');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.0.title', 'Produit B');
+    }
+
     // ─── POST /listings ───────────────────────────────────────
 
     public function test_can_create_listing(): void

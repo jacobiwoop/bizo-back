@@ -1,4 +1,5 @@
 import { Image } from "expo-image";
+import * as React from "react";
 import {
   ArrowRight,
   CheckCircle,
@@ -21,12 +22,24 @@ import {
   ThumbsUp,
   X,
 } from "lucide-react-native";
-import { Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import { listingCategories } from "@/src/lib/categories/listing-categories";
 
 type SearchMode = "grid" | "list";
 
-type SearchListing = {
+export type SearchFilters = {
+  category: string | null;
+  city: string;
+  condition: string | null;
+  maxPrice: string;
+  minPrice: string;
+  sort: "recent" | "price_asc" | "price_desc";
+  type: "VENTE" | "TROC" | "TROC_CASH" | null;
+};
+
+export type SearchListing = {
   id: string;
   title: string;
   price: string;
@@ -84,8 +97,6 @@ const searchListings: SearchListing[] = [
   },
 ];
 
-const filters = ["Prix ↓", "Localisation", "État", "Catégorie"];
-
 function UrgentBadge() {
   return (
     <View className="absolute left-1 top-1 flex-row items-center rounded px-[6px] py-[2px] shadow-soft" style={{ backgroundColor: "#B79200" }}>
@@ -96,10 +107,12 @@ function UrgentBadge() {
 }
 
 export function SearchResultsHeader({
+  onChangeQuery,
   query,
   onBack,
   onCancel,
 }: {
+  onChangeQuery: (query: string) => void;
   query: string;
   onBack: () => void;
   onCancel: () => void;
@@ -114,11 +127,16 @@ export function SearchResultsHeader({
           <Search color="#5F5E5E" size={20} strokeWidth={2} />
           <TextInput
             className="ml-2 flex-1 text-[14px] font-bold text-[#191C1D]"
-            defaultValue={query}
+            onChangeText={onChangeQuery}
             placeholder="Rechercher"
             placeholderTextColor="#5F5E5E"
+            value={query}
           />
-          <X color="#5F5E5E" size={18} strokeWidth={2} />
+          {query ? (
+            <Pressable onPress={() => onChangeQuery("")}>
+              <X color="#5F5E5E" size={18} strokeWidth={2} />
+            </Pressable>
+          ) : null}
         </View>
         <Pressable onPress={onCancel}>
           <Text className="text-[14px] font-bold text-[#5F5E5E]">Annuler</Text>
@@ -129,15 +147,22 @@ export function SearchResultsHeader({
 }
 
 export function SearchResultsMeta({
+  isLoading,
   mode,
   onChangeMode,
+  total,
 }: {
+  isLoading?: boolean;
   mode: SearchMode;
   onChangeMode: (mode: SearchMode) => void;
+  total: number;
 }) {
   return (
     <View className="flex-row items-center justify-between px-5 py-4">
-      <Text className="text-[12px] font-bold uppercase tracking-[1.2px] text-[#5F5E5E]">124 annonces</Text>
+      <View className="flex-row items-center">
+        <Text className="text-[12px] font-bold uppercase tracking-[1.2px] text-[#5F5E5E]">{total} annonce{total > 1 ? "s" : ""}</Text>
+        {isLoading ? <ActivityIndicator color="#5B5BD6" size="small" style={{ marginLeft: 8 }} /> : null}
+      </View>
       <View className="flex-row rounded-full bg-[#EDEEEF] p-1">
         <Pressable
           className={`h-8 w-8 items-center justify-center rounded-full ${mode === "list" ? "bg-[#191C1D]" : "bg-transparent"}`}
@@ -156,7 +181,26 @@ export function SearchResultsMeta({
   );
 }
 
-export function SearchFilterChips({ onOpenFilter }: { onOpenFilter: () => void }) {
+function getActiveFilterChips(filters: SearchFilters): string[] {
+  const chips: string[] = [];
+  const category = listingCategories.find((item) => item.id === filters.category);
+
+  if (category) chips.push(category.label);
+  if (filters.city.trim()) chips.push(filters.city.trim());
+  if (filters.type === "VENTE") chips.push("Vente");
+  if (filters.type === "TROC") chips.push("Troc");
+  if (filters.type === "TROC_CASH") chips.push("Troc + cash");
+  if (filters.condition) chips.push(filters.condition === "neuf" ? "Neuf" : filters.condition === "excellent" ? "Très bon" : filters.condition === "bon" ? "Bon" : "Correct");
+  if (filters.minPrice || filters.maxPrice) chips.push(`${filters.minPrice || "0"} - ${filters.maxPrice || "max"} FCFA`);
+  if (filters.sort === "price_asc") chips.push("Prix croissant");
+  if (filters.sort === "price_desc") chips.push("Prix décroissant");
+
+  return chips;
+}
+
+export function SearchFilterChips({ filters, onOpenFilter }: { filters: SearchFilters; onOpenFilter: () => void }) {
+  const activeChips = getActiveFilterChips(filters);
+
   return (
     <ScrollView
       horizontal
@@ -168,19 +212,16 @@ export function SearchFilterChips({ onOpenFilter }: { onOpenFilter: () => void }
         <SlidersHorizontal color="#FFFFFF" size={18} strokeWidth={2} />
         <Text className="ml-[6px] text-[12px] font-bold text-white">Filtres</Text>
       </Pressable>
-      {filters.map((filter) => {
-        const selected = filter === "Localisation";
-        return (
-          <Pressable
-            key={filter}
-            className={`h-9 flex-row items-center rounded-full border px-4 ${selected ? "border-[#191C1D] bg-[#191C1D]" : "border-[#D1C5AC] bg-white"}`}
-            onPress={filter === "Localisation" ? onOpenFilter : undefined}
-          >
-            <Text className={`text-[12px] font-bold ${selected ? "text-white" : "text-[#4E4633]"}`}>{filter}</Text>
-            {selected ? <ChevronDown color="#FFFFFF" size={16} strokeWidth={2} style={{ marginLeft: 4 }} /> : null}
-          </Pressable>
-        );
-      })}
+      {(activeChips.length ? activeChips : ["Catégorie", "Prix", "Localisation", "État"]).map((filter) => (
+        <Pressable
+          key={filter}
+          className={`h-9 flex-row items-center rounded-full border px-4 ${activeChips.length ? "border-[#191C1D] bg-[#191C1D]" : "border-[#D1C5AC] bg-white"}`}
+          onPress={onOpenFilter}
+        >
+          <Text className={`text-[12px] font-bold ${activeChips.length ? "text-white" : "text-[#4E4633]"}`}>{filter}</Text>
+          {activeChips.length ? <ChevronDown color="#FFFFFF" size={16} strokeWidth={2} style={{ marginLeft: 4 }} /> : null}
+        </Pressable>
+      ))}
     </ScrollView>
   );
 }
@@ -267,16 +308,38 @@ export function SearchResultGridCard({
 }
 
 export function SearchResultsContent({
+  isLoading,
+  listings,
   mode,
   onListingPress,
 }: {
+  isLoading?: boolean;
+  listings: SearchListing[];
   mode: SearchMode;
   onListingPress?: (id: string) => void;
 }) {
+  if (isLoading) {
+    return (
+      <View className="items-center justify-center px-5 py-16">
+        <ActivityIndicator color="#F5C518" size="large" />
+        <Text className="mt-4 text-[14px] font-semibold text-[#5F5E5E]">Recherche en cours...</Text>
+      </View>
+    );
+  }
+
+  if (listings.length === 0) {
+    return (
+      <View className="items-center justify-center px-8 py-16">
+        <Text className="text-center text-[20px] font-black text-[#191C1D]">Aucun résultat</Text>
+        <Text className="mt-2 text-center text-[14px] leading-5 text-[#5F5E5E]">Essayez une autre recherche ou retirez quelques filtres.</Text>
+      </View>
+    );
+  }
+
   if (mode === "grid") {
     return (
       <View className="flex-row flex-wrap justify-between gap-y-4 px-5">
-        {searchListings.map((listing) => (
+        {listings.map((listing) => (
           <SearchResultGridCard key={listing.id} listing={listing} onPress={() => onListingPress?.(listing.id)} />
         ))}
       </View>
@@ -285,7 +348,7 @@ export function SearchResultsContent({
 
   return (
     <View className="gap-4 px-5">
-      {searchListings.map((listing) => (
+      {listings.map((listing) => (
         <SearchResultListCard key={listing.id} listing={listing} onPress={() => onListingPress?.(listing.id)} />
       ))}
     </View>
@@ -296,27 +359,29 @@ function FilterSectionTitle({ children }: { children: string }) {
   return <Text className="text-[12px] font-bold uppercase tracking-[1.1px] text-[#5F5E5E]">{children}</Text>;
 }
 
-function SortChip({ label, selected = false }: { label: string; selected?: boolean }) {
+function SortChip({ label, onPress, selected = false }: { label: string; onPress: () => void; selected?: boolean }) {
   return (
-    <View className={`rounded-full border px-6 py-[10px] ${selected ? "border-[#191C1D] bg-[#191C1D]" : "border-[#D1C5AC] bg-[#EDEEEF]"}`}>
+    <Pressable className={`rounded-full border px-6 py-[10px] ${selected ? "border-[#191C1D] bg-[#191C1D]" : "border-[#D1C5AC] bg-[#EDEEEF]"}`} onPress={onPress}>
       <Text className={`text-[14px] ${selected ? "font-bold text-white" : "text-[#191C1D]"}`}>{label}</Text>
-    </View>
+    </Pressable>
   );
 }
 
 function ConditionCard({
   label,
   icon,
+  onPress,
   selected = false,
 }: {
   label: string;
   icon: "sparkles" | "shield" | "thumb" | "package";
+  onPress: () => void;
   selected?: boolean;
 }) {
   const Icon = icon === "sparkles" ? Sparkles : icon === "shield" ? ShieldCheck : icon === "thumb" ? ThumbsUp : Package;
 
   return (
-    <View className={`w-[48%] rounded-xl border p-4 ${selected ? "border-[#191C1D] bg-[#191C1D]" : "border-[#D1C5AC] bg-white"}`}>
+    <Pressable className={`w-[48%] rounded-xl border p-4 ${selected ? "border-[#191C1D] bg-[#191C1D]" : "border-[#D1C5AC] bg-white"}`} onPress={onPress}>
       <View className="flex-row items-start justify-between">
         <View>
           <Icon color={selected ? "#FFFFFF" : "#5F5E5E"} size={20} fill={selected && icon === "sparkles" ? "#FFFFFF" : "transparent"} />
@@ -326,19 +391,27 @@ function ConditionCard({
         </View>
         {selected ? <CheckCircle color="#F5C518" fill="#F5C518" size={20} /> : null}
       </View>
-    </View>
+    </Pressable>
   );
 }
 
 export function SearchFilterSheet({
+  filters,
   onApply,
   onClose,
+  onReset,
 }: {
-  onApply: () => void;
+  filters: SearchFilters;
+  onApply: (filters: SearchFilters) => void;
   onClose: () => void;
+  onReset: () => void;
 }) {
   const { height } = useWindowDimensions();
   const sheetHeight = Math.round(height * 0.85);
+  const [draft, setDraft] = React.useState(filters);
+  const updateDraft = (patch: Partial<SearchFilters>) => setDraft((current) => ({ ...current, ...patch }));
+  const category = listingCategories.find((item) => item.id === draft.category);
+  const resultLabel = "Appliquer les filtres";
 
   return (
     <View className="overflow-hidden rounded-t-[24px] bg-white shadow-soft" style={{ height: sheetHeight }}>
@@ -355,42 +428,70 @@ export function SearchFilterSheet({
       <ScrollView className="flex-1 px-5" contentContainerStyle={{ gap: 32, paddingBottom: 48, paddingTop: 24 }}>
         <View>
           <FilterSectionTitle>Catégorie</FilterSectionTitle>
-          <View className="mt-4 self-start flex-row items-center rounded-full bg-[#191C1D] px-4 py-[10px] shadow-soft">
-            <Text className="text-[14px] text-white">Électronique &gt; Smartphones</Text>
-            <X color="#FFFFFF" size={18} strokeWidth={2} style={{ marginLeft: 8 }} />
-          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-4 -mx-5" contentContainerStyle={{ gap: 8, paddingHorizontal: 20 }}>
+            <Pressable className={`rounded-full border px-4 py-[10px] ${draft.category === null ? "border-[#191C1D] bg-[#191C1D]" : "border-[#D1C5AC] bg-white"}`} onPress={() => updateDraft({ category: null })}>
+              <Text className={`text-[13px] font-bold ${draft.category === null ? "text-white" : "text-[#191C1D]"}`}>Toutes</Text>
+            </Pressable>
+            {listingCategories.map((item) => (
+              <Pressable key={item.id} className={`rounded-full border px-4 py-[10px] ${draft.category === item.id ? "border-[#191C1D] bg-[#191C1D]" : "border-[#D1C5AC] bg-white"}`} onPress={() => updateDraft({ category: item.id })}>
+                <Text className={`text-[13px] font-bold ${draft.category === item.id ? "text-white" : "text-[#191C1D]"}`}>{item.label}</Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+          {category ? <Text className="mt-3 text-[12px] font-semibold text-[#5F5E5E]">Filtre actif: {category.label}</Text> : null}
         </View>
 
         <View>
           <FilterSectionTitle>Trier par</FilterSectionTitle>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-4 -mx-5" contentContainerStyle={{ gap: 8, paddingHorizontal: 20 }}>
-            <SortChip label="Pertinence" selected />
-            <SortChip label="Prix croissant ↑" />
-            <SortChip label="Prix décroissant ↓" />
-            <SortChip label="Plus récent" />
+            <SortChip label="Plus récent" selected={draft.sort === "recent"} onPress={() => updateDraft({ sort: "recent" })} />
+            <SortChip label="Prix croissant" selected={draft.sort === "price_asc"} onPress={() => updateDraft({ sort: "price_asc" })} />
+            <SortChip label="Prix décroissant" selected={draft.sort === "price_desc"} onPress={() => updateDraft({ sort: "price_desc" })} />
           </ScrollView>
+        </View>
+
+        <View>
+          <FilterSectionTitle>Type d’annonce</FilterSectionTitle>
+          <View className="mt-4 flex-row flex-wrap gap-2">
+            {[
+              { label: "Tous", value: null },
+              { label: "Vente", value: "VENTE" },
+              { label: "Troc", value: "TROC" },
+              { label: "Troc + cash", value: "TROC_CASH" },
+            ].map((item) => {
+              const selected = draft.type === item.value;
+
+              return (
+                <Pressable key={item.label} className={`rounded-full border px-4 py-[10px] ${selected ? "border-[#191C1D] bg-[#191C1D]" : "border-[#D1C5AC] bg-white"}`} onPress={() => updateDraft({ type: item.value as SearchFilters["type"] })}>
+                  <Text className={`text-[13px] font-bold ${selected ? "text-white" : "text-[#191C1D]"}`}>{item.label}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
         </View>
 
         <View>
           <View className="flex-row items-center justify-between">
             <FilterSectionTitle>Fourchette de prix</FilterSectionTitle>
-            <Text className="text-[20px] font-black text-[#745B00]">0€ — 500€</Text>
-          </View>
-          <View className="mt-6 h-6 justify-center">
-            <View className="h-[6px] rounded-full bg-[#E1E3E4]" />
-            <View className="absolute left-0 h-[6px] w-[60%] rounded-full bg-[#F5C518]" />
-            <View className="absolute left-0 h-6 w-6 rounded-full border-4 border-[#F5C518] bg-white shadow-soft" />
-            <View className="absolute left-[58%] h-6 w-6 rounded-full border-4 border-[#F5C518] bg-white shadow-soft" />
+            <Text className="text-[14px] font-black text-[#745B00]">FCFA</Text>
           </View>
           <View className="mt-5 flex-row gap-4">
-            {["0", "500"].map((value, index) => (
-              <View key={value} className="flex-1">
+            {[
+              { key: "minPrice", value: draft.minPrice },
+              { key: "maxPrice", value: draft.maxPrice },
+            ].map((item, index) => (
+              <View key={item.key} className="flex-1">
                 <Text className="absolute -top-2 left-3 z-10 bg-white px-1 text-[10px] font-bold uppercase text-[#5F5E5E]">
                   {index === 0 ? "Min" : "Max"}
                 </Text>
                 <View className="h-[52px] flex-row items-center rounded-xl border border-[#D1C5AC] bg-white px-4">
-                  <Text className="flex-1 text-[16px] text-[#191C1D]">{value}</Text>
-                  <Text className="text-[16px] text-[#5F5E5E]">€</Text>
+                  <TextInput
+                    className="flex-1 text-[16px] text-[#191C1D]"
+                    keyboardType="number-pad"
+                    onChangeText={(value) => updateDraft({ [item.key]: value.replace(/[^\d]/g, "") } as Partial<SearchFilters>)}
+                    placeholder={index === 0 ? "0" : "Max"}
+                    value={item.value}
+                  />
                 </View>
               </View>
             ))}
@@ -400,10 +501,10 @@ export function SearchFilterSheet({
         <View>
           <FilterSectionTitle>État / Condition</FilterSectionTitle>
           <View className="mt-4 flex-row flex-wrap justify-between gap-y-3">
-            <ConditionCard icon="sparkles" label="Neuf" selected />
-            <ConditionCard icon="shield" label="Très bon état" />
-            <ConditionCard icon="thumb" label="Bon état" />
-            <ConditionCard icon="package" label="Occasion" />
+            <ConditionCard icon="sparkles" label="Neuf" selected={draft.condition === "neuf"} onPress={() => updateDraft({ condition: draft.condition === "neuf" ? null : "neuf" })} />
+            <ConditionCard icon="shield" label="Très bon état" selected={draft.condition === "excellent"} onPress={() => updateDraft({ condition: draft.condition === "excellent" ? null : "excellent" })} />
+            <ConditionCard icon="thumb" label="Bon état" selected={draft.condition === "bon"} onPress={() => updateDraft({ condition: draft.condition === "bon" ? null : "bon" })} />
+            <ConditionCard icon="package" label="État correct" selected={draft.condition === "correct"} onPress={() => updateDraft({ condition: draft.condition === "correct" ? null : "correct" })} />
           </View>
         </View>
 
@@ -415,20 +516,14 @@ export function SearchFilterSheet({
                 <MapPin color="#5B5BD6" size={24} strokeWidth={2} />
               </View>
               <View className="ml-4">
-                <Text className="text-[16px] font-bold text-[#191C1D]">Paris, 75000</Text>
-                <Text className="mt-1 text-[14px] text-[#5F5E5E]">Île-de-France, FR</Text>
+                <Text className="text-[12px] font-bold uppercase tracking-[1px] text-[#5F5E5E]">Ville</Text>
+                <TextInput
+                  className="mt-1 min-w-[190px] text-[16px] font-bold text-[#191C1D]"
+                  onChangeText={(city) => updateDraft({ city })}
+                  placeholder="Ex: Cotonou"
+                  value={draft.city}
+                />
               </View>
-            </View>
-            <ChevronRight color="#C8C6C5" size={22} strokeWidth={2} />
-          </View>
-          <View className="mt-5">
-            <View className="flex-row items-center justify-between">
-              <Text className="text-[14px] font-medium text-[#5F5E5E]">Rayon</Text>
-              <Text className="text-[12px] font-bold text-[#745B00]">25 km</Text>
-            </View>
-            <View className="mt-3 h-[6px] rounded-full bg-[#E1E3E4]">
-              <View className="h-[6px] w-1/4 rounded-full bg-[#F5C518]" />
-              <View className="absolute left-[23%] -top-[9px] h-6 w-6 rounded-full border-4 border-white bg-[#F5C518] shadow-soft" />
             </View>
           </View>
         </View>
@@ -437,12 +532,12 @@ export function SearchFilterSheet({
       </ScrollView>
 
       <View className="flex-row items-center gap-4 border-t border-[#EDEEEF] bg-white px-5 py-6">
-        <Pressable className="flex-row items-center px-2 py-4">
+        <Pressable className="flex-row items-center px-2 py-4" onPress={onReset}>
           <RotateCcw color="#5F5E5E" size={20} strokeWidth={2} />
           <Text className="ml-2 text-[14px] font-bold text-[#5F5E5E]">Réinitialiser</Text>
         </Pressable>
-        <Pressable className="flex-1 flex-row items-center justify-between rounded-full bg-[#191C1D] px-6 py-4 shadow-soft" onPress={onApply}>
-          <Text className="text-[16px] font-bold text-white">Voir 124 résultats</Text>
+        <Pressable className="flex-1 flex-row items-center justify-between rounded-full bg-[#191C1D] px-6 py-4 shadow-soft" onPress={() => onApply(draft)}>
+          <Text className="text-[16px] font-bold text-white">{resultLabel}</Text>
           <ArrowRight color="#FFFFFF" size={22} strokeWidth={2} />
         </Pressable>
       </View>

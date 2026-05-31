@@ -3,6 +3,7 @@ import { ApiResourceResponse, ListingAttributes, ListingResource, ListingType, P
 
 export type ListingsQueryParams = {
   per_page?: number;
+  q?: string;
   category?: string;
   type?: "VENTE" | "TROC" | "TROC_CASH";
   condition?: string;
@@ -10,6 +11,7 @@ export type ListingsQueryParams = {
   city?: string;
   min_price?: number;
   max_price?: number;
+  sort?: "recent" | "price_asc" | "price_desc";
 };
 
 export type ListingPhotoUpload = {
