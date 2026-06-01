@@ -48,7 +48,8 @@ import {
   X,
 } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, KeyboardAvoidingView, Modal, type NativeSyntheticEvent, Platform, Pressable, ScrollView, type DimensionValue, Text, TextInput, useWindowDimensions, View } from "react-native";
+import { ActivityIndicator, Modal, type NativeSyntheticEvent, Pressable, ScrollView, type DimensionValue, Text, TextInput, useWindowDimensions, View } from "react-native";
+import { KeyboardAwareScrollView, KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type PublishMode = "sale" | "trade" | "trade-cash";
@@ -484,9 +485,17 @@ function ModeCard({
 
 function StepShell({ children }: { children: React.ReactNode }) {
   return (
-    <ScrollView className="flex-1 bg-[#F8F9FA]" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 180 }}>
+    <KeyboardAwareScrollView
+      bottomOffset={96}
+      extraKeyboardSpace={24}
+      keyboardShouldPersistTaps="handled"
+      mode="insets"
+      showsVerticalScrollIndicator={false}
+      style={{ backgroundColor: "#F8F9FA", flex: 1 }}
+      contentContainerStyle={{ paddingBottom: 180 }}
+    >
       <View className="px-5 pt-6">{children}</View>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 
@@ -2083,7 +2092,7 @@ export function PublishFlowScreen({ editId }: { editId?: string }) {
   }
 
   return (
-    <KeyboardAvoidingView className="flex-1 bg-[#F8F9FA]" behavior={Platform.OS === "ios" ? "padding" : "height"}>
+    <KeyboardAvoidingView automaticOffset behavior="translate-with-padding" style={{ backgroundColor: "#F8F9FA", flex: 1 }}>
       <Header step={step} onClose={close} />
       {content}
       <Footer

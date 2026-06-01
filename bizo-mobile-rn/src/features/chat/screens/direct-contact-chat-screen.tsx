@@ -1,7 +1,8 @@
 import { CheckCheck, ChevronLeft, Image as ImageIcon, Info, Mic, MoreVertical, Send, Shield, UserCircle, X } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { Image } from "expo-image";
+import { KeyboardStickyView } from "react-native-keyboard-controller";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const martinAvatar =
@@ -110,17 +111,8 @@ function SecurityBanner() {
   );
 }
 
-function ChatMessages({ keyboardHeight }: { keyboardHeight: number }) {
+function ChatMessages() {
   const scrollRef = useRef<ScrollView>(null);
-
-  useEffect(() => {
-    if (keyboardHeight > 0) {
-      const timeout = setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 80);
-      return () => clearTimeout(timeout);
-    }
-
-    return undefined;
-  }, [keyboardHeight]);
 
   return (
     <ScrollView
@@ -128,7 +120,7 @@ function ChatMessages({ keyboardHeight }: { keyboardHeight: number }) {
       className="flex-1"
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{ gap: 24, paddingBottom: 24 + keyboardHeight, paddingHorizontal: 16, paddingTop: 24 }}
+      contentContainerStyle={{ gap: 24, paddingBottom: 24, paddingHorizontal: 16, paddingTop: 24 }}
       onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}
     >
       <StarterCard />
@@ -145,11 +137,11 @@ function ChatMessages({ keyboardHeight }: { keyboardHeight: number }) {
   );
 }
 
-function ChatInputBar({ keyboardHeight }: { keyboardHeight: number }) {
+function ChatInputBar() {
   const [message, setMessage] = useState("");
 
   return (
-    <SafeAreaView edges={["bottom"]} className="border-t border-gray-100 bg-white" style={{ marginBottom: keyboardHeight }}>
+    <SafeAreaView edges={["bottom"]} className="border-t border-gray-100 bg-white">
       <View className="flex-row items-center gap-3 px-4 py-3">
         <View className="flex-row items-center gap-2">
           <Pressable className="h-8 w-8 items-center justify-center">
@@ -177,30 +169,14 @@ function ChatInputBar({ keyboardHeight }: { keyboardHeight: number }) {
 }
 
 export function DirectContactChatScreen({ onBack }: { onBack: () => void }) {
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
-
-  useEffect(() => {
-    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
-    const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
-    const showSub = Keyboard.addListener(showEvent, (event) => {
-      setKeyboardHeight(event.endCoordinates.height);
-    });
-    const hideSub = Keyboard.addListener(hideEvent, () => {
-      setKeyboardHeight(0);
-    });
-
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-    };
-  }, []);
-
   return (
-    <KeyboardAvoidingView className="flex-1 bg-[#F9FAFB]" behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <View className="flex-1 bg-[#F9FAFB]">
       <ChatHeader onBack={onBack} />
       <InfoBanner />
-      <ChatMessages keyboardHeight={keyboardHeight} />
-      <ChatInputBar keyboardHeight={Platform.OS === "android" ? keyboardHeight : 0} />
-    </KeyboardAvoidingView>
+      <ChatMessages />
+      <KeyboardStickyView>
+        <ChatInputBar />
+      </KeyboardStickyView>
+    </View>
   );
 }

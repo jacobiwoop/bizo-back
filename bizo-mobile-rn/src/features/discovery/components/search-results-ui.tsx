@@ -24,6 +24,7 @@ import {
   X,
 } from "lucide-react-native";
 import { ActivityIndicator, Animated, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { listingCategories } from "@/src/lib/categories/listing-categories";
@@ -463,7 +464,14 @@ export function SearchFilterSheet({
         </Pressable>
       </View>
 
-      <ScrollView className="flex-1 px-5" contentContainerStyle={{ gap: 32, paddingBottom: 48, paddingTop: 24 }}>
+      <KeyboardAwareScrollView
+        bottomOffset={24}
+        extraKeyboardSpace={16}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        style={{ flex: 1, paddingHorizontal: 20 }}
+        contentContainerStyle={{ gap: 32, paddingBottom: 48, paddingTop: 24 }}
+      >
         <View>
           <FilterSectionTitle>Catégorie</FilterSectionTitle>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-4 -mx-5" contentContainerStyle={{ gap: 8, paddingHorizontal: 20 }}>
@@ -567,7 +575,7 @@ export function SearchFilterSheet({
         </View>
 
         <View className="h-3" />
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       <View
         className="flex-row items-center gap-4 border-t border-[#EDEEEF] bg-white px-5 pt-4"

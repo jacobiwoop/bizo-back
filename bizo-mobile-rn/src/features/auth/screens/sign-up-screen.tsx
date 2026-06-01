@@ -15,7 +15,8 @@ import {
   User,
 } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useRegisterMutation } from "@/src/features/auth/api/use-auth-mutations";
@@ -154,7 +155,14 @@ function StepOne({
 }) {
   return (
     <>
-      <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 132 }} showsVerticalScrollIndicator={false}>
+      <KeyboardAwareScrollView
+        bottomOffset={92}
+        extraKeyboardSpace={16}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 132 }}
+      >
         <View className="px-5 py-6">
           <View className="mb-8">
             <Text className="mb-1 text-[24px] font-black text-[#191C1D]">Créez votre compte</Text>
@@ -206,7 +214,7 @@ function StepOne({
             </View>
           </View>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       <View className="absolute bottom-0 left-0 right-0 h-24 justify-center rounded-t-xl bg-[#F8F9FA]/95 px-5 shadow-soft">
         <Pressable className="h-[52px] flex-row items-center justify-center rounded-full bg-[#191C1D]" onPress={onContinue}>
@@ -244,7 +252,14 @@ function StepTwo({
 
   return (
     <>
-      <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 124 }} showsVerticalScrollIndicator={false}>
+      <KeyboardAwareScrollView
+        bottomOffset={92}
+        extraKeyboardSpace={16}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 124 }}
+      >
         <View className="px-4 py-6">
           <View className="mb-8">
             <Text className="text-[24px] font-black text-[#191C1D]">Sécurisez votre compte</Text>
@@ -290,7 +305,7 @@ function StepTwo({
           </View>
           {error ? <Text className="mt-5 text-center text-[13px] font-semibold text-[#BA1A1A]">{error}</Text> : null}
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       <View className="border-t border-[#E5E7EB] bg-white px-4 pb-10 pt-4">
         <Pressable

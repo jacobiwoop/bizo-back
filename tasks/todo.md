@@ -16,8 +16,9 @@
 
 - [x] Install `react-native-keyboard-controller`.
 - [x] Run mobile typecheck before push.
-- [ ] Push current mobile state to trigger Android debug and production builds.
-- [ ] Integrate keyboard-aware containers while CI builds.
+- [x] Push current mobile state to trigger Android debug and production builds.
+- [x] Integrate keyboard-aware containers while CI builds.
+- [x] Run mobile typecheck after keyboard integration.
 
 ## Review
 
@@ -26,4 +27,5 @@
 - Connected Home category buttons to Search with the category filter active.
 - Replaced the all-categories page with the real category tree used by publication/search.
 - Installed `react-native-keyboard-controller` for the next keyboard visibility pass.
+- Added app-wide `KeyboardProvider`, keyboard-aware publication/auth/filter forms, and sticky chat input.
 - Verification: `npm run typecheck` passed in `bizo-mobile-rn`.
