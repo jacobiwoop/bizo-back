@@ -24,7 +24,7 @@ import {
   X,
 } from "lucide-react-native";
 import { ActivityIndicator, Animated, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { KeyboardAwareScrollView, KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { listingCategories } from "@/src/lib/categories/listing-categories";
@@ -450,6 +450,7 @@ export function SearchFilterSheet({
   const resultLabel = "Appliquer les filtres";
 
   return (
+    <KeyboardProvider>
     <View
       className="overflow-hidden rounded-t-[24px] bg-white shadow-soft"
       style={{ height: Math.min(sheetHeight, height - bottomNavigationOffset - 28), marginBottom: bottomNavigationOffset }}
@@ -591,5 +592,6 @@ export function SearchFilterSheet({
         </Pressable>
       </View>
     </View>
+    </KeyboardProvider>
   );
 }

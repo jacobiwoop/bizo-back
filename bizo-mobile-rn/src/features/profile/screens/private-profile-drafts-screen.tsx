@@ -25,7 +25,7 @@ import {
 } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useLogoutMutation } from "@/src/features/auth/api/use-auth-mutations";
 import { resolveMediaUrl } from "@/src/lib/api/media";
@@ -541,10 +541,13 @@ function ProfileSettingsSheet({
   onClose: () => void;
   onLogout: () => void;
 }) {
+  const insets = useSafeAreaInsets();
+  const bottomNavigationOffset = Math.max(insets.bottom + 70, 86);
+
   return (
-    <View className="absolute inset-0 z-50 justify-end">
+    <View className="absolute inset-0 z-50 justify-end" style={{ paddingBottom: bottomNavigationOffset }}>
       <Pressable className="absolute inset-0 bg-black/25" onPress={onClose} />
-      <View className="rounded-t-[28px] bg-white px-5 pb-8 pt-4 shadow-soft">
+      <View className="rounded-t-[28px] bg-white px-5 pb-6 pt-4 shadow-soft">
         <View className="mb-5 flex-row items-center justify-between">
           <View>
             <Text className="text-[22px] font-black text-[#191C1D]">Paramètres</Text>

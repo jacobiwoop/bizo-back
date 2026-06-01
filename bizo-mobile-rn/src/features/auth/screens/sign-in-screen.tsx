@@ -3,7 +3,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { ArrowRight, Eye, EyeOff, Lock, Mail } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
-import { KeyboardAwareScrollView, KeyboardAvoidingView } from "react-native-keyboard-controller";
+import { KeyboardAwareScrollView, KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 
@@ -174,7 +174,8 @@ export function SignInScreen() {
   };
 
   return (
-    <KeyboardAvoidingView automaticOffset behavior="translate-with-padding" style={{ backgroundColor: "#F8F9FA", flex: 1 }}>
+    <KeyboardProvider>
+    <View style={{ backgroundColor: "#F8F9FA", flex: 1 }}>
       <SafeAreaView className="h-[180px] items-center justify-center overflow-hidden bg-[#EFF6FF]" edges={["top"]}>
         <View className="absolute inset-x-0 bottom-0 h-[96px] bg-white" />
         <View className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[#F5C518]/20" />
@@ -324,6 +325,7 @@ export function SignInScreen() {
           </BottomSheetCard>
         </BottomSheetModal>
       ) : null}
-    </KeyboardAvoidingView>
+    </View>
+    </KeyboardProvider>
   );
 }

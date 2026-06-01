@@ -1,7 +1,7 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
-import { KeyboardAvoidingView } from "react-native-keyboard-controller";
+import { KeyboardAvoidingView, KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft } from "lucide-react-native";
 
@@ -105,6 +105,7 @@ export function VerificationScreen() {
   };
 
   return (
+    <KeyboardProvider>
     <KeyboardAvoidingView automaticOffset behavior="translate-with-padding" style={{ backgroundColor: "#F0EEEB", flex: 1 }}>
       <SafeAreaView className="flex-1 bg-[#F0EEEB]" edges={["top", "bottom"]}>
         <View className="h-[58px] flex-row items-center px-5">
@@ -174,5 +175,6 @@ export function VerificationScreen() {
         </View>
       </SafeAreaView>
     </KeyboardAvoidingView>
+    </KeyboardProvider>
   );
 }

@@ -49,7 +49,7 @@ import {
 } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Modal, type NativeSyntheticEvent, Pressable, ScrollView, type DimensionValue, Text, TextInput, useWindowDimensions, View } from "react-native";
-import { KeyboardAwareScrollView, KeyboardAvoidingView } from "react-native-keyboard-controller";
+import { KeyboardAwareScrollView, KeyboardAvoidingView, KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type PublishMode = "sale" | "trade" | "trade-cash";
@@ -2092,17 +2092,19 @@ export function PublishFlowScreen({ editId }: { editId?: string }) {
   }
 
   return (
-    <KeyboardAvoidingView automaticOffset behavior="translate-with-padding" style={{ backgroundColor: "#F8F9FA", flex: 1 }}>
-      <Header step={step} onClose={close} />
-      {content}
-      <Footer
-        disabled={isSubmitting}
-        label={footerLabel}
-        onBack={step > 1 ? back : undefined}
-        onNext={next}
-        onSecondary={!isEditing ? saveDraftNow : undefined}
-        secondary={step === 7 && !isEditing ? "Enregistrer comme brouillon" : undefined}
-      />
-    </KeyboardAvoidingView>
+    <KeyboardProvider>
+      <KeyboardAvoidingView automaticOffset behavior="translate-with-padding" style={{ backgroundColor: "#F8F9FA", flex: 1 }}>
+        <Header step={step} onClose={close} />
+        {content}
+        <Footer
+          disabled={isSubmitting}
+          label={footerLabel}
+          onBack={step > 1 ? back : undefined}
+          onNext={next}
+          onSecondary={!isEditing ? saveDraftNow : undefined}
+          secondary={step === 7 && !isEditing ? "Enregistrer comme brouillon" : undefined}
+        />
+      </KeyboardAvoidingView>
+    </KeyboardProvider>
   );
 }

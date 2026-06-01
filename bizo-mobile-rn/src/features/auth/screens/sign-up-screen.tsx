@@ -16,7 +16,7 @@ import {
 } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { KeyboardAwareScrollView, KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useRegisterMutation } from "@/src/features/auth/api/use-auth-mutations";
@@ -367,33 +367,35 @@ export function SignUpScreen() {
   };
 
   return (
-    <View className="flex-1 bg-[#F8F9FA]">
-      <RegistrationHeader step={step} onBack={handleBack} />
-      <View className="flex-1">
-        {step === 1 ? (
-          <StepOne
-            email={email}
-            firstName={firstName}
-            lastName={lastName}
-            onContinue={() => setStep(2)}
-            phone={phone}
-            setEmail={setEmail}
-            setFirstName={setFirstName}
-            setLastName={setLastName}
-            setPhone={setPhone}
-          />
-        ) : (
-          <StepTwo
-            confirmPassword={confirmPassword}
-            error={error}
-            isSubmitting={registerMutation.isPending}
-            onContinue={handleRegister}
-            password={password}
-            setConfirmPassword={setConfirmPassword}
-            setPassword={setPassword}
-          />
-        )}
+    <KeyboardProvider>
+      <View className="flex-1 bg-[#F8F9FA]">
+        <RegistrationHeader step={step} onBack={handleBack} />
+        <View className="flex-1">
+          {step === 1 ? (
+            <StepOne
+              email={email}
+              firstName={firstName}
+              lastName={lastName}
+              onContinue={() => setStep(2)}
+              phone={phone}
+              setEmail={setEmail}
+              setFirstName={setFirstName}
+              setLastName={setLastName}
+              setPhone={setPhone}
+            />
+          ) : (
+            <StepTwo
+              confirmPassword={confirmPassword}
+              error={error}
+              isSubmitting={registerMutation.isPending}
+              onContinue={handleRegister}
+              password={password}
+              setConfirmPassword={setConfirmPassword}
+              setPassword={setPassword}
+            />
+          )}
+        </View>
       </View>
-    </View>
+    </KeyboardProvider>
   );
 }

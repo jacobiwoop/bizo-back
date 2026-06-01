@@ -20,6 +20,25 @@
 - [x] Integrate keyboard-aware containers while CI builds.
 - [x] Run mobile typecheck after keyboard integration.
 
+# Messaging V1
+
+- [x] Add mobile API helpers for conversations and messages.
+- [x] Connect the inbox screen to real conversations.
+- [x] Connect the chat thread to real messages and text sending.
+- [x] Remove the Messages tab `useRouter` hook that crashes without a navigation context in the dev client.
+- [x] Replace the inbox NativeWind styles with native `StyleSheet` styles to avoid the dev-only css-interop navigation context crash.
+- [x] Run mobile typecheck.
+
+# Profile Settings Sheet
+
+- [x] Keep the profile settings modal above the bottom tab navigation.
+- [x] Run mobile typecheck after the modal positioning fix.
+
+# Sign-in Keyboard Stability
+
+- [x] Remove the double keyboard movement on the sign-in screen.
+- [x] Run mobile typecheck after the sign-in keyboard fix.
+
 ## Review
 
 - Removed Home/Search mock listing data and fallback remote images.
@@ -28,4 +47,7 @@
 - Replaced the all-categories page with the real category tree used by publication/search.
 - Installed `react-native-keyboard-controller` for the next keyboard visibility pass.
 - Added app-wide `KeyboardProvider`, keyboard-aware publication/auth/filter forms, and sticky chat input.
+- Connected Messaging V1 to the existing backend conversations and text messages APIs.
+- Raised the profile settings sheet above the bottom tab navigation using the device safe-area inset.
+- Removed the nested keyboard translation from the sign-in screen so only the keyboard-aware scroll handles focused inputs.
 - Verification: `npm run typecheck` passed in `bizo-mobile-rn`.

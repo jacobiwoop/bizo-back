@@ -1,93 +1,67 @@
 import { Image } from "expo-image";
-import { Camera, Edit, Menu, Search } from "lucide-react-native";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { useQuery } from "@tanstack/react-query";
+import { Clock3, ImageIcon, MessageCircle, Search } from "lucide-react-native";
+import { useState } from "react";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const conversations = [
-  {
-    avatar:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCSsplh_8rh7EY1EAyWuNTe79pQzT9mt1foCcgg6odnvarItzYWFJtfbF0Iew6KjRecXbAW8Le1o9d7wTvH9iYeUOhCEnsCY_CcGqDK-Rydad4K8zELsRcsd-wr39lbzaGAqQ80zWBQb6FJsnmcZgM3SRaNE4sMUtW6XuGpsHE8XDHPI2DUtEQ8ovUpj_REV5-zci9QcTocPdYIGal9UbrIy_q2hnu7vmJ47x9bVG7hoSRJXO9UQQwJnwk7JM4EoY6ogvh82l9RV_k",
-    listing: "iPhone 13 Pro",
-    message: "Est-ce que le prix est négociable ?",
-    name: "Thomas B.",
-    online: true,
-    time: "10:30",
-    unread: 3,
-  },
-  {
-    avatar:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCISEJ5FJDAUuQaTNMaNFfWUngiYKfNnhZ3PPfTC85gwkf8xO11Xx7gPiVbqVlVbUP-_KBn6t51GzrKrnn3sEg0exug_nBYn3POpdgr_eUScbKCMaNiweNNE8jbnXpiKtgPGiRwZfmUGrsi9o9Z7WisO4f_NQcAf-xDDivubZtIsA4USOu-agh83PoU3EeybsukjbjyVdWMjcs0cgD_GYntboM-gcQImmOzIVRnz_mMQyVFtxn4hThIvmVZXtQfTYiHwvt8SKn8GUM",
-    listing: "PlayStation 5",
-    message: "Photo",
-    name: "Sophie L.",
-    photo: true,
-    time: "Hier",
-  },
-  {
-    avatar:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCX_teCWSt-FdR5c-9zwQeok5IBKjq2jwfyVcLcfNSG_wj95Fc-oWlDSMAMFpmqlaOstxBmP4vxSbsDUgLEEDygYYUT3vhvd2Qhlgb3A_-HpCg8OGoUII1ZPs8LOpCuPSPU_vqM-vezLbfGSiQrsUmLs989ZqJ2KFvGtX1RuMdfGSPqMbn3MIbxXsQl9pdCZAqZ2zfJjimgGSUdrKmdOKPQhFiT7G4S5MX8bWGcqHbW1gTobMZu5Z1lIM9Ahoei3AQWK1MtnDMfu8c",
-    listing: "MacBook Air M1",
-    message: "C'est parfait, merci !",
-    name: "Lucas M.",
-    online: true,
-    time: "Lun.",
-  },
-];
+import { getConversations, type ConversationResource } from "@/src/lib/api/interactions";
+import { resolveMediaUrl } from "@/src/lib/api/media";
+import { useSessionStore } from "@/src/store/session";
+
+function formatConversationTime(value: string | null): string {
+  if (!value) return "";
+
+  const date = new Date(value);
+  const now = new Date();
+  const sameDay = date.toDateString() === now.toDateString();
+
+  if (sameDay) {
+    return date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / 86_400_000);
+
+  if (diffDays === 1) return "Hier";
+  if (diffDays < 7) return date.toLocaleDateString("fr-FR", { weekday: "short" });
+  return date.toLocaleDateString("fr-FR", { day: "2-digit", month: "short" });
+}
+
+function conversationPreview(conversation: ConversationResource): string {
+  if (conversation.last_message) return conversation.last_message;
+  return "Conversation ouverte";
+}
 
 function InboxHeader() {
   return (
-    <SafeAreaView edges={["top"]} className="bg-[#F9F9FF] shadow-soft">
-      <View className="h-16 flex-row items-center justify-between px-4">
-        <View className="flex-row items-center gap-4">
-          <Pressable className="h-10 w-10 items-center justify-center rounded-full">
-            <Menu color="#745B00" size={24} strokeWidth={2.2} />
-          </Pressable>
-          <Text className="text-[24px] font-bold text-[#151C27]">Messages</Text>
+    <SafeAreaView edges={["top"]} style={styles.headerSafeArea}>
+      <View style={styles.header}>
+        <View style={styles.headerTitleRow}>
+          <Text style={styles.headerTitle}>Messages</Text>
         </View>
-        <Pressable className="h-10 w-10 items-center justify-center rounded-full">
-          <Edit color="#745B00" size={22} strokeWidth={2.2} />
-        </Pressable>
+        <View style={styles.headerIcon}>
+          <MessageCircle color="#745B00" size={22} strokeWidth={2.2} />
+        </View>
       </View>
     </SafeAreaView>
   );
 }
 
-function SearchBar() {
+function SearchBar({ onChangeText, value }: { onChangeText: (value: string) => void; value: string }) {
   return (
-    <View className="mb-6 rounded-full border border-[#D1C5AC]/20 bg-[#F3F4F6] px-4 py-3 shadow-soft">
-      <View className="flex-row items-center">
+    <View style={styles.searchBox}>
+      <View style={styles.searchRow}>
         <Search color="#5F5E5E" size={21} strokeWidth={2} />
         <TextInput
-          className="ml-3 flex-1 text-[16px] text-[#151C27]"
+          style={styles.searchInput}
+          onChangeText={onChangeText}
           placeholder="Rechercher une conversation..."
           placeholderTextColor="#5F5E5E"
+          value={value}
         />
       </View>
     </View>
-  );
-}
-
-function FilterChips() {
-  const chips = [
-    { label: "Tous", active: true },
-    { label: "Non lus", dot: true },
-    { label: "Vente" },
-    { label: "Troc" },
-    { label: "Sans annonce" },
-  ];
-
-  return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-6" contentContainerStyle={{ gap: 12 }}>
-      {chips.map((chip) => (
-        <Pressable
-          key={chip.label}
-          className={`h-9 flex-row items-center rounded-full px-6 ${chip.active ? "bg-[#1A1A1A]" : "border border-[#D1C5AC] bg-white"}`}
-        >
-          {chip.dot ? <View className="mr-2 h-2 w-2 rounded-full bg-[#5B5BD6]" /> : null}
-          <Text className={`text-[12px] font-bold ${chip.active ? "text-white" : "text-[#151C27]"}`}>{chip.label}</Text>
-        </Pressable>
-      ))}
-    </ScrollView>
   );
 }
 
@@ -95,61 +69,328 @@ function ConversationRow({
   item,
   onPress,
 }: {
-  item: (typeof conversations)[number];
+  item: ConversationResource;
   onPress: () => void;
 }) {
-  const unread = Boolean(item.unread);
+  const unread = item.unread_count > 0;
+  const avatar = resolveMediaUrl(item.other_user?.photo_url ?? null);
+  const listing = item.listing_title || "Annonce";
+  const time = formatConversationTime(item.last_message_at ?? item.created_at);
 
   return (
     <Pressable
-      className={`h-20 flex-row items-center border-b border-[#D1C5AC]/10 px-4 ${unread ? "border-l-[3px] border-l-[#5B5BD6] bg-[#FAFAFA]" : "bg-white"}`}
+      style={[styles.conversationRow, unread ? styles.conversationRowUnread : styles.conversationRowRead]}
       onPress={onPress}
     >
       <View>
-        <Image source={item.avatar} style={{ width: 52, height: 52, borderRadius: 26 }} contentFit="cover" />
-        <View className={`absolute bottom-0 right-0 h-[14px] w-[14px] rounded-full border-2 border-white ${item.online ? "bg-[#22C55E]" : "bg-gray-400"}`} />
+        {avatar ? (
+          <Image source={avatar} style={{ width: 52, height: 52, borderRadius: 26 }} contentFit="cover" />
+        ) : (
+          <View style={styles.avatarFallback}>
+            <Text style={styles.avatarInitial}>{(item.other_user?.display_name || "B").slice(0, 1).toUpperCase()}</Text>
+          </View>
+        )}
       </View>
-      <View className="ml-4 min-w-0 flex-1">
-        <View className="mb-[2px] flex-row items-baseline justify-between">
-          <Text className={`flex-1 text-[18px] ${unread ? "font-bold" : "font-medium"} text-[#151C27]`} numberOfLines={1}>
-            {item.name}
+      <View style={styles.conversationContent}>
+        <View style={styles.conversationTopRow}>
+          <Text style={[styles.conversationName, unread ? styles.conversationNameUnread : styles.conversationNameRead]} numberOfLines={1}>
+            {item.other_user?.display_name || "Utilisateur Bizo"}
           </Text>
-          <Text className="ml-2 text-[12px] text-[#5F5E5E]">{item.time}</Text>
+          <Text style={styles.conversationTime}>{time}</Text>
         </View>
-        <View className="flex-row items-center gap-2">
-          {item.photo ? <Camera color="#5F5E5E" size={16} strokeWidth={2} /> : null}
-          <Text className={`min-w-0 flex-1 text-[14px] ${item.photo ? "italic" : ""} text-[#5F5E5E]`} numberOfLines={1}>
-            {item.message}
+        <View style={styles.conversationMetaRow}>
+          {item.listing_photo ? <ImageIcon color="#5F5E5E" size={16} strokeWidth={2} /> : <Clock3 color="#5F5E5E" size={15} strokeWidth={2} />}
+          <Text style={styles.conversationPreview} numberOfLines={1}>
+            {conversationPreview(item)}
           </Text>
-          <View className={`${unread ? "bg-[#F5C518]" : "bg-[#DCE2F3]"} rounded-full px-2 py-[2px]`}>
-            <Text className={`text-[10px] font-bold ${unread ? "text-[#241A00]" : "text-[#5F5E5E]"}`} numberOfLines={1}>
-              {item.listing}
+          <View style={[styles.listingBadge, unread ? styles.listingBadgeUnread : styles.listingBadgeRead]}>
+            <Text style={[styles.listingBadgeText, unread ? styles.listingBadgeTextUnread : styles.listingBadgeTextRead]} numberOfLines={1}>
+              {listing}
             </Text>
           </View>
         </View>
       </View>
       {unread ? (
-        <View className="ml-4 h-5 w-5 items-center justify-center rounded-full bg-[#F5C518]">
-          <Text className="text-[10px] font-bold text-[#1A1A1A]">{item.unread}</Text>
+        <View style={styles.unreadPill}>
+          <Text style={styles.unreadPillText}>{item.unread_count}</Text>
         </View>
       ) : null}
     </Pressable>
   );
 }
 
-export function MessagingInboxScreen({ onOpenConversation }: { onOpenConversation: () => void }) {
+function InboxState({ message, title }: { message: string; title: string }) {
   return (
-    <View className="flex-1 bg-[#F9F9FF]">
+    <View style={styles.stateBox}>
+      <MessageCircle color="#C8C6C5" size={32} strokeWidth={1.8} />
+      <Text style={styles.stateTitle}>{title}</Text>
+      <Text style={styles.stateMessage}>{message}</Text>
+    </View>
+  );
+}
+
+export function MessagingInboxScreen({ onOpenConversation }: { onOpenConversation: (conversationId: string) => void }) {
+  const token = useSessionStore((state) => state.token);
+  const [query, setQuery] = useState("");
+  const conversationsQuery = useQuery({
+    enabled: Boolean(token),
+    queryFn: getConversations,
+    queryKey: ["conversations"],
+    staleTime: 15_000,
+  });
+  const conversations = conversationsQuery.data ?? [];
+  const normalizedQuery = query.trim().toLowerCase();
+  const visibleConversations = normalizedQuery
+    ? conversations.filter((conversation) => {
+        const haystack = [
+          conversation.other_user?.display_name,
+          conversation.listing_title,
+          conversation.last_message,
+        ].filter(Boolean).join(" ").toLowerCase();
+
+        return haystack.includes(normalizedQuery);
+      })
+    : conversations;
+
+  return (
+    <View style={styles.screen}>
       <InboxHeader />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 96, paddingHorizontal: 16, paddingTop: 16 }}>
-        <SearchBar />
-        <FilterChips />
-        <View className="overflow-hidden rounded-xl border border-[#D1C5AC]/10 bg-white shadow-soft">
-          {conversations.map((item) => (
-            <ConversationRow key={item.name} item={item} onPress={onOpenConversation} />
-          ))}
-        </View>
+        <SearchBar onChangeText={setQuery} value={query} />
+        {!token ? (
+          <InboxState title="Connexion requise" message="Connectez-vous pour voir vos conversations." />
+        ) : conversationsQuery.isLoading ? (
+          <View style={styles.loadingBox}>
+            <ActivityIndicator color="#F5C518" size="large" />
+            <Text style={styles.loadingText}>Chargement des messages...</Text>
+          </View>
+        ) : conversationsQuery.error ? (
+          <InboxState title="Messages indisponibles" message="Impossible de charger vos conversations pour le moment." />
+        ) : visibleConversations.length ? (
+          <View style={styles.conversationsBox}>
+            {visibleConversations.map((item) => (
+              <ConversationRow key={item.id} item={item} onPress={() => onOpenConversation(item.id)} />
+            ))}
+          </View>
+        ) : (
+          <InboxState title="Aucune conversation" message={query ? "Aucune conversation ne correspond à cette recherche." : "Contactez un vendeur depuis une annonce pour démarrer une discussion."} />
+        )}
       </ScrollView>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  avatarFallback: {
+    alignItems: "center",
+    backgroundColor: "#EDEEEF",
+    borderRadius: 26,
+    height: 52,
+    justifyContent: "center",
+    width: 52,
+  },
+  avatarInitial: {
+    color: "#5F5E5E",
+    fontSize: 16,
+    fontWeight: "900",
+  },
+  conversationContent: {
+    flex: 1,
+    marginLeft: 16,
+    minWidth: 0,
+  },
+  conversationMetaRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+  },
+  conversationName: {
+    color: "#151C27",
+    flex: 1,
+    fontSize: 18,
+  },
+  conversationNameRead: {
+    fontWeight: "500",
+  },
+  conversationNameUnread: {
+    fontWeight: "700",
+  },
+  conversationPreview: {
+    color: "#5F5E5E",
+    flex: 1,
+    fontSize: 14,
+    minWidth: 0,
+  },
+  conversationRow: {
+    alignItems: "center",
+    borderBottomColor: "rgba(209, 197, 172, 0.1)",
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    height: 80,
+    paddingHorizontal: 16,
+  },
+  conversationRowRead: {
+    backgroundColor: "#FFFFFF",
+  },
+  conversationRowUnread: {
+    backgroundColor: "#FAFAFA",
+    borderLeftColor: "#5B5BD6",
+    borderLeftWidth: 3,
+  },
+  conversationTime: {
+    color: "#5F5E5E",
+    fontSize: 12,
+    marginLeft: 8,
+  },
+  conversationTopRow: {
+    alignItems: "baseline",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 2,
+  },
+  conversationsBox: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "rgba(209, 197, 172, 0.1)",
+    borderRadius: 12,
+    borderWidth: 1,
+    elevation: 2,
+    overflow: "hidden",
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.06,
+    shadowRadius: 18,
+  },
+  header: {
+    alignItems: "center",
+    flexDirection: "row",
+    height: 64,
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+  },
+  headerIcon: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    height: 40,
+    justifyContent: "center",
+    width: 40,
+  },
+  headerSafeArea: {
+    backgroundColor: "#F9F9FF",
+    elevation: 2,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.06,
+    shadowRadius: 18,
+  },
+  headerTitle: {
+    color: "#151C27",
+    fontSize: 24,
+    fontWeight: "700",
+  },
+  headerTitleRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 16,
+  },
+  listingBadge: {
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  listingBadgeRead: {
+    backgroundColor: "#DCE2F3",
+  },
+  listingBadgeText: {
+    fontSize: 10,
+    fontWeight: "700",
+  },
+  listingBadgeTextRead: {
+    color: "#5F5E5E",
+  },
+  listingBadgeTextUnread: {
+    color: "#241A00",
+  },
+  listingBadgeUnread: {
+    backgroundColor: "#F5C518",
+  },
+  loadingBox: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    justifyContent: "center",
+    paddingVertical: 48,
+  },
+  loadingText: {
+    color: "#5F5E5E",
+    fontSize: 13,
+    fontWeight: "600",
+    marginTop: 12,
+  },
+  screen: {
+    backgroundColor: "#F9F9FF",
+    flex: 1,
+  },
+  searchBox: {
+    backgroundColor: "#F3F4F6",
+    borderColor: "rgba(209, 197, 172, 0.2)",
+    borderRadius: 999,
+    borderWidth: 1,
+    elevation: 2,
+    marginBottom: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.06,
+    shadowRadius: 18,
+  },
+  searchInput: {
+    color: "#151C27",
+    flex: 1,
+    fontSize: 16,
+    marginLeft: 12,
+  },
+  searchRow: {
+    alignItems: "center",
+    flexDirection: "row",
+  },
+  stateBox: {
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderColor: "rgba(209, 197, 172, 0.1)",
+    borderRadius: 12,
+    borderWidth: 1,
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    paddingVertical: 48,
+  },
+  stateMessage: {
+    color: "#5F5E5E",
+    fontSize: 13,
+    lineHeight: 20,
+    marginTop: 8,
+    textAlign: "center",
+  },
+  stateTitle: {
+    color: "#151C27",
+    fontSize: 18,
+    fontWeight: "900",
+    marginTop: 16,
+    textAlign: "center",
+  },
+  unreadPill: {
+    alignItems: "center",
+    backgroundColor: "#F5C518",
+    borderRadius: 10,
+    height: 20,
+    justifyContent: "center",
+    marginLeft: 16,
+    width: 20,
+  },
+  unreadPillText: {
+    color: "#1A1A1A",
+    fontSize: 10,
+    fontWeight: "700",
+  },
+});

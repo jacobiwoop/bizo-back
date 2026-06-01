@@ -30,12 +30,65 @@ export type ConversationResource = {
   created_at: string;
 };
 
+export type MessageResource = {
+  id: string;
+  conv_id: string;
+  sender_id: string;
+  type: "text" | "image" | "troc_proposal";
+  text: string | null;
+  image_url: string | null;
+  proposal: {
+    offered_listing_id: string | null;
+    offered_listing_title: string | null;
+    offered_listing_photo: string | null;
+    cash_amount: number | null;
+    status: string | null;
+    refusal_reason: string | null;
+  } | null;
+  is_read: boolean;
+  created_at: string;
+};
+
 export async function getFavorites(): Promise<FavoriteResource[]> {
   const response = await api.get<PaginatedApiResponse<FavoriteResource>>("/favorites", {
     params: { per_page: 100 },
   });
 
   return response.data.data;
+}
+
+export async function getConversations(): Promise<ConversationResource[]> {
+  const response = await api.get<PaginatedApiResponse<ConversationResource>>("/conversations", {
+    params: { per_page: 50 },
+  });
+
+  return response.data.data;
+}
+
+export async function getConversation(id: string): Promise<ConversationResource> {
+  const response = await api.get<ApiResourceResponse<ConversationResource>>(`/conversations/${id}`);
+  return response.data.data;
+}
+
+export async function getConversationMessages(id: string): Promise<MessageResource[]> {
+  const response = await api.get<PaginatedApiResponse<MessageResource>>(`/conversations/${id}/messages`, {
+    params: { per_page: 100 },
+  });
+
+  return response.data.data;
+}
+
+export async function sendTextMessage(conversationId: string, text: string): Promise<MessageResource> {
+  const response = await api.post<ApiResourceResponse<MessageResource>>(`/conversations/${conversationId}/messages`, {
+    type: "text",
+    text,
+  });
+
+  return response.data.data;
+}
+
+export async function markConversationRead(id: string): Promise<void> {
+  await api.post(`/conversations/${id}/read`);
 }
 
 export async function addFavorite(listingId: string): Promise<FavoriteResource> {

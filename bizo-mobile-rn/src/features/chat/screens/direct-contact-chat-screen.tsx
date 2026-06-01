@@ -1,14 +1,32 @@
 import { CheckCheck, ChevronLeft, Image as ImageIcon, Info, Mic, MoreVertical, Send, Shield, UserCircle, X } from "lucide-react-native";
-import { useEffect, useRef, useState } from "react";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useRef, useState } from "react";
+import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { Image } from "expo-image";
-import { KeyboardStickyView } from "react-native-keyboard-controller";
+import { KeyboardProvider, KeyboardStickyView } from "react-native-keyboard-controller";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const martinAvatar =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuDEYgs--UU8MhNu_bzr0XCKwaRuczowlGt4p0R1PjbUqxEf-qgjL42bb82c_6vw7A--eAR6TBHDUYB9DbGxHrcQZIThipJGh4KcDBr3shWID0zG-ai8CdAgzG1g75ZFrADXmTQfyXd-sUVdj8xK1FWqJXWH5vZR7yeQKe3KB6tP5AwGHtGXzainVQ3_Qlu3J4p_To-3HAnxKaYofk8jtire9CxBzfRqxntQaKEvcYa5wyymI6-sRLgGUQojoAZfHF_NA2mkhvIx_9U";
+import {
+  getConversation,
+  getConversationMessages,
+  markConversationRead,
+  sendTextMessage,
+  type ConversationResource,
+  type MessageResource,
+} from "@/src/lib/api/interactions";
+import { resolveMediaUrl } from "@/src/lib/api/media";
+import { queryClient } from "@/src/lib/query-client";
+import { useSessionStore } from "@/src/store/session";
 
-function ChatHeader({ onBack }: { onBack: () => void }) {
+function formatMessageTime(value: string): string {
+  return new Date(value).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+}
+
+function ChatHeader({ conversation, onBack }: { conversation?: ConversationResource | null; onBack: () => void }) {
+  const avatar = resolveMediaUrl(conversation?.other_user?.photo_url ?? null);
+  const name = conversation?.other_user?.display_name || "Conversation";
+  const subtitle = conversation?.listing_title || "Message Bizo";
+
   return (
     <SafeAreaView edges={["top"]} className="bg-white shadow-soft">
       <View className="h-16 flex-row items-center justify-between px-4">
@@ -18,12 +36,17 @@ function ChatHeader({ onBack }: { onBack: () => void }) {
           </Pressable>
           <View className="flex-row items-center gap-2">
             <View>
-              <Image source={martinAvatar} style={{ width: 36, height: 36, borderRadius: 18 }} contentFit="cover" />
-              <View className="absolute bottom-0 right-0 h-[10px] w-[10px] rounded-full border-2 border-white bg-[#22C55E]" />
+              {avatar ? (
+                <Image source={avatar} style={{ width: 36, height: 36, borderRadius: 18 }} contentFit="cover" />
+              ) : (
+                <View className="h-9 w-9 items-center justify-center rounded-full bg-[#EDEEEF]">
+                  <Text className="text-[13px] font-black text-[#5F5E5E]">{name.slice(0, 1).toUpperCase()}</Text>
+                </View>
+              )}
             </View>
             <View>
-              <Text className="text-[15px] font-bold leading-5 text-[#1A1A1A]">Martin D.</Text>
-              <Text className="text-[11px] font-medium text-[#22C55E]">En ligne</Text>
+              <Text className="text-[15px] font-bold leading-5 text-[#1A1A1A]" numberOfLines={1}>{name}</Text>
+              <Text className="max-w-[190px] text-[11px] font-medium text-[#5F5E5E]" numberOfLines={1}>{subtitle}</Text>
             </View>
           </View>
         </View>
@@ -46,7 +69,7 @@ function InfoBanner() {
     <View className="flex-row items-center justify-between bg-[#EFF6FF] px-4 py-[10px]">
       <View className="flex-row items-center gap-2">
         <Info color="#5B5BD6" size={16} strokeWidth={2.2} />
-        <Text className="text-[12px] font-bold text-[#5B5BD6]">Contact direct — aucune annonce liée</Text>
+        <Text className="text-[12px] font-bold text-[#5B5BD6]">Restez sur Bizo pour échanger en sécurité</Text>
       </View>
       <Pressable className="h-6 w-6 items-center justify-center" onPress={() => setVisible(false)}>
         <X color="#6B7280" size={15} strokeWidth={2.2} />
@@ -55,14 +78,13 @@ function InfoBanner() {
   );
 }
 
-function StarterCard() {
+function StarterCard({ conversation }: { conversation?: ConversationResource | null }) {
   return (
     <View className="items-center">
       <View className="w-[280px] items-center rounded-2xl bg-[#F3F4F6] p-4 shadow-soft">
         <UserCircle color="#6B7280" size={32} strokeWidth={1.8} />
-        <Text className="mt-2 text-[14px] font-bold text-[#1A1A1A]">Vous avez contacté Martin D.</Text>
-        <Text className="mt-1 text-[12px] text-[#6B7280]">depuis son profil public</Text>
-        <Text className="mt-2 text-[11px] text-[#6B7280]">12 Mai 2026</Text>
+        <Text className="mt-2 text-center text-[14px] font-bold text-[#1A1A1A]">Conversation avec {conversation?.other_user?.display_name || "un utilisateur Bizo"}</Text>
+        <Text className="mt-1 text-center text-[12px] text-[#6B7280]" numberOfLines={2}>{conversation?.listing_title || "Annonce Bizo"}</Text>
       </View>
     </View>
   );
@@ -79,20 +101,27 @@ function DateSeparator() {
 }
 
 function MessageBubble({
-  children,
+  message,
   sent,
-  time,
 }: {
-  children: string;
+  message: MessageResource;
   sent?: boolean;
-  time: string;
 }) {
+  const image = resolveMediaUrl(message.image_url);
+  const proposalTitle = message.proposal?.offered_listing_title;
+  const content = message.type === "image"
+    ? "Photo"
+    : message.type === "troc_proposal"
+      ? `Proposition: ${proposalTitle || "échange"}`
+      : message.text || "";
+
   return (
     <View className={`max-w-[85%] ${sent ? "ml-auto items-end" : "items-start"}`}>
       <View className={`${sent ? "rounded-tr-none bg-[#1A1A1A]" : "rounded-tl-none bg-white"} rounded-2xl p-[14px] shadow-soft`}>
-        <Text className={`text-[14px] leading-[21px] ${sent ? "text-white" : "text-[#1A1A1A]"}`}>{children}</Text>
+        {image ? <Image source={image} style={{ width: 180, height: 140, borderRadius: 12, marginBottom: 8 }} contentFit="cover" /> : null}
+        <Text className={`text-[14px] leading-[21px] ${sent ? "text-white" : "text-[#1A1A1A]"}`}>{content}</Text>
         <View className={`mt-1 flex-row items-center justify-end ${sent ? "gap-1" : ""}`}>
-          <Text className={`text-[11px] ${sent ? "text-gray-400" : "text-[#6B7280]"}`}>{time}</Text>
+          <Text className={`text-[11px] ${sent ? "text-gray-400" : "text-[#6B7280]"}`}>{formatMessageTime(message.created_at)}</Text>
           {sent ? <CheckCheck color="#F5C518" size={14} strokeWidth={2} /> : null}
         </View>
       </View>
@@ -111,7 +140,17 @@ function SecurityBanner() {
   );
 }
 
-function ChatMessages() {
+function ChatMessages({
+  conversation,
+  isLoading,
+  messages,
+  userId,
+}: {
+  conversation?: ConversationResource | null;
+  isLoading?: boolean;
+  messages: MessageResource[];
+  userId?: string | null;
+}) {
   const scrollRef = useRef<ScrollView>(null);
 
   return (
@@ -123,22 +162,40 @@ function ChatMessages() {
       contentContainerStyle={{ gap: 24, paddingBottom: 24, paddingHorizontal: 16, paddingTop: 24 }}
       onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}
     >
-      <StarterCard />
+      <StarterCard conversation={conversation} />
       <DateSeparator />
-      <MessageBubble time="09:41">
-        Bonjour ! J&apos;ai vu que vous proposiez des services de conseil en logistique sur votre profil. Seriez-vous disponible pour un court appel cette semaine ?
-      </MessageBubble>
-      <MessageBubble sent time="09:45">
-        Bonjour Martin, merci de me contacter. Effectivement, je suis disponible jeudi après-midi. Quel créneau vous conviendrait ?
-      </MessageBubble>
-      <SecurityBanner />
-      <MessageBubble time="09:50">Parfait, disons 15h30 ? Je vous enverrai une invitation calendrier si cela vous va.</MessageBubble>
+      {isLoading ? (
+        <View className="items-center py-8">
+          <ActivityIndicator color="#F5C518" size="large" />
+          <Text className="mt-3 text-[13px] font-semibold text-[#6B7280]">Chargement des messages...</Text>
+        </View>
+      ) : messages.length ? (
+        messages.map((message, index) => (
+          <View key={message.id} className="gap-6">
+            {index === 2 ? <SecurityBanner /> : null}
+            <MessageBubble message={message} sent={message.sender_id === userId} />
+          </View>
+        ))
+      ) : (
+        <View className="items-center py-8">
+          <Text className="text-center text-[14px] font-semibold text-[#6B7280]">Aucun message pour le moment.</Text>
+        </View>
+      )}
     </ScrollView>
   );
 }
 
-function ChatInputBar() {
+function ChatInputBar({ disabled, onSend }: { disabled?: boolean; onSend: (message: string) => void }) {
   const [message, setMessage] = useState("");
+  const trimmedMessage = message.trim();
+  const send = () => {
+    if (!trimmedMessage || disabled) {
+      return;
+    }
+
+    onSend(trimmedMessage);
+    setMessage("");
+  };
 
   return (
     <SafeAreaView edges={["bottom"]} className="border-t border-gray-100 bg-white">
@@ -158,9 +215,12 @@ function ChatInputBar() {
             placeholder="Votre message..."
             placeholderTextColor="#6B7280"
             className="text-[14px] text-[#1A1A1A]"
+            editable={!disabled}
+            returnKeyType="send"
+            onSubmitEditing={send}
           />
         </View>
-        <Pressable className="h-10 w-10 items-center justify-center rounded-full bg-[#1A1A1A] shadow-soft" onPress={() => setMessage("")}>
+        <Pressable className={`h-10 w-10 items-center justify-center rounded-full shadow-soft ${trimmedMessage && !disabled ? "bg-[#1A1A1A]" : "bg-[#C8C6C5]"}`} disabled={!trimmedMessage || disabled} onPress={send}>
           <Send color="#FFFFFF" size={20} strokeWidth={2.2} style={{ marginLeft: 2 }} />
         </Pressable>
       </View>
@@ -168,15 +228,59 @@ function ChatInputBar() {
   );
 }
 
-export function DirectContactChatScreen({ onBack }: { onBack: () => void }) {
+export function DirectContactChatScreen({ conversationId, onBack }: { conversationId: string; onBack: () => void }) {
+  const user = useSessionStore((state) => state.user);
+  const conversationQuery = useQuery({
+    enabled: Boolean(conversationId),
+    queryFn: () => getConversation(conversationId),
+    queryKey: ["conversation", conversationId],
+    staleTime: 15_000,
+  });
+  const messagesQuery = useQuery({
+    enabled: Boolean(conversationId),
+    queryFn: () => getConversationMessages(conversationId),
+    queryKey: ["conversation-messages", conversationId],
+    staleTime: 5_000,
+  });
+  const sendMutation = useMutation({
+    mutationFn: (text: string) => sendTextMessage(conversationId, text),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["conversation-messages", conversationId] }),
+        queryClient.invalidateQueries({ queryKey: ["conversation", conversationId] }),
+        queryClient.invalidateQueries({ queryKey: ["conversations"] }),
+      ]);
+    },
+  });
+
+  useQuery({
+    enabled: Boolean(conversationId && messagesQuery.data),
+    queryFn: () => markConversationRead(conversationId),
+    queryKey: ["conversation-read", conversationId, messagesQuery.data?.length ?? 0],
+  });
+
   return (
+    <KeyboardProvider>
     <View className="flex-1 bg-[#F9FAFB]">
-      <ChatHeader onBack={onBack} />
+      <ChatHeader conversation={conversationQuery.data} onBack={onBack} />
       <InfoBanner />
-      <ChatMessages />
+      {conversationQuery.error || messagesQuery.error ? (
+        <View className="flex-1 items-center justify-center px-6">
+          <Text className="text-center text-[18px] font-black text-[#151C27]">Conversation indisponible</Text>
+          <Text className="mt-2 text-center text-[13px] leading-5 text-[#6B7280]">Impossible de charger cette discussion pour le moment.</Text>
+        </View>
+      ) : (
+        <ChatMessages
+          conversation={conversationQuery.data}
+          isLoading={conversationQuery.isLoading || messagesQuery.isLoading}
+          messages={messagesQuery.data ?? []}
+          userId={user?.id}
+        />
+      )}
       <KeyboardStickyView>
-        <ChatInputBar />
+        <ChatInputBar disabled={sendMutation.isPending || Boolean(conversationQuery.error || messagesQuery.error)} onSend={(text) => sendMutation.mutate(text)} />
       </KeyboardStickyView>
     </View>
+    </KeyboardProvider>
   );
 }
