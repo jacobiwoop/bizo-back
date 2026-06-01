@@ -1,4 +1,5 @@
 import { Image } from "expo-image";
+import * as React from "react";
 import {
   ArrowLeftRight,
   ArrowRight,
@@ -6,6 +7,7 @@ import {
   CarFront,
   Heart,
   House,
+  ImageIcon,
   MapPin,
   MonitorSmartphone,
   Plus,
@@ -15,8 +17,10 @@ import {
   Tag,
   User,
 } from "lucide-react-native";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Animated, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import type { ListingCategoryId } from "@/src/lib/categories/listing-categories";
 
 const bizoBrandLogo = require("../../../../design/bizo/bizo_brand_logo/brand.png");
 
@@ -26,6 +30,7 @@ type Category = {
   icon: "vehicle" | "home" | "phone" | "fashion" | "more";
   color: string;
   background: string;
+  searchCategoryId?: ListingCategoryId;
 };
 
 export type Listing = {
@@ -34,7 +39,7 @@ export type Listing = {
   value: string;
   badge: "VENTE" | "TROC" | "TROC+CASH";
   badgeColor: string;
-  image: string;
+  image?: string | null;
   seller: string;
   meta: string;
   favorite?: boolean;
@@ -45,84 +50,15 @@ export type CompactListing = {
   title: string;
   subtitle: string;
   badge?: string;
-  image: string;
+  image?: string | null;
 };
 
 const categories: Category[] = [
-  { id: "vehicles", label: "Véhicules", icon: "vehicle", color: "#00687C", background: "#D7F3FA" },
-  { id: "property", label: "Immobilier", icon: "home", color: "#745B00", background: "#FFE08B" },
-  { id: "electronics", label: "Électro", icon: "phone", color: "#006D3B", background: "#D5F2DF" },
-  { id: "fashion", label: "Mode", icon: "fashion", color: "#BA1A1A", background: "#FFDAD6" },
+  { id: "vehicles", label: "Véhicules", icon: "vehicle", color: "#00687C", background: "#D7F3FA", searchCategoryId: "vehicules" },
+  { id: "property", label: "Immobilier", icon: "home", color: "#745B00", background: "#FFE08B", searchCategoryId: "maison" },
+  { id: "electronics", label: "Électro", icon: "phone", color: "#006D3B", background: "#D5F2DF", searchCategoryId: "electronique" },
+  { id: "fashion", label: "Mode", icon: "fashion", color: "#BA1A1A", background: "#FFDAD6", searchCategoryId: "vetements" },
   { id: "more", label: "Plus", icon: "more", color: "#5F5E5E", background: "#E8EAED" },
-];
-
-const recentListings: Listing[] = [
-  {
-    id: "sony-wh-1000xm4",
-    title: "Sony WH-1000XM4",
-    value: "185,000 FCFA",
-    badge: "VENTE",
-    badgeColor: "#2A313D",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAquGbs5XEpp5Ve_MPFdWdE3PMBBhFXuCg5lkAkxMHwr4f9x1keBLbtcCSY8vV1a0sKKGgnamXaSLKPai5rPN4hnhaN0KKgVrxAYYXCHJ9yZMGY6MPog1kA_kObUSScM8UjLdBLyptQ8TqqDKIvQFlOkSZPsdjKhs557HAV96hftqY39O1cju51h41vTCwt5QulWKzardOda-Ctk5QV4dOWULy_BV0LbrzFQntnkreliaOEd3fvHevMHZtYd4eZyrdtSquLtu8wVac",
-    seller: "Yannick",
-    meta: "Il y a 2h",
-  },
-  {
-    id: "iphone-13-pro",
-    title: "iPhone 13 Pro 256G",
-    value: "Contre Samsung",
-    badge: "TROC",
-    badgeColor: "#00687C",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAu-3CP6vOwWMnmAfpcC6UU9lJ-Jnb88E-3TQB2ywUJ4UrzL1-YNcqhUb85KAlgvGyraMUeXeigr0WP6ZL98ZAXS3-x40WIBePGeVNZU_aFBDjd1PJFWOiOs0QR02wH6_jHHOhmOjMIKHrNx6UCiH-CX2XAnIv41T4HEO8S-wm2wJkvj8HN__P9To3FGuqCodf0u5BRgC0C-ukJnPNVT4T6c6MKr-X1EOfZmL_L6sDV8PTLoElOrgp_FN52qyfJ5IQ38U-S94LH-Jc",
-    seller: "Sarah G.",
-    meta: "Cocody",
-    favorite: true,
-  },
-];
-
-const tradeListings: CompactListing[] = [
-  {
-    id: "nike-air-max",
-    title: "Nike Air Max Limited",
-    subtitle: "Contre Jordan 4 + 10k",
-    badge: "TROC+CASH",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuD2p4XTm4nI_C0sUTBWefXKjSI7s_TRSCDAzVr_q34hVSGEHJtVdH0v-xTbn34nQFonHkOyBNoYwj7Kj45-OchxcfErCTPNoh95qVMZZL6TX2uDiesHBbHzsqxjTuj9tD09P-XEZJick__xVB8_xOtHqfU_uwqbNchZxdzPqoONky61tjkel6vAwgfAbjFww0Vu9ZzD2K0D4l0K7LIa3T8cQIb3JFqhGQBzdI3CJTvZrG24oMt_2CpND2WJ0KMOzZpKvzszvpr3tAE",
-  },
-  {
-    id: "macbook-air-m1",
-    title: "MacBook Air M1 2020",
-    subtitle: "Contre PC Gaming",
-    badge: "TROC",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuC2ca28xCI8Oy8vuWVRcrj-1BXZeJXEkD_KsSWfyHrDVKvvCGuLJSGRRz4wtZpQAQgxJf_Z9ltmvzcDj-5NFGlsGzOcdNvgULtv6uhmkt4wPBQJTRC2BbhaefYhqPkfrwfWaVZYMosXgn5fANGzf2AZ2YTAMVztKTc6MfwebM0LKdgGJqef01kq5CDoc-x4E6AkAkQp8is4sj2hgqu7d7RyTrhEdVbfKlAC91z4jD5e0IRlmz0uGwoN9vaB_cfzSvTeUQg23wQZjjg",
-  },
-];
-
-const dealListings: CompactListing[] = [
-  {
-    id: "fauteuil-design",
-    title: "45,000 FCFA",
-    subtitle: "Fauteuil Design",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDuDeFdqb5_sybJG4fE4HfPKyLYJtK7OGU6j2IpwDCDKMgxgAm9aqEuWlR7KckhnFqR6_XdwvsBryr02gp25G0jZKNwoXmaQsunjLX24MZFp7hgghziYw2U1G0rtLm-xMsVPM17dXAEGPnfNKpgIgBfGaVtpqfw6XMe2ovKv3QYIdpZOqV_3muqNOKl3ctUZ85RsvJfdAK67Igqkyap9SVhEPAmLf_h5olLKKLaVbR1TLOAKUrPkhkscIz75CV6WzrsXLtR3WxTIVk",
-  },
-  {
-    id: "vtt-cross",
-    title: "120,000 FCFA",
-    subtitle: "VTT Cross 200",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuARU7RGjoEFjZ682tyoqngPWdYGSpCpVz_FN-mYgbBPFelXw0vyYC2kJs6boNIJusVz2b2sAiNI2tcOuCRLJnSk05QE2hYh2rbeGZmlUYqtkqNu9DCzmfmQF71cEA_4pIykWxh4DNzJLIYko0fcTOw1_Nz-_VaxUAwB1W2NHsTW5hTuYpKUg_UYYeXuwJA8txb98GOg33B84o1s_8YHf0fSHFTZxpCMgC3bQ3ZcbydT-lE2kEce1qlSNLAULkt7N-38tfbkVTXtSt0",
-  },
-  {
-    id: "montre-quartz",
-    title: "15,000 FCFA",
-    subtitle: "Montre Quartz",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCPnrfVzgazjC7cOwtBo5a3Xd4NWSqVM7MTAgr0olEwkdBY6j0OSGgZL1ZK4b-FnyA-JOilAehJSd0Ar4gK1qKMfDxq1N_EgA11gaDcZO-xaq4ubSKT2qsfQROpGIlhl9qP-q99k9PSskcul1yYRzGusypwnZB5aC43huhVEJR8hsIJPVgzhlX5gAz5rNyAv8yiVm-u9G6aQwkaBbNGA3_qga7UHmtkhGAAwd18O0kyC0ms_46RP3ybus3-hr6FxxkHSRa5F0WBaKQ",
-  },
 ];
 
 function CategoryIcon({ category }: { category: Category }) {
@@ -133,6 +69,87 @@ function CategoryIcon({ category }: { category: Category }) {
   if (category.icon === "phone") return <MonitorSmartphone {...props} />;
   if (category.icon === "fashion") return <Shirt {...props} />;
   return <Plus {...props} />;
+}
+
+function ListingImage({ source, rounded = false }: { source?: string | null; rounded?: boolean }) {
+  if (source) {
+    return <Image source={source} style={{ width: "100%", height: "100%", borderRadius: rounded ? 12 : 0 }} contentFit="cover" />;
+  }
+
+  return (
+    <View className={`h-full w-full items-center justify-center bg-[#EDEEEF] ${rounded ? "rounded-xl" : ""}`}>
+      <ImageIcon color="#A6AAAD" size={28} strokeWidth={1.8} />
+    </View>
+  );
+}
+
+function SkeletonBlock({ className }: { className: string }) {
+  const opacity = React.useRef(new Animated.Value(0.52)).current;
+
+  React.useEffect(() => {
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, { duration: 720, toValue: 1, useNativeDriver: true }),
+        Animated.timing(opacity, { duration: 720, toValue: 0.52, useNativeDriver: true }),
+      ]),
+    );
+
+    animation.start();
+
+    return () => animation.stop();
+  }, [opacity]);
+
+  return (
+    <Animated.View style={{ opacity }}>
+      <View className={`bg-[#E6E8EA] ${className}`} />
+    </Animated.View>
+  );
+}
+
+function ListingCardSkeleton() {
+  return (
+    <View className="w-[48%] overflow-hidden rounded-[18px] bg-white shadow-soft">
+      <SkeletonBlock className="h-[130px] w-full" />
+      <View className="p-3">
+        <SkeletonBlock className="h-4 w-[82%] rounded-full" />
+        <SkeletonBlock className="mt-3 h-5 w-[68%] rounded-full" />
+        <View className="mt-3 flex-row items-center justify-between">
+          <SkeletonBlock className="h-4 w-[44%] rounded-full" />
+          <SkeletonBlock className="h-4 w-[28%] rounded-full" />
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function HorizontalTradeCardSkeleton() {
+  return (
+    <View className="w-[200px] overflow-hidden rounded-[18px] bg-white shadow-soft">
+      <SkeletonBlock className="h-[100px] w-full" />
+      <View className="p-3">
+        <SkeletonBlock className="h-4 w-[78%] rounded-full" />
+        <SkeletonBlock className="mt-2 h-3 w-[58%] rounded-full" />
+      </View>
+    </View>
+  );
+}
+
+function HorizontalDealCardSkeleton() {
+  return (
+    <View className="w-[160px] rounded-[18px] border border-[#ECEEEF] bg-white p-3 shadow-soft">
+      <SkeletonBlock className="h-24 w-full rounded-xl" />
+      <SkeletonBlock className="mt-3 h-4 w-[74%] rounded-full" />
+      <SkeletonBlock className="mt-2 h-3 w-[62%] rounded-full" />
+    </View>
+  );
+}
+
+function SectionEmptyState({ message }: { message: string }) {
+  return (
+    <View className="mx-4 rounded-[16px] border border-[#E5E5E5] bg-white px-4 py-4">
+      <Text className="text-[12px] font-semibold text-[#5F5E5E]">{message}</Text>
+    </View>
+  );
 }
 
 export function MarketplaceHeader({
@@ -237,7 +254,13 @@ export function MarketplaceHero() {
   );
 }
 
-export function CategoryRail({ onViewAll }: { onViewAll?: () => void }) {
+export function CategoryRail({
+  onCategoryPress,
+  onViewAll,
+}: {
+  onCategoryPress?: (categoryId: ListingCategoryId) => void;
+  onViewAll?: () => void;
+}) {
   return (
     <View className="mb-8">
       <View className="mb-4 flex-row items-center justify-between px-4">
@@ -252,7 +275,11 @@ export function CategoryRail({ onViewAll }: { onViewAll?: () => void }) {
         contentContainerStyle={{ gap: 16, paddingHorizontal: 16 }}
       >
         {categories.map((category) => (
-          <Pressable key={category.id} className="items-center">
+          <Pressable
+            key={category.id}
+            className="items-center"
+            onPress={() => (category.searchCategoryId ? onCategoryPress?.(category.searchCategoryId) : onViewAll?.())}
+          >
             <View
               className="h-16 w-16 items-center justify-center rounded-[18px]"
               style={{ backgroundColor: category.background }}
@@ -271,7 +298,7 @@ export function ListingCard({ listing, onPress }: { listing: Listing; onPress?: 
   return (
     <Pressable className="w-[48%] overflow-hidden rounded-[18px] bg-white shadow-soft" onPress={onPress}>
       <View className="h-[130px] overflow-hidden">
-        <Image source={listing.image} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+        <ListingImage source={listing.image} />
         <View className="absolute left-2 top-2 rounded-full px-2 py-[3px]" style={{ backgroundColor: listing.badgeColor }}>
           <Text className="text-[10px] font-black text-white">{listing.badge}</Text>
         </View>
@@ -345,7 +372,7 @@ export function HorizontalTradeCard({ item }: { item: CompactListing }) {
   return (
     <Pressable className="w-[200px] overflow-hidden rounded-[18px] bg-white shadow-soft">
       <View className="h-[100px]">
-        <Image source={item.image} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+        <ListingImage source={item.image} />
         {item.badge ? (
           <View className="absolute bottom-2 left-2 rounded bg-[#00687C] px-2 py-[2px]">
             <Text className="text-[9px] font-black text-white">{item.badge}</Text>
@@ -367,7 +394,9 @@ export function HorizontalTradeCard({ item }: { item: CompactListing }) {
 export function HorizontalDealCard({ item }: { item: CompactListing }) {
   return (
     <Pressable className="w-[160px] rounded-[18px] border border-[#ECEEEF] bg-white p-3 shadow-soft">
-      <Image source={item.image} style={{ width: "100%", height: 96, borderRadius: 12 }} contentFit="cover" />
+      <View className="h-24 overflow-hidden rounded-xl">
+        <ListingImage rounded source={item.image} />
+      </View>
       <Text className="mt-2 text-[14px] font-bold text-[#F5C518]" numberOfLines={1}>
         {item.title}
       </Text>
@@ -383,6 +412,7 @@ export function MarketplaceHome({
   onBellPress,
   onFilterPress,
   onCategoriesPress,
+  onCategoryPress,
   onListingPress,
   recentListingsData,
   tradeListingsData,
@@ -394,6 +424,7 @@ export function MarketplaceHome({
   onBellPress?: () => void;
   onFilterPress?: () => void;
   onCategoriesPress?: () => void;
+  onCategoryPress?: (categoryId: ListingCategoryId) => void;
   onListingPress?: (id: string) => void;
   recentListingsData?: Listing[];
   tradeListingsData?: CompactListing[];
@@ -401,9 +432,9 @@ export function MarketplaceHome({
   isLoading?: boolean;
   errorMessage?: string | null;
 }) {
-  const visibleRecentListings = recentListingsData?.length ? recentListingsData : recentListings;
-  const visibleTradeListings = tradeListingsData?.length ? tradeListingsData : tradeListings;
-  const visibleDealListings = dealListingsData?.length ? dealListingsData : dealListings;
+  const visibleRecentListings = recentListingsData ?? [];
+  const visibleTradeListings = tradeListingsData ?? [];
+  const visibleDealListings = dealListingsData ?? [];
 
   return (
     <View className="flex-1 bg-[#FAFAFA]">
@@ -412,21 +443,30 @@ export function MarketplaceHome({
         <MarketplaceSearchBar onFilterPress={onFilterPress} />
         <TransactionTabs />
         <MarketplaceHero />
-        <CategoryRail onViewAll={onCategoriesPress} />
+        <CategoryRail onCategoryPress={onCategoryPress} onViewAll={onCategoriesPress} />
 
         <View className="mb-8 px-4">
           <Text className="mb-4 text-[24px] font-bold text-[#191C1D]">Annonces récentes</Text>
-          {isLoading || errorMessage ? (
+          {errorMessage ? (
             <View className="mb-3 rounded-[16px] border border-[#E5E5E5] bg-white px-4 py-3">
-              <Text className="text-[12px] font-semibold text-[#5F5E5E]">
-                {isLoading ? "Chargement des annonces..." : errorMessage}
-              </Text>
+              <Text className="text-[12px] font-semibold text-[#5F5E5E]">{errorMessage}</Text>
             </View>
           ) : null}
           <View className="flex-row justify-between">
-            {visibleRecentListings.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} onPress={() => onListingPress?.(listing.id)} />
-            ))}
+            {isLoading ? (
+              <>
+                <ListingCardSkeleton />
+                <ListingCardSkeleton />
+              </>
+            ) : visibleRecentListings.length ? (
+              visibleRecentListings.map((listing) => (
+                <ListingCard key={listing.id} listing={listing} onPress={() => onListingPress?.(listing.id)} />
+              ))
+            ) : (
+              <View className="w-full">
+                <SectionEmptyState message="Aucune annonce récente pour le moment." />
+              </View>
+            )}
           </View>
         </View>
 
@@ -437,9 +477,13 @@ export function MarketplaceHome({
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ gap: 16, paddingHorizontal: 16 }}
           >
-            {visibleTradeListings.map((item) => (
-              <HorizontalTradeCard key={item.id} item={item} />
-            ))}
+            {isLoading
+              ? [0, 1, 2].map((item) => <HorizontalTradeCardSkeleton key={item} />)
+              : visibleTradeListings.length
+                ? visibleTradeListings.map((item) => (
+                    <HorizontalTradeCard key={item.id} item={item} />
+                  ))
+                : <SectionEmptyState message="Aucun troc disponible pour le moment." />}
           </ScrollView>
         </View>
 
@@ -450,9 +494,13 @@ export function MarketplaceHome({
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ gap: 16, paddingHorizontal: 16 }}
           >
-            {visibleDealListings.map((item) => (
-              <HorizontalDealCard key={item.id} item={item} />
-            ))}
+            {isLoading
+              ? [0, 1, 2].map((item) => <HorizontalDealCardSkeleton key={item} />)
+              : visibleDealListings.length
+                ? visibleDealListings.map((item) => (
+                    <HorizontalDealCard key={item.id} item={item} />
+                  ))
+                : <SectionEmptyState message="Aucun bon plan disponible pour le moment." />}
           </ScrollView>
         </View>
       </ScrollView>

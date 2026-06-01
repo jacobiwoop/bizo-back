@@ -9,6 +9,7 @@ import {
   Clock3,
   Grid2X2,
   Heart,
+  ImageIcon,
   List,
   LocateFixed,
   MapPin,
@@ -22,7 +23,7 @@ import {
   ThumbsUp,
   X,
 } from "lucide-react-native";
-import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from "react-native";
+import { ActivityIndicator, Animated, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { listingCategories } from "@/src/lib/categories/listing-categories";
@@ -46,62 +47,83 @@ export type SearchListing = {
   city: string;
   time: string;
   condition: "Neuf" | "Occasion";
-  image: string;
+  image?: string | null;
   urgent?: boolean;
   favorite?: boolean;
 };
-
-const searchListings: SearchListing[] = [
-  {
-    id: "iphone-13-pro-256-graphite",
-    title: "iPhone 13 Pro - 256GB Graphite",
-    price: "749 €",
-    city: "Paris 16e",
-    time: "il y a 3h",
-    condition: "Occasion",
-    urgent: true,
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDlgbbZ85syNqtG1y0mvmmKlSbDXLaQFGlzNTp2vX_1S2Jw7zOBaVTg5jkUwPdIKfegzuOJ__k6xUHyqLSnE9-A3YuJG33jGl2G2JXQ8aVVDaX1TH-4KtJelQXsxNi25lSGcidPxQ5GjixbooiTH5Z57J8JUu_sbksBF7_ScYRvLK4aU3x_9GrlCsaC2MO5_gaenXauryn1ERJt5VC50DdU_r1Vwtk0Yu-5UrOv_0dtOCdFEyDT_YncLZTyTN8S4NeWdh91yu5VE-k",
-  },
-  {
-    id: "iphone-13-128-rose",
-    title: "iPhone 13 128GB Rose Neuf",
-    price: "620 €",
-    city: "Lyon",
-    time: "il y a 5h",
-    condition: "Neuf",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuD3-_bHPT6bOQoG75gsQZ5DzcqVM5Ly3UAKd7ncLKsBBHxfZCHByIH8cTxSqeK3Ft5AXUfEDADKoBj_VBLbeq9JwC2iSj9x0UxJZGDES9_Spzo_kvq3Yk0Mq__OYvwrFE9kEPKG_gHIvqs5EMC3hK6AyBoL4q6u2h9bAenkdMj0cEKZ_cgpwnR3kB6Uq4-yIxSd2ykOkwo8b2ArL2UfTyLeMmgsVacxG3SibkJkRD1KVjgMipWByQPsGOIEL3mySwnEWuDC0OWlgQA",
-  },
-  {
-    id: "iphone-13-pro-max-blue",
-    title: "iPhone 13 Pro Max - Blue Sierra",
-    price: "810 €",
-    city: "Bordeaux",
-    time: "il y a 1j",
-    condition: "Occasion",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDSUoRrfKxXvmTNr4tb7TbrdJitS1HRf2Ldt3OAiNz-16fULXAP-ibZoPo0CzRxNwPlwpzTXDvD58C-Pveyf8RPoS-TOvVYHna-g2ofRzZdqBGCoo1HD3RD9dPg0LC25-WuALy2XZteMAvOPOz_vZkXPrlZox8X0Deco0_B2asdQMT3A-yp7ev4rmTQZEEvPeGDNCecteOzWZs3W5JipDF4cpVjZtVq2xPLu3c9HAq99aneKn16SB0cvuf4VEiKR1QQ5Ve7dr6JI7M",
-  },
-  {
-    id: "iphone-13-mini-128",
-    title: "iPhone 13 Mini - 128GB Lumière",
-    price: "490 €",
-    city: "Nantes",
-    time: "il y a 2j",
-    condition: "Occasion",
-    urgent: true,
-    favorite: true,
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDpWeGQZ9QwWhJlab-jKUqZbsYYL5TJDAIKtXA4Bl24TV4F-01Suw85HlSXOHO8a7qyT5B9HWFw27RsLXjdy1szcDm48Yws0NHkLDvwFioAvtxo66RV9zjLw_KfCm2mXUM2OoTEj8rNynkQ7xwuVlB9wJvRF1WM2WqcZedOyUlRKIq9J2r0XqO9tBbDP39RvMkEIGZ_-kKLogv-cqydwrCgJnmGzYnQUoJbFW9eWtkqPx4NnOJoyirV6T-N2EiUIgaHKC0Y5igHqKY",
-  },
-];
 
 function UrgentBadge() {
   return (
     <View className="absolute left-1 top-1 flex-row items-center rounded px-[6px] py-[2px] shadow-soft" style={{ backgroundColor: "#B79200" }}>
       <Star color="#241A00" fill="#241A00" size={10} strokeWidth={1.5} />
       <Text className="ml-1 text-[8px] font-black text-[#241A00]">URGENT</Text>
+    </View>
+  );
+}
+
+function ResultImage({ source }: { source?: string | null }) {
+  if (source) {
+    return <Image source={source} style={{ width: "100%", height: "100%" }} contentFit="cover" />;
+  }
+
+  return (
+    <View className="h-full w-full items-center justify-center bg-[#EDEEEF]">
+      <ImageIcon color="#A6AAAD" size={26} strokeWidth={1.8} />
+    </View>
+  );
+}
+
+function SkeletonBlock({ className }: { className: string }) {
+  const opacity = React.useRef(new Animated.Value(0.52)).current;
+
+  React.useEffect(() => {
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, { duration: 720, toValue: 1, useNativeDriver: true }),
+        Animated.timing(opacity, { duration: 720, toValue: 0.52, useNativeDriver: true }),
+      ]),
+    );
+
+    animation.start();
+
+    return () => animation.stop();
+  }, [opacity]);
+
+  return (
+    <Animated.View style={{ opacity }}>
+      <View className={`bg-[#E6E8EA] ${className}`} />
+    </Animated.View>
+  );
+}
+
+function SearchResultListSkeleton() {
+  return (
+    <View className="flex-row gap-4 rounded-xl bg-white p-3 shadow-soft">
+      <SkeletonBlock className="h-[90px] w-[90px] rounded-lg" />
+      <View className="min-w-0 flex-1 py-[2px]">
+        <SkeletonBlock className="h-4 w-[82%] rounded-full" />
+        <SkeletonBlock className="mt-4 h-6 w-[48%] rounded-full" />
+        <View className="mt-5 flex-row">
+          <SkeletonBlock className="h-3 w-[34%] rounded-full" />
+          <SkeletonBlock className="ml-3 h-3 w-[24%] rounded-full" />
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function SearchResultGridSkeleton() {
+  return (
+    <View className="w-[48%] overflow-hidden rounded-xl bg-white shadow-soft">
+      <SkeletonBlock className="h-[118px] w-full" />
+      <View className="p-3">
+        <SkeletonBlock className="h-4 w-[92%] rounded-full" />
+        <SkeletonBlock className="mt-2 h-4 w-[64%] rounded-full" />
+        <View className="mt-3 flex-row justify-between">
+          <SkeletonBlock className="h-3 w-[42%] rounded-full" />
+          <SkeletonBlock className="h-3 w-[28%] rounded-full" />
+        </View>
+      </View>
     </View>
   );
 }
@@ -236,7 +258,7 @@ export function SearchResultListCard({
   return (
     <Pressable className="relative flex-row gap-4 rounded-xl bg-white p-3 shadow-soft" onPress={onPress}>
       <View className="h-[90px] w-[90px] overflow-hidden rounded-lg bg-[#EDEEEF]">
-        <Image source={listing.image} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+        <ResultImage source={listing.image} />
         {listing.urgent ? <UrgentBadge /> : null}
       </View>
       <View className="min-w-0 flex-1 justify-between py-[2px]">
@@ -279,7 +301,7 @@ export function SearchResultGridCard({
   return (
     <Pressable className="w-[48%] overflow-hidden rounded-xl bg-white shadow-soft" onPress={onPress}>
       <View className="h-[118px] overflow-hidden bg-[#EDEEEF]">
-        <Image source={listing.image} style={{ width: "100%", height: "100%" }} contentFit="cover" />
+        <ResultImage source={listing.image} />
         {listing.urgent ? <UrgentBadge /> : null}
         <View className="absolute right-2 top-2 h-7 w-7 items-center justify-center rounded-full bg-white/85">
           <Heart
@@ -319,10 +341,21 @@ export function SearchResultsContent({
   onListingPress?: (id: string) => void;
 }) {
   if (isLoading) {
+    if (mode === "grid") {
+      return (
+        <View className="flex-row flex-wrap justify-between gap-y-4 px-5">
+          {[0, 1, 2, 3, 4, 5].map((item) => (
+            <SearchResultGridSkeleton key={item} />
+          ))}
+        </View>
+      );
+    }
+
     return (
-      <View className="items-center justify-center px-5 py-16">
-        <ActivityIndicator color="#F5C518" size="large" />
-        <Text className="mt-4 text-[14px] font-semibold text-[#5F5E5E]">Recherche en cours...</Text>
+      <View className="gap-4 px-5">
+        {[0, 1, 2, 3].map((item) => (
+          <SearchResultListSkeleton key={item} />
+        ))}
       </View>
     );
   }
@@ -552,5 +585,3 @@ export function SearchFilterSheet({
     </View>
   );
 }
-
-export { searchListings };

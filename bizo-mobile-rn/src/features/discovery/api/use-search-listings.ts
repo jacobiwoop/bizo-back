@@ -6,9 +6,6 @@ import { getListings, ListingsQueryParams } from "@/src/lib/api/listings";
 import { resolveMediaUrl } from "@/src/lib/api/media";
 import { ListingResource } from "@/src/lib/api/types";
 
-const fallbackImage =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuAquGbs5XEpp5Ve_MPFdWdE3PMBBhFXuCg5lkAkxMHwr4f9x1keBLbtcCSY8vV1a0sKKGgnamXaSLKPai5rPN4hnhaN0KKgVrxAYYXCHJ9yZMGY6MPog1kA_kObUSScM8UjLdBLyptQ8TqqDKIvQFlOkSZPsdjKhs557HAV96hftqY39O1cju51h41vTCwt5QulWKzardOda-Ctk5QV4dOWULy_BV0LbrzFQntnkreliaOEd3fvHevMHZtYd4eZyrdtSquLtu8wVac";
-
 function formatAmount(amount: number): string {
   return `${amount.toLocaleString("fr-FR")} FCFA`;
 }
@@ -52,7 +49,7 @@ function mapListing(listing: ListingResource): SearchListing {
     condition: formatCondition(listing.condition),
     favorite: listing.favorite_count > 0,
     id: listing.id,
-    image: resolveMediaUrl(listing.photos[0]) ?? fallbackImage,
+    image: resolveMediaUrl(listing.photos[0]) ?? null,
     price: formatPrice(listing),
     time: formatTime(listing.created_at),
     title: listing.title,
