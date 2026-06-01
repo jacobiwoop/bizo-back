@@ -23,7 +23,7 @@ import {
   X,
 } from "lucide-react-native";
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { listingCategories } from "@/src/lib/categories/listing-categories";
 
@@ -407,6 +407,8 @@ export function SearchFilterSheet({
   onReset: () => void;
 }) {
   const { height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const bottomNavigationOffset = Math.max(insets.bottom + 18, 40);
   const sheetHeight = Math.round(height * 0.85);
   const [draft, setDraft] = React.useState(filters);
   const updateDraft = (patch: Partial<SearchFilters>) => setDraft((current) => ({ ...current, ...patch }));
@@ -414,7 +416,10 @@ export function SearchFilterSheet({
   const resultLabel = "Appliquer les filtres";
 
   return (
-    <View className="overflow-hidden rounded-t-[24px] bg-white shadow-soft" style={{ height: sheetHeight }}>
+    <View
+      className="overflow-hidden rounded-t-[24px] bg-white shadow-soft"
+      style={{ height: Math.min(sheetHeight, height - bottomNavigationOffset - 28), marginBottom: bottomNavigationOffset }}
+    >
       <View className="items-center pb-2 pt-3">
         <View className="h-[6px] w-10 rounded-full bg-[#D1D5DB]" />
       </View>
@@ -531,7 +536,10 @@ export function SearchFilterSheet({
         <View className="h-3" />
       </ScrollView>
 
-      <View className="flex-row items-center gap-4 border-t border-[#EDEEEF] bg-white px-5 py-6">
+      <View
+        className="flex-row items-center gap-4 border-t border-[#EDEEEF] bg-white px-5 pt-4"
+        style={{ paddingBottom: Math.max(insets.bottom + 92, 118) }}
+      >
         <Pressable className="flex-row items-center px-2 py-4" onPress={onReset}>
           <RotateCcw color="#5F5E5E" size={20} strokeWidth={2} />
           <Text className="ml-2 text-[14px] font-bold text-[#5F5E5E]">Réinitialiser</Text>
