@@ -10,6 +10,10 @@ jobs:
   emulator-session:
     runs-on: ubuntu-latest
     timeout-minutes: 360
+    env:
+      NODE_ENV: production
+      CI: "1"
+      EX_DEV_CLIENT_NETWORK_INSPECTOR: "false"
 
     steps:
       - name: Checkout
@@ -49,25 +53,37 @@ jobs:
         working-directory: bizo-mobile-rn
         run: npm run typecheck
 
-      - name: Configure debug Android app
+      - name: Strip unused production Expo modules
         working-directory: bizo-mobile-rn
-        env:
-          ANDROID_DEV_GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.ANDROID_DEV_GOOGLE_SERVICES_JSON_BASE64 }}
         run: |
           node -e '
           const fs = require("fs");
           const appPath = "app.json";
           const app = JSON.parse(fs.readFileSync(appPath, "utf8"));
-          app.expo.name = "Bizo Dev";
-          app.expo.slug = "bizo-mobile-rn-dev";
-          app.expo.android = app.expo.android || {};
-          app.expo.android.package = "io.bizo.woop.dev";
-          if (process.env.ANDROID_DEV_GOOGLE_SERVICES_JSON_BASE64) {
-            fs.writeFileSync("google-services.json", Buffer.from(process.env.ANDROID_DEV_GOOGLE_SERVICES_JSON_BASE64, "base64"));
-            app.expo.android.googleServicesFile = "./google-services.json";
-          }
+          const keepPlugins = new Set(["expo-router", "expo-image", "@maplibre/maplibre-react-native", "expo-secure-store", "expo-splash-screen", "./plugins/with-native-startup-animation", "expo-image-picker", "expo-notifications", "expo-location"]);
+          app.expo.plugins = (app.expo.plugins || []).filter((plugin) => keepPlugins.has(Array.isArray(plugin) ? plugin[0] : plugin));
+          const keepPermissions = new Set(["android.permission.READ_MEDIA_IMAGES", "android.permission.POST_NOTIFICATIONS", "android.permission.ACCESS_COARSE_LOCATION", "android.permission.ACCESS_FINE_LOCATION"]);
+          app.expo.android.permissions = (app.expo.android.permissions || []).filter((permission) => keepPermissions.has(permission));
           fs.writeFileSync(appPath, `${JSON.stringify(app, null, 2)}\n`);
           '
+          npm remove expo-dev-client expo-camera expo-sharing --no-save --package-lock=false
+
+      - name: Configure Firebase Android app
+        working-directory: bizo-mobile-rn
+        env:
+          ANDROID_GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.ANDROID_GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          if [ -n "$ANDROID_GOOGLE_SERVICES_JSON_BASE64" ]; then
+            echo "$ANDROID_GOOGLE_SERVICES_JSON_BASE64" | base64 --decode > google-services.json
+            node -e '
+            const fs = require("fs");
+            const appPath = "app.json";
+            const app = JSON.parse(fs.readFileSync(appPath, "utf8"));
+            app.expo.android = app.expo.android || {};
+            app.expo.android.googleServicesFile = "./google-services.json";
+            fs.writeFileSync(appPath, `${JSON.stringify(app, null, 2)}\n`);
+            '
+          fi
 
       - name: Expo prebuild Android
         working-directory: bizo-mobile-rn
@@ -75,11 +91,63 @@ jobs:
           CI: "1"
         run: npx expo prebuild --platform android --no-install --clean
 
-      - name: Build debug APK
+      - name: Require Android release signing secrets
+        working-directory: bizo-mobile-rn
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          test -n "$ANDROID_KEYSTORE_BASE64"
+          test -n "$ANDROID_KEYSTORE_PASSWORD"
+          test -n "$ANDROID_KEY_ALIAS"
+          test -n "$ANDROID_KEY_PASSWORD"
+
+      - name: Configure release signing
+        working-directory: bizo-mobile-rn
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/bizo-release.keystore
+          perl -0pi -e 's/signingConfigs \{\n        debug \{/signingConfigs {\n        release {\n            storeFile file("bizo-release.keystore")\n            storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")\n            keyAlias System.getenv("ANDROID_KEY_ALIAS")\n            keyPassword System.getenv("ANDROID_KEY_PASSWORD")\n        }\n        debug {/s' android/app/build.gradle
+          perl -0pi -e 's/signingConfig signingConfigs\.debug/signingConfig signingConfigs.release/g' android/app/build.gradle
+
+      - name: Configure production Gradle flags
+        working-directory: bizo-mobile-rn
+        run: |
+          cat >> android/gradle.properties <<'EOF'
+
+          # CI production emulator session: install the same release app users receive.
+          android.enableMinifyInReleaseBuilds=true
+          android.enableShrinkResourcesInReleaseBuilds=true
+          android.enableBundleCompression=true
+          reactNativeArchitectures=armeabi-v7a,arm64-v8a
+          EX_DEV_CLIENT_NETWORK_INSPECTOR=false
+          expo.gif.enabled=false
+          expo.webp.enabled=true
+          expo.webp.animated=false
+          EOF
+
+      - name: Build production APK
         working-directory: bizo-mobile-rn/android
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           chmod +x ./gradlew
-          ./gradlew --no-daemon assembleDebug
+          ./gradlew --no-daemon clean :app:assembleRelease \
+            -PreactNativeArchitectures=armeabi-v7a,arm64-v8a \
+            -Pandroid.enableMinifyInReleaseBuilds=true \
+            -Pandroid.enableShrinkResourcesInReleaseBuilds=true \
+            -Pandroid.enableBundleCompression=true \
+            -PEX_DEV_CLIENT_NETWORK_INSPECTOR=false \
+            -Pexpo.gif.enabled=false \
+            -Pexpo.webp.animated=false
 
       - name: Start docker-android emulator
         run: |
@@ -87,7 +155,7 @@ jobs:
             --name android-emulator \
             --device /dev/kvm \
             -p 6080:6080 \
-            -v "$PWD/bizo-mobile-rn/android/app/build/outputs/apk/debug:/apk" \
+            -v "$PWD/bizo-mobile-rn/android/app/build/outputs/apk/release:/apk" \
             -e EMULATOR_DEVICE="Samsung Galaxy S10" \
             -e WEB_VNC=true \
             -e APPIUM=false \
@@ -108,7 +176,13 @@ jobs:
           exit 1
 
       - name: Install APK
-        run: docker exec android-emulator adb install -r /apk/app-debug.apk
+        run: |
+          APK_PATH=$(docker exec android-emulator sh -lc 'ls /apk/*.apk | head -1')
+          docker exec android-emulator adb install -r "$APK_PATH"
+
+      - name: Launch Bizo on emulator
+        run: |
+          docker exec android-emulator adb shell monkey -p io.bizo.woop -c android.intent.category.LAUNCHER 1
 
       - name: Install cloudflared
         run: |
