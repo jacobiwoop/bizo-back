@@ -1,12 +1,14 @@
 import { Image } from "expo-image";
 import { useQuery } from "@tanstack/react-query";
 import { Clock3, ImageIcon, MessageCircle, Search } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getConversations, type ConversationResource } from "@/src/lib/api/interactions";
 import { resolveMediaUrl } from "@/src/lib/api/media";
+import { queryClient } from "@/src/lib/query-client";
+import { getRealtimeEcho } from "@/src/lib/realtime/client";
 import { useSessionStore } from "@/src/store/session";
 
 function formatConversationTime(value: string | null): string {
@@ -66,6 +68,10 @@ function SearchBar({ onChangeText, value }: { onChangeText: (value: string) => v
 }
 
 type InboxMode = "selling" | "buying";
+
+type ConversationSummaryPayload = {
+  conversation?: ConversationResource;
+};
 
 function InboxModeSwitch({
   mode,
@@ -171,6 +177,47 @@ export function MessagingInboxScreen({ onOpenConversation }: { onOpenConversatio
     queryKey: ["conversations"],
     staleTime: 15_000,
   });
+
+  useEffect(() => {
+    if (!token || !userId) {
+      return;
+    }
+
+    const echo = getRealtimeEcho(token);
+    if (!echo) {
+      return;
+    }
+
+    const channelName = `users.${userId}.conversations`;
+    const channel = echo.private(channelName);
+
+    const handleSummaryUpdate = (payload: ConversationSummaryPayload) => {
+      const updatedConversation = payload.conversation;
+
+      if (!updatedConversation) {
+        return;
+      }
+
+      queryClient.setQueryData<ConversationResource[]>(["conversations"], (current = []) => {
+        const next = current.filter((conversation) => conversation.id !== updatedConversation.id);
+        next.unshift(updatedConversation);
+
+        return next.sort((left, right) => {
+          const leftTime = new Date(left.last_message_at ?? left.created_at).getTime();
+          const rightTime = new Date(right.last_message_at ?? right.created_at).getTime();
+          return rightTime - leftTime;
+        });
+      });
+    };
+
+    channel.listen(".conversation.summary.updated", handleSummaryUpdate);
+
+    return () => {
+      channel.stopListening(".conversation.summary.updated", handleSummaryUpdate);
+      echo.leave(channelName);
+    };
+  }, [token, userId]);
+
   const conversations = conversationsQuery.data ?? [];
   const normalizedQuery = query.trim().toLowerCase();
   const modeConversations = conversations.filter((conversation) => {

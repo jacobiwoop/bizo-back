@@ -9,6 +9,7 @@ import {
 } from "@/src/features/notifications/register-push-notifications";
 import { queryClient } from "@/src/lib/query-client";
 import { getProfile } from "@/src/lib/api/auth";
+import { disconnectRealtimeEcho } from "@/src/lib/realtime/client";
 import { useSessionStore } from "@/src/store/session";
 
 function SessionBootstrap() {
@@ -43,6 +44,7 @@ function SessionBootstrap() {
 
   useEffect(() => {
     if (!hydrated || !token) {
+      disconnectRealtimeEcho();
       registeredPushTokenRef.current = null;
       return;
     }

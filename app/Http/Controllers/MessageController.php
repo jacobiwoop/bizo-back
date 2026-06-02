@@ -111,7 +111,7 @@ class MessageController extends Controller
             );
         }
 
-        $conversation = $conversation->fresh()->load(['participant1', 'participant2']);
+        $conversation = $conversation->fresh()->load(['participant1', 'participant2', 'listing']);
         $message = $message->fresh();
 
         event(new ConversationMessageCreated($message));
@@ -141,6 +141,8 @@ class MessageController extends Controller
 
     private function broadcastConversationSummary(Conversation $conversation, array $users): void
     {
+        $conversation->loadMissing('listing');
+
         foreach ($users as $user) {
             if (! $user instanceof User) {
                 continue;

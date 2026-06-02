@@ -1,6 +1,6 @@
 import { CheckCheck, ChevronLeft, Image as ImageIcon, Info, Mic, MoreVertical, Send, Shield, UserCircle, X } from "lucide-react-native";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { Image } from "expo-image";
 import { KeyboardProvider, KeyboardStickyView } from "react-native-keyboard-controller";
@@ -16,7 +16,20 @@ import {
 } from "@/src/lib/api/interactions";
 import { resolveMediaUrl } from "@/src/lib/api/media";
 import { queryClient } from "@/src/lib/query-client";
+import { getRealtimeEcho } from "@/src/lib/realtime/client";
 import { useSessionStore } from "@/src/store/session";
+
+type MessageCreatedPayload = {
+  message?: MessageResource;
+};
+
+function mergeMessages(current: MessageResource[], incoming: MessageResource): MessageResource[] {
+  if (current.some((message) => message.id === incoming.id)) {
+    return current.map((message) => message.id === incoming.id ? { ...message, ...incoming, delivery_status: "sent" } : message);
+  }
+
+  return [...current, incoming].sort((left, right) => new Date(left.created_at).getTime() - new Date(right.created_at).getTime());
+}
 
 function formatMessageTime(value: string): string {
   return new Date(value).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
@@ -122,7 +135,15 @@ function MessageBubble({
         <Text className={`text-[14px] leading-[21px] ${sent ? "text-white" : "text-[#1A1A1A]"}`}>{content}</Text>
         <View className={`mt-1 flex-row items-center justify-end ${sent ? "gap-1" : ""}`}>
           <Text className={`text-[11px] ${sent ? "text-gray-400" : "text-[#6B7280]"}`}>{formatMessageTime(message.created_at)}</Text>
-          {sent ? <CheckCheck color="#F5C518" size={14} strokeWidth={2} /> : null}
+          {sent ? (
+            message.delivery_status === "failed" ? (
+              <Text className="text-[11px] font-bold text-[#FFDAD6]">Echec</Text>
+            ) : message.delivery_status === "sending" ? (
+              <Text className="text-[11px] font-bold text-gray-400">Envoi...</Text>
+            ) : (
+              <CheckCheck color="#F5C518" size={14} strokeWidth={2} />
+            )
+          ) : null}
         </View>
       </View>
     </View>
@@ -144,11 +165,13 @@ function ChatMessages({
   conversation,
   isLoading,
   messages,
+  onRetry,
   userId,
 }: {
   conversation?: ConversationResource | null;
   isLoading?: boolean;
   messages: MessageResource[];
+  onRetry?: () => void;
   userId?: string | null;
 }) {
   const scrollRef = useRef<ScrollView>(null);
@@ -179,13 +202,26 @@ function ChatMessages({
       ) : (
         <View className="items-center py-8">
           <Text className="text-center text-[14px] font-semibold text-[#6B7280]">Aucun message pour le moment.</Text>
+          {onRetry ? (
+            <Pressable className="mt-3 rounded-full bg-[#1A1A1A] px-5 py-2" onPress={onRetry}>
+              <Text className="text-[13px] font-bold text-white">Rafraichir</Text>
+            </Pressable>
+          ) : null}
         </View>
       )}
     </ScrollView>
   );
 }
 
-function ChatInputBar({ disabled, onSend }: { disabled?: boolean; onSend: (message: string) => void }) {
+function ChatInputBar({
+  disabled,
+  error,
+  onSend,
+}: {
+  disabled?: boolean;
+  error?: string | null;
+  onSend: (message: string) => void;
+}) {
   const [message, setMessage] = useState("");
   const trimmedMessage = message.trim();
   const send = () => {
@@ -199,6 +235,9 @@ function ChatInputBar({ disabled, onSend }: { disabled?: boolean; onSend: (messa
 
   return (
     <SafeAreaView edges={["bottom"]} className="border-t border-gray-100 bg-white">
+      {error ? (
+        <Text className="px-4 pt-2 text-[12px] font-semibold text-[#BA1A1A]">{error}</Text>
+      ) : null}
       <View className="flex-row items-center gap-3 px-4 py-3">
         <View className="flex-row items-center gap-2">
           <Pressable className="h-8 w-8 items-center justify-center">
@@ -230,6 +269,8 @@ function ChatInputBar({ disabled, onSend }: { disabled?: boolean; onSend: (messa
 
 export function DirectContactChatScreen({ conversationId, onBack }: { conversationId: string; onBack: () => void }) {
   const user = useSessionStore((state) => state.user);
+  const token = useSessionStore((state) => state.token);
+  const markedReadKeyRef = useRef<string | null>(null);
   const conversationQuery = useQuery({
     enabled: Boolean(conversationId),
     queryFn: () => getConversation(conversationId),
@@ -242,22 +283,111 @@ export function DirectContactChatScreen({ conversationId, onBack }: { conversati
     queryKey: ["conversation-messages", conversationId],
     staleTime: 5_000,
   });
+  const markReadMutation = useMutation({
+    mutationFn: () => markConversationRead(conversationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+    },
+  });
   const sendMutation = useMutation({
     mutationFn: (text: string) => sendTextMessage(conversationId, text),
-    onSuccess: async () => {
+    onMutate: async (text) => {
+      await queryClient.cancelQueries({ queryKey: ["conversation-messages", conversationId] });
+
+      const optimisticMessage: MessageResource = {
+        conv_id: conversationId,
+        created_at: new Date().toISOString(),
+        delivery_status: "sending",
+        id: `local-${Date.now()}`,
+        image_url: null,
+        is_read: true,
+        proposal: null,
+        sender_id: user?.id ?? "",
+        text,
+        type: "text",
+      };
+
+      queryClient.setQueryData<MessageResource[]>(["conversation-messages", conversationId], (current = []) => [
+        ...current,
+        optimisticMessage,
+      ]);
+
+      return { optimisticMessage };
+    },
+    onError: (_error, _text, context) => {
+      if (!context?.optimisticMessage) {
+        return;
+      }
+
+      queryClient.setQueryData<MessageResource[]>(["conversation-messages", conversationId], (current = []) =>
+        current.map((message) => message.id === context.optimisticMessage.id ? { ...message, delivery_status: "failed" } : message),
+      );
+    },
+    onSuccess: async (message, _text, context) => {
+      queryClient.setQueryData<MessageResource[]>(["conversation-messages", conversationId], (current = []) => {
+        const withoutOptimistic = context?.optimisticMessage
+          ? current.filter((item) => item.id !== context.optimisticMessage.id)
+          : current;
+
+        return mergeMessages(withoutOptimistic, { ...message, delivery_status: "sent" });
+      });
+
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["conversation-messages", conversationId] }),
         queryClient.invalidateQueries({ queryKey: ["conversation", conversationId] }),
         queryClient.invalidateQueries({ queryKey: ["conversations"] }),
       ]);
     },
   });
 
-  useQuery({
-    enabled: Boolean(conversationId && messagesQuery.data),
-    queryFn: () => markConversationRead(conversationId),
-    queryKey: ["conversation-read", conversationId, messagesQuery.data?.length ?? 0],
-  });
+  useEffect(() => {
+    if (!conversationId || !messagesQuery.data?.length || markReadMutation.isPending) {
+      return;
+    }
+
+    const lastMessage = messagesQuery.data[messagesQuery.data.length - 1];
+    const readKey = `${conversationId}:${lastMessage.id}:${messagesQuery.data.length}`;
+
+    if (markedReadKeyRef.current === readKey) {
+      return;
+    }
+
+    markedReadKeyRef.current = readKey;
+    markReadMutation.mutate();
+  }, [conversationId, markReadMutation, messagesQuery.data]);
+
+  useEffect(() => {
+    if (!conversationId || !token) {
+      return;
+    }
+
+    const echo = getRealtimeEcho(token);
+    if (!echo) {
+      return;
+    }
+
+    const channelName = `conversation.${conversationId}`;
+    const channel = echo.private(channelName);
+
+    const handleMessageCreated = (payload: MessageCreatedPayload) => {
+      if (!payload.message) {
+        return;
+      }
+
+      queryClient.setQueryData<MessageResource[]>(["conversation-messages", conversationId], (current = []) =>
+        mergeMessages(current, { ...payload.message!, delivery_status: "sent" }),
+      );
+
+      queryClient.invalidateQueries({ queryKey: ["conversation", conversationId] });
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+    };
+
+    channel.listen(".conversation.message.created", handleMessageCreated);
+
+    return () => {
+      channel.stopListening(".conversation.message.created", handleMessageCreated);
+      echo.leave(channelName);
+    };
+  }, [conversationId, token]);
 
   return (
     <KeyboardProvider>
@@ -268,17 +398,31 @@ export function DirectContactChatScreen({ conversationId, onBack }: { conversati
         <View className="flex-1 items-center justify-center px-6">
           <Text className="text-center text-[18px] font-black text-[#151C27]">Conversation indisponible</Text>
           <Text className="mt-2 text-center text-[13px] leading-5 text-[#6B7280]">Impossible de charger cette discussion pour le moment.</Text>
+          <Pressable
+            className="mt-4 rounded-full bg-[#1A1A1A] px-5 py-3"
+            onPress={() => {
+              conversationQuery.refetch();
+              messagesQuery.refetch();
+            }}
+          >
+            <Text className="text-[13px] font-bold text-white">Reessayer</Text>
+          </Pressable>
         </View>
       ) : (
         <ChatMessages
           conversation={conversationQuery.data}
           isLoading={conversationQuery.isLoading || messagesQuery.isLoading}
           messages={messagesQuery.data ?? []}
+          onRetry={() => messagesQuery.refetch()}
           userId={user?.id}
         />
       )}
       <KeyboardStickyView>
-        <ChatInputBar disabled={sendMutation.isPending || Boolean(conversationQuery.error || messagesQuery.error)} onSend={(text) => sendMutation.mutate(text)} />
+        <ChatInputBar
+          disabled={Boolean(conversationQuery.error || messagesQuery.error)}
+          error={sendMutation.error ? "Message non envoye. Verifiez votre connexion et reessayez." : null}
+          onSend={(text) => sendMutation.mutate(text)}
+        />
       </KeyboardStickyView>
     </View>
     </KeyboardProvider>

@@ -48,6 +48,16 @@
 - [x] Set `J'achete` as the default inbox mode.
 - [x] Run backend and mobile verification.
 
+# Realtime Messaging
+
+- [x] Install realtime client dependencies.
+- [x] Install the React Native NetInfo dependency required by `pusher-js/react-native`.
+- [x] Add Echo/Reverb client configuration for the mobile app.
+- [x] Subscribe the inbox to conversation summary updates.
+- [x] Subscribe conversation threads to new messages.
+- [x] Stabilize chat states, read marking, and send feedback.
+- [x] Run mobile and backend verification.
+
 ## Review
 
 - Removed Home/Search mock listing data and fallback remote images.
@@ -61,5 +71,7 @@
 - Removed the nested keyboard translation from the sign-in screen so only the keyboard-aware scroll handles focused inputs.
 - Added inbox modes so conversations can be filtered between listings the user sells and listings the user contacted.
 - Made `J'achete` the default inbox mode and added backend role metadata for reliable filtering.
+- Added Reverb/Echo realtime subscriptions for inbox summaries and conversation messages.
+- Added optimistic text sending, send failure feedback, and mutation-based read marking in chat threads.
 - Verification: `npm run typecheck` passed in `bizo-mobile-rn`.
 - Verification: `php artisan test` passed.

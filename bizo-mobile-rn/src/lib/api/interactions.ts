@@ -49,6 +49,7 @@ export type MessageResource = {
   } | null;
   is_read: boolean;
   created_at: string;
+  delivery_status?: "sending" | "sent" | "failed";
 };
 
 export async function getFavorites(): Promise<FavoriteResource[]> {
