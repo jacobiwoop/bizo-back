@@ -26,7 +26,7 @@ class ConversationController extends Controller
     {
         $userId = $request->user()->id;
 
-        $conversations = Conversation::with(['participant1', 'participant2'])
+        $conversations = Conversation::with(['participant1', 'participant2', 'listing'])
             ->where('participant_1', $userId)
             ->orWhere('participant_2', $userId)
             ->orderByDesc('last_message_at')
@@ -94,7 +94,7 @@ class ConversationController extends Controller
             );
         }
 
-        $conversation = $conversation->fresh()->load(['participant1', 'participant2']);
+        $conversation = $conversation->fresh()->load(['participant1', 'participant2', 'listing']);
         $message = $message->fresh();
 
         event(new ConversationMessageCreated($message));
@@ -108,6 +108,8 @@ class ConversationController extends Controller
 
     private function broadcastConversationSummary(Conversation $conversation, array $users): void
     {
+        $conversation->loadMissing('listing');
+
         foreach ($users as $user) {
             if (! $user instanceof User) {
                 continue;

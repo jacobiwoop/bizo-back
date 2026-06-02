@@ -113,8 +113,17 @@ class SocialTest extends TestCase
         $response = $this->actingAs($this->buyer)
             ->getJson('/api/v1/conversations');
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertJsonPath('data.0.listing_owner_id', $this->seller->id)
+            ->assertJsonPath('data.0.current_user_role', 'buyer');
         $this->assertCount(1, $response->json('data'));
+
+        $sellerResponse = $this->actingAs($this->seller)
+            ->getJson('/api/v1/conversations');
+
+        $sellerResponse->assertOk()
+            ->assertJsonPath('data.0.listing_owner_id', $this->seller->id)
+            ->assertJsonPath('data.0.current_user_role', 'seller');
     }
 
     public function test_participant_can_view_conversation_detail(): void

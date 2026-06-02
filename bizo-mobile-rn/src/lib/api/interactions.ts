@@ -16,6 +16,8 @@ export type FavoriteResource = {
 export type ConversationResource = {
   id: string;
   listing_id: string;
+  listing_owner_id?: string | null;
+  current_user_role?: "seller" | "buyer" | null;
   listing_title: string | null;
   listing_photo: string | null;
   last_message: string | null;

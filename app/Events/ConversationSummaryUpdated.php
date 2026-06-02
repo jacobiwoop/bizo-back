@@ -41,6 +41,8 @@ class ConversationSummaryUpdated implements ShouldBroadcastNow
             'conversation' => [
                 'id' => $this->conversation->id,
                 'listing_id' => $this->conversation->listing_id,
+                'listing_owner_id' => $this->conversation->listing?->owner_id,
+                'current_user_role' => $this->conversation->listing?->owner_id === $this->recipient->id ? 'seller' : 'buyer',
                 'listing_title' => $this->conversation->listing_title,
                 'listing_photo' => $this->conversation->listing_photo,
                 'last_message' => $this->conversation->last_message,

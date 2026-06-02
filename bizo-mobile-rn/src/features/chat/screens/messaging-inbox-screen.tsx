@@ -65,6 +65,37 @@ function SearchBar({ onChangeText, value }: { onChangeText: (value: string) => v
   );
 }
 
+type InboxMode = "selling" | "buying";
+
+function InboxModeSwitch({
+  mode,
+  onChange,
+}: {
+  mode: InboxMode;
+  onChange: (mode: InboxMode) => void;
+}) {
+  return (
+    <View style={styles.modeSwitch}>
+      <Pressable
+        onPress={() => onChange("selling")}
+        style={[styles.modeButton, mode === "selling" ? styles.modeButtonActive : styles.modeButtonInactive]}
+      >
+        <Text style={[styles.modeButtonText, mode === "selling" ? styles.modeButtonTextActive : styles.modeButtonTextInactive]}>
+          Je vends
+        </Text>
+      </Pressable>
+      <Pressable
+        onPress={() => onChange("buying")}
+        style={[styles.modeButton, mode === "buying" ? styles.modeButtonActive : styles.modeButtonInactive]}
+      >
+        <Text style={[styles.modeButtonText, mode === "buying" ? styles.modeButtonTextActive : styles.modeButtonTextInactive]}>
+          J'achete
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
+
 function ConversationRow({
   item,
   onPress,
@@ -131,7 +162,9 @@ function InboxState({ message, title }: { message: string; title: string }) {
 
 export function MessagingInboxScreen({ onOpenConversation }: { onOpenConversation: (conversationId: string) => void }) {
   const token = useSessionStore((state) => state.token);
+  const userId = useSessionStore((state) => state.user?.id ?? null);
   const [query, setQuery] = useState("");
+  const [mode, setMode] = useState<InboxMode>("buying");
   const conversationsQuery = useQuery({
     enabled: Boolean(token),
     queryFn: getConversations,
@@ -140,8 +173,22 @@ export function MessagingInboxScreen({ onOpenConversation }: { onOpenConversatio
   });
   const conversations = conversationsQuery.data ?? [];
   const normalizedQuery = query.trim().toLowerCase();
+  const modeConversations = conversations.filter((conversation) => {
+    if (conversation.current_user_role) {
+      return mode === "selling"
+        ? conversation.current_user_role === "seller"
+        : conversation.current_user_role === "buyer";
+    }
+
+    if (!userId || !conversation.listing_owner_id) {
+      return true;
+    }
+
+    const userOwnsListing = conversation.listing_owner_id === userId;
+    return mode === "selling" ? userOwnsListing : !userOwnsListing;
+  });
   const visibleConversations = normalizedQuery
-    ? conversations.filter((conversation) => {
+    ? modeConversations.filter((conversation) => {
         const haystack = [
           conversation.other_user?.display_name,
           conversation.listing_title,
@@ -150,13 +197,19 @@ export function MessagingInboxScreen({ onOpenConversation }: { onOpenConversatio
 
         return haystack.includes(normalizedQuery);
       })
-    : conversations;
+    : modeConversations;
+  const emptyMessage = query
+    ? "Aucune conversation ne correspond a cette recherche."
+    : mode === "selling"
+      ? "Les acheteurs qui vous contactent apparaitront ici."
+      : "Contactez un vendeur depuis une annonce pour demarrer une discussion.";
 
   return (
     <View style={styles.screen}>
       <InboxHeader />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 96, paddingHorizontal: 16, paddingTop: 16 }}>
         <SearchBar onChangeText={setQuery} value={query} />
+        <InboxModeSwitch mode={mode} onChange={setMode} />
         {!token ? (
           <InboxState title="Connexion requise" message="Connectez-vous pour voir vos conversations." />
         ) : conversationsQuery.isLoading ? (
@@ -173,7 +226,7 @@ export function MessagingInboxScreen({ onOpenConversation }: { onOpenConversatio
             ))}
           </View>
         ) : (
-          <InboxState title="Aucune conversation" message={query ? "Aucune conversation ne correspond à cette recherche." : "Contactez un vendeur depuis une annonce pour démarrer une discussion."} />
+          <InboxState title="Aucune conversation" message={emptyMessage} />
         )}
       </ScrollView>
     </View>
@@ -313,6 +366,37 @@ const styles = StyleSheet.create({
   },
   listingBadgeUnread: {
     backgroundColor: "#F5C518",
+  },
+  modeButton: {
+    alignItems: "center",
+    borderRadius: 999,
+    flex: 1,
+    height: 40,
+    justifyContent: "center",
+  },
+  modeButtonActive: {
+    backgroundColor: "#191C1D",
+  },
+  modeButtonInactive: {
+    backgroundColor: "transparent",
+  },
+  modeButtonText: {
+    fontSize: 14,
+    fontWeight: "800",
+  },
+  modeButtonTextActive: {
+    color: "#FFFFFF",
+  },
+  modeButtonTextInactive: {
+    color: "#5F5E5E",
+  },
+  modeSwitch: {
+    backgroundColor: "#ECEEF3",
+    borderRadius: 999,
+    flexDirection: "row",
+    gap: 6,
+    marginBottom: 16,
+    padding: 4,
   },
   loadingBox: {
     alignItems: "center",

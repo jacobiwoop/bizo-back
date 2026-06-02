@@ -10,6 +10,9 @@ class ConversationResource extends JsonResource
     public function toArray(Request $request): array
     {
         $userId = $request->user()?->id;
+        $listingOwnerId = $this->relationLoaded('listing')
+            ? $this->listing?->owner_id
+            : null;
 
         $otherUser = $this->participant_1 === $userId
             ? $this->participant2
@@ -18,6 +21,10 @@ class ConversationResource extends JsonResource
         return [
             'id' => $this->id,
             'listing_id' => $this->listing_id,
+            'listing_owner_id' => $listingOwnerId,
+            'current_user_role' => $listingOwnerId && $userId
+                ? ($listingOwnerId === $userId ? 'seller' : 'buyer')
+                : null,
             'listing_title' => $this->listing_title,
             'listing_photo' => $this->listing_photo,
             'last_message' => $this->last_message,

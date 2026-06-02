@@ -39,6 +39,15 @@
 - [x] Remove the double keyboard movement on the sign-in screen.
 - [x] Run mobile typecheck after the sign-in keyboard fix.
 
+# Messaging Inbox Modes
+
+- [x] Expose the listing owner in conversation API responses.
+- [x] Expose the current user's conversation role in conversation API responses.
+- [x] Add the `Je vends` / `J'achete` switch under the inbox search field.
+- [x] Filter inbox conversations by current user role.
+- [x] Set `J'achete` as the default inbox mode.
+- [x] Run backend and mobile verification.
+
 ## Review
 
 - Removed Home/Search mock listing data and fallback remote images.
@@ -50,4 +59,7 @@
 - Connected Messaging V1 to the existing backend conversations and text messages APIs.
 - Raised the profile settings sheet above the bottom tab navigation using the device safe-area inset.
 - Removed the nested keyboard translation from the sign-in screen so only the keyboard-aware scroll handles focused inputs.
+- Added inbox modes so conversations can be filtered between listings the user sells and listings the user contacted.
+- Made `J'achete` the default inbox mode and added backend role metadata for reliable filtering.
 - Verification: `npm run typecheck` passed in `bizo-mobile-rn`.
+- Verification: `php artisan test` passed.
