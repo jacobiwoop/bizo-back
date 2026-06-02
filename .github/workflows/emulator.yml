@@ -180,9 +180,26 @@ jobs:
           APK_PATH=$(docker exec android-emulator sh -lc 'ls /apk/*.apk | head -1')
           docker exec android-emulator adb install -r "$APK_PATH"
 
+      - name: Clear emulator logs
+        run: docker exec android-emulator adb logcat -c
+
       - name: Launch Bizo on emulator
         run: |
           docker exec android-emulator adb shell monkey -p io.bizo.woop -c android.intent.category.LAUNCHER 1
+
+      - name: Verify Bizo stays open
+        run: |
+          sleep 20
+          if docker exec android-emulator adb shell pidof io.bizo.woop >/tmp/bizo-pid.txt; then
+            echo "Bizo is running with pid: $(cat /tmp/bizo-pid.txt)"
+            exit 0
+          fi
+
+          echo "Bizo is not running after launch. Recent crash logs:"
+          docker exec android-emulator adb logcat -d -v time \
+            AndroidRuntime:E ReactNative:V ReactNativeJS:V Expo:V expo:V unknown:D '*:S' \
+            | tail -n 300
+          exit 1
 
       - name: Install cloudflared
         run: |
@@ -201,4 +218,10 @@ jobs:
 
       - name: Dump emulator logs on failure
         if: failure()
-        run: docker logs android-emulator | tail -n 200
+        run: |
+          docker logs android-emulator | tail -n 200
+          echo
+          echo "==> Filtered app logcat"
+          docker exec android-emulator adb logcat -d -v time \
+            AndroidRuntime:E ReactNative:V ReactNativeJS:V Expo:V expo:V unknown:D '*:S' \
+            | tail -n 300 || true
