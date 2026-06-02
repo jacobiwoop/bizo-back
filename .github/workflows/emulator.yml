@@ -1,0 +1,130 @@
+name: Expo Android Emulator Session
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  emulator-session:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.19.6
+          cache: npm
+          cache-dependency-path: bizo-mobile-rn/package-lock.json
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install dependencies
+        working-directory: bizo-mobile-rn
+        run: npm ci
+
+      - name: Typecheck
+        working-directory: bizo-mobile-rn
+        run: npm run typecheck
+
+      - name: Configure debug Android app
+        working-directory: bizo-mobile-rn
+        env:
+          ANDROID_DEV_GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.ANDROID_DEV_GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          node -e '
+          const fs = require("fs");
+          const appPath = "app.json";
+          const app = JSON.parse(fs.readFileSync(appPath, "utf8"));
+          app.expo.name = "Bizo Dev";
+          app.expo.slug = "bizo-mobile-rn-dev";
+          app.expo.android = app.expo.android || {};
+          app.expo.android.package = "io.bizo.woop.dev";
+          if (process.env.ANDROID_DEV_GOOGLE_SERVICES_JSON_BASE64) {
+            fs.writeFileSync("google-services.json", Buffer.from(process.env.ANDROID_DEV_GOOGLE_SERVICES_JSON_BASE64, "base64"));
+            app.expo.android.googleServicesFile = "./google-services.json";
+          }
+          fs.writeFileSync(appPath, `${JSON.stringify(app, null, 2)}\n`);
+          '
+
+      - name: Expo prebuild Android
+        working-directory: bizo-mobile-rn
+        env:
+          CI: "1"
+        run: npx expo prebuild --platform android --no-install --clean
+
+      - name: Build debug APK
+        working-directory: bizo-mobile-rn/android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon assembleDebug
+
+      - name: Start docker-android emulator
+        run: |
+          docker run -d \
+            --name android-emulator \
+            --device /dev/kvm \
+            -p 6080:6080 \
+            -v "$PWD/bizo-mobile-rn/android/app/build/outputs/apk/debug:/apk" \
+            -e EMULATOR_DEVICE="Samsung Galaxy S10" \
+            -e WEB_VNC=true \
+            -e APPIUM=false \
+            budtmo/docker-android:emulator_11.0
+
+      - name: Wait for emulator to boot
+        run: |
+          docker exec android-emulator adb wait-for-device
+          for i in $(seq 1 60); do
+            BOOTED=$(docker exec android-emulator adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
+            if [ "$BOOTED" = "1" ]; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Emulator did not finish booting in time"
+          docker logs android-emulator | tail -n 200
+          exit 1
+
+      - name: Install APK
+        run: docker exec android-emulator adb install -r /apk/app-debug.apk
+
+      - name: Install cloudflared
+        run: |
+          curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+            -o cloudflared
+          chmod +x cloudflared
+
+      - name: Start tunnel and display URL
+        run: |
+          ./cloudflared tunnel --url http://localhost:6080 > /tmp/cloudflared.log 2>&1 &
+          sleep 8
+          grep -o 'https://.*\.trycloudflare\.com' /tmp/cloudflared.log | head -1
+
+      - name: Keep session alive
+        run: sleep 21600
+
+      - name: Dump emulator logs on failure
+        if: failure()
+        run: docker logs android-emulator | tail -n 200

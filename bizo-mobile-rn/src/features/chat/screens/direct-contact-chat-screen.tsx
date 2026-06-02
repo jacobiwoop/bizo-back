@@ -16,7 +16,7 @@ import {
 } from "@/src/lib/api/interactions";
 import { resolveMediaUrl } from "@/src/lib/api/media";
 import { queryClient } from "@/src/lib/query-client";
-import { getRealtimeEcho } from "@/src/lib/realtime/client";
+import { getRealtimeEcho, logRealtime } from "@/src/lib/realtime/client";
 import { useSessionStore } from "@/src/store/session";
 
 type MessageCreatedPayload = {
@@ -362,11 +362,13 @@ export function DirectContactChatScreen({ conversationId, onBack }: { conversati
 
     const echo = getRealtimeEcho(token);
     if (!echo) {
+      logRealtime("conversation subscription skipped", { conversationId });
       return;
     }
 
     const channelName = `conversation.${conversationId}`;
     const channel = echo.private(channelName);
+    logRealtime("subscribing conversation", { channelName });
 
     const handleMessageCreated = (payload: MessageCreatedPayload) => {
       if (!payload.message) {
@@ -382,8 +384,11 @@ export function DirectContactChatScreen({ conversationId, onBack }: { conversati
     };
 
     channel.listen(".conversation.message.created", handleMessageCreated);
+    channel.subscribed(() => logRealtime("conversation subscribed", { channelName }));
+    channel.error((error: unknown) => logRealtime("conversation subscription error", { channelName, error }));
 
     return () => {
+      logRealtime("leaving conversation", { channelName });
       channel.stopListening(".conversation.message.created", handleMessageCreated);
       echo.leave(channelName);
     };

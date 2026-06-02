@@ -8,7 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { getConversations, type ConversationResource } from "@/src/lib/api/interactions";
 import { resolveMediaUrl } from "@/src/lib/api/media";
 import { queryClient } from "@/src/lib/query-client";
-import { getRealtimeEcho } from "@/src/lib/realtime/client";
+import { getRealtimeEcho, logRealtime } from "@/src/lib/realtime/client";
 import { useSessionStore } from "@/src/store/session";
 
 function formatConversationTime(value: string | null): string {
@@ -185,11 +185,13 @@ export function MessagingInboxScreen({ onOpenConversation }: { onOpenConversatio
 
     const echo = getRealtimeEcho(token);
     if (!echo) {
+      logRealtime("inbox subscription skipped");
       return;
     }
 
     const channelName = `users.${userId}.conversations`;
     const channel = echo.private(channelName);
+    logRealtime("subscribing inbox", { channelName });
 
     const handleSummaryUpdate = (payload: ConversationSummaryPayload) => {
       const updatedConversation = payload.conversation;
@@ -211,8 +213,11 @@ export function MessagingInboxScreen({ onOpenConversation }: { onOpenConversatio
     };
 
     channel.listen(".conversation.summary.updated", handleSummaryUpdate);
+    channel.subscribed(() => logRealtime("inbox subscribed", { channelName }));
+    channel.error((error: unknown) => logRealtime("inbox subscription error", { channelName, error }));
 
     return () => {
+      logRealtime("leaving inbox", { channelName });
       channel.stopListening(".conversation.summary.updated", handleSummaryUpdate);
       echo.leave(channelName);
     };
