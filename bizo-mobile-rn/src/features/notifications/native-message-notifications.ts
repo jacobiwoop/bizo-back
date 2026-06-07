@@ -67,6 +67,7 @@ export async function displayNativeMessageNotification(remoteMessage: FirebaseMe
   const senderName = normalizeText(data.sender_name) ?? normalizeText(data.title) ?? "Nouveau message";
   const body = normalizeText(data.body) ?? "Nouveau message";
   const conversationAvatarUrl = conversationAvatarUrlFrom(data);
+  const timestamp = Date.now();
   const sender = {
     id: normalizeText(data.sender_id) ?? senderName,
     name: senderName,
@@ -90,6 +91,9 @@ export async function displayNativeMessageNotification(remoteMessage: FirebaseMe
       channelId: BIZO_NATIVE_MESSAGE_CHANNEL_ID,
       color: "#111111",
       groupId: conversationId ? `conversation-${conversationId}` : "bizo-messages",
+      showTimestamp: true,
+      smallIcon: "notification_icon",
+      timestamp,
       pressAction: {
         id: "default",
       },
@@ -102,7 +106,7 @@ export async function displayNativeMessageNotification(remoteMessage: FirebaseMe
         messages: [
           {
             text: body,
-            timestamp: Date.now(),
+            timestamp,
             person: sender,
           },
         ],

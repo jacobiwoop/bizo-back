@@ -214,3 +214,20 @@
 - Updated the `/notification` preview to match Claude's compact individual message spec.
 - The mock notification now uses a 52x52 rounded-square avatar, sender/timestamp row, one-line message preview, and a right chevron button.
 - Verification: `npm run typecheck` passed in `bizo-mobile-rn`.
+
+# Real Native Notification Compact Pass
+
+- [x] Map Claude compact spec to real Notifee/Android-supported fields.
+- [x] Keep app logo as the small notification icon.
+- [x] Keep sender photo only as `AndroidPerson.icon` for the conversation avatar.
+- [x] Add native timestamp display and consistent message timestamp.
+- [x] Run mobile typecheck.
+- [x] Record native limitations and verification.
+
+## Review
+
+- Updated the real Notifee message renderer with `timestamp` and `showTimestamp` so Android can show message recency natively.
+- Set `smallIcon` to the existing `notification_icon` resource used by the Android manifest.
+- Kept sender photos only on `AndroidPerson.icon`; no `largeIcon`, so the sender/listing image should not replace the primary notification identity.
+- Native limitation: Notifee/Android `MESSAGING` style does not expose full custom layout control for radius, exact padding, custom chevron placement, or arbitrary React Native notification UI.
+- Verification: `npm run typecheck` passed in `bizo-mobile-rn`.
