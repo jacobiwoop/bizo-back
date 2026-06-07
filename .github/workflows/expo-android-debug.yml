@@ -74,6 +74,24 @@ jobs:
           CI: "1"
         run: npx expo prebuild --platform android --no-install --clean
 
+      - name: Resolve Firebase notification manifest conflict
+        run: |
+          node - <<'NODE'
+          const fs = require("fs");
+          const manifestPath = "android/app/src/main/AndroidManifest.xml";
+          const manifest = fs.readFileSync(manifestPath, "utf8");
+          const next = manifest.replace(
+            /(<meta-data android:name="com\.google\.firebase\.messaging\.default_notification_color" android:resource="[^"]+")(\s*\/>)/,
+            '$1 tools:replace="android:resource"$2'
+          );
+
+          if (next === manifest) {
+            throw new Error("Firebase notification color meta-data was not patched.");
+          }
+
+          fs.writeFileSync(manifestPath, next);
+          NODE
+
       - name: Build debug APK
         working-directory: bizo-mobile-rn/android
         run: |
