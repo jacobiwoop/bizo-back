@@ -244,3 +244,16 @@
 - The `/notification` preview chevron now toggles between compact and expanded states.
 - Expanded state shows a divider and two additional message rows using rounded-square avatars.
 - Verification: `npm run typecheck` passed in `bizo-mobile-rn`.
+
+# Notification Preview Grouped Model
+
+- [x] Change individual expanded preview to reveal the full message text only.
+- [x] Add a separate grouped notification preview block.
+- [x] Run mobile typecheck.
+- [x] Record the review result.
+
+## Review
+
+- The individual preview chevron now expands only the current message text.
+- Added a separate grouped compact preview block inspired by the provided screenshot.
+- Verification: `npm run typecheck` passed in `bizo-mobile-rn`.

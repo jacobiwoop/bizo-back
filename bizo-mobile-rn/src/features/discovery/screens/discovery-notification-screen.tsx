@@ -16,6 +16,8 @@ import {
 
 function NotificationAnatomyPreview() {
   const [expanded, setExpanded] = useState(false);
+  const fullMessage =
+    "Bonjour, je suis interesse par ton article. Est-ce que le prix est encore negociable si je passe le recuperer aujourd'hui ?";
 
   return (
     <View className="mx-4 mb-4 rounded-[20px] bg-white px-4 py-4 shadow-soft">
@@ -40,8 +42,8 @@ function NotificationAnatomyPreview() {
               <Text className="text-[13px] text-[#9CA3AF]">• 2 min</Text>
             </View>
 
-            <Text className="mt-1 text-[14px] text-[#9CA3AF]" numberOfLines={expanded ? 2 : 1}>
-              Test notif logo Bizo 17:27:47
+            <Text className="mt-1 text-[14px] text-[#9CA3AF]" numberOfLines={expanded ? 5 : 1}>
+              {fullMessage}
             </Text>
           </View>
 
@@ -58,28 +60,50 @@ function NotificationAnatomyPreview() {
           </Pressable>
         </View>
 
-        {expanded ? (
-          <View className="mt-1 border-t border-[#2D2D2D] pt-3">
-            {[
-              ["DW", "desmarc", "Je suis disponible, tu peux passer voir l'article."],
-              ["JW", "jacobi", "Ok, je confirme dans la messagerie Bizo."],
-            ].map(([initials, name, message], index) => (
-              <View key={`${name}-${message}`} className={`flex-row items-center ${index > 0 ? "mt-3" : ""}`}>
-                <View className="h-10 w-10 items-center justify-center rounded-[8px] bg-[#E8ECFF]">
-                  <Text className="text-[13px] font-bold text-[#2F66F3]">{initials}</Text>
-                </View>
-                <View className="ml-[10px] flex-1">
-                  <Text className="text-[14px] font-bold text-white" numberOfLines={1}>
-                    {name}
-                  </Text>
-                  <Text className="mt-1 text-[13px] text-[#9CA3AF]" numberOfLines={1}>
-                    {message}
-                  </Text>
-                </View>
-              </View>
-            ))}
+      </View>
+    </View>
+  );
+}
+
+function GroupedNotificationPreview() {
+  return (
+    <View className="mx-4 mb-4 rounded-[20px] bg-white px-4 py-4 shadow-soft">
+      <View className="mb-4">
+        <Text className="text-[18px] font-semibold text-[#111111]">Apercu groupe compact</Text>
+        <Text className="mt-1 text-[12px] leading-4 text-[#686868]">
+          Plusieurs messages de plusieurs discussions, separes de la notification individuelle.
+        </Text>
+      </View>
+
+      <View className="rounded-[16px] bg-[#1A1A1A] px-[14px] py-3">
+        <View className="mb-[10px] flex-row items-center justify-between">
+          <View className="flex-1 flex-row items-center">
+            <View className="h-7 w-7 items-center justify-center rounded-full bg-[#23C15F]">
+              <Text className="text-[12px] font-bold text-white">b</Text>
+            </View>
+            <Text className="ml-2 flex-1 text-[13px] text-[#9CA3AF]" numberOfLines={1}>
+              <Text className="font-bold text-white">Bizo</Text> • 5 messages de 3 discussions • 1 h
+            </Text>
           </View>
-        ) : null}
+          <View className="ml-[10px] h-9 w-9 items-center justify-center rounded-full bg-[#2D2D2D]">
+            <ChevronDown color="#FFFFFF" size={18} strokeWidth={2.2} />
+          </View>
+        </View>
+
+        {[
+          ["RS", "Ressi", "Merci, je passe ce soir."],
+          ["22", "+229 95 05 98 25", "Bonjour mon grand, l'annonce est toujours disponible ?"],
+          ["LU", "Lucifer", "Sticker"],
+        ].map(([initials, name, message], index) => (
+          <View key={`${name}-${message}`} className={`flex-row items-center ${index > 0 ? "mt-[6px]" : ""}`}>
+            <View className="h-9 w-9 items-center justify-center rounded-[8px] bg-[#E8ECFF]">
+              <Text className="text-[11px] font-bold text-[#2F66F3]">{initials}</Text>
+            </View>
+            <Text className="ml-[10px] flex-1 text-[14px] text-[#9CA3AF]" numberOfLines={1}>
+              <Text className="font-bold text-white">{name}</Text>  {message}
+            </Text>
+          </View>
+        ))}
       </View>
     </View>
   );
@@ -101,6 +125,7 @@ export function DiscoveryNotificationScreen() {
           />
           <View className="mt-3" />
           <NotificationAnatomyPreview />
+          <GroupedNotificationPreview />
           <View className="gap-6">
             {discoveryNotifications.map((notification) => (
               <DiscoveryNotificationCard key={notification.id} notification={notification} />
