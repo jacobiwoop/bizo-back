@@ -167,18 +167,25 @@ public final class BizoLabNotifications {
     public static void showMultiSummary(Context context) {
         ensureChannel(context);
 
-        RemoteViews summary = new RemoteViews(context.getPackageName(), R.layout.notification_multi_summary);
-        summary.setTextViewText(R.id.summary_header, "Bizo • 3 messages de 2 discuss... • maintenant");
-        summary.setTextViewText(R.id.summary_avatar_1, "AK");
-        summary.setTextViewText(R.id.summary_text_1, "Akatsuki </> Dev  Muka'z : Photo");
-        summary.setTextViewText(R.id.summary_avatar_2, "JW");
-        summary.setTextViewText(R.id.summary_text_2, "jacobi  Bonjour mon grand comment...");
+        RemoteViews compact = new RemoteViews(context.getPackageName(), R.layout.notification_multi_summary);
+        compact.setTextViewText(R.id.summary_header, "Bizo • 3 messages de 2 discuss... • maintenant");
+        compact.setTextViewText(R.id.summary_text_1, "Akatsuki </> Dev  Muka'z : Photo");
+        compact.setTextViewText(R.id.summary_text_2, "jacobi  Bonjour mon grand comment...");
+
+        RemoteViews expanded = new RemoteViews(context.getPackageName(), R.layout.notification_multi_summary_expanded);
+        expanded.setTextViewText(R.id.summary_header, "Bizo • 3 messages de 2 discuss... • maintenant");
+        expanded.setTextViewText(R.id.summary_avatar_1, "AK");
+        expanded.setTextViewText(R.id.summary_text_1, "Akatsuki </> Dev  Muka'z : Photo");
+        expanded.setTextViewText(R.id.summary_avatar_2, "JW");
+        expanded.setTextViewText(R.id.summary_text_2, "jacobi  Bonjour mon grand comment...");
+        expanded.setTextViewText(R.id.summary_avatar_3, "RS");
+        expanded.setTextViewText(R.id.summary_text_3, "Ressi  Merci");
 
         NotificationCompat.Builder builder = baseBuilder(context)
             .setContentTitle("Bizo")
             .setContentText("3 messages de 2 discussions")
-            .setCustomContentView(summary)
-            .setCustomBigContentView(summary)
+            .setCustomContentView(compact)
+            .setCustomBigContentView(expanded)
             .setStyle(new NotificationCompat.DecoratedCustomViewStyle());
 
         NotificationManagerCompat.from(context).notify(MULTI_SUMMARY_ID, builder.build());
