@@ -341,5 +341,17 @@
 - [x] Register a long-lived group conversation shortcut.
 - [x] Add a dedicated app button and ADB broadcast action.
 - [x] Keep the existing custom `RemoteViews` group for comparison.
-- [ ] Validate and run the GitHub Actions build.
-- [ ] Record review result.
+- [x] Validate and run the GitHub Actions build.
+- [x] Record review result.
+
+## Review
+
+- Added `showGroupMessagingStyle`, an official Android grouped `MessagingStyle` variant with three senders.
+- Added bitmap-backed `Person.icon` avatars for `Akatsuki </> Dev`, `Ressi`, and `jacobi`.
+- Registered long-lived shortcut `bizo-lab-group` and attached it with `setShortcutId`.
+- Added app button `Show group MessagingStyle notification`.
+- Added ADB action `io.bizo.notificationlab.SHOW_GROUP_MESSAGING_STYLE`.
+- Kept the existing custom `SHOW_GROUP` `RemoteViews` notification for comparison.
+- Verification: notification-lab XML resources passed `xmllint --noout`.
+- Verification: GitHub workflow YAML parsed successfully.
+- CI verification: `Android Notification Lab` run `27104198671` completed successfully on commit `cd42b26`.
