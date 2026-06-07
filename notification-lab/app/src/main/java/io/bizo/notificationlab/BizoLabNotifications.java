@@ -168,18 +168,27 @@ public final class BizoLabNotifications {
         ensureChannel(context);
 
         RemoteViews compact = new RemoteViews(context.getPackageName(), R.layout.notification_multi_summary);
+        compact.setTextViewText(R.id.summary_header, "Bizo Notif Lab • 3 messages de 2 discuss... • maintenant");
         compact.setTextViewText(R.id.summary_avatar_1, "AK");
         compact.setTextViewText(R.id.summary_text_1, "Akatsuki </> Dev  Muka'z : Photo");
         compact.setTextViewText(R.id.summary_avatar_2, "JW");
         compact.setTextViewText(R.id.summary_text_2, "jacobi  Bonjour mon grand comment...");
+        compact.setTextViewText(R.id.summary_more, "1 autre");
 
         RemoteViews expanded = new RemoteViews(context.getPackageName(), R.layout.notification_multi_summary_expanded);
+        expanded.setTextViewText(R.id.summary_header, "Bizo Notif Lab • 3 messages de 2 discuss... • maintenant");
         expanded.setTextViewText(R.id.summary_avatar_1, "AK");
         expanded.setTextViewText(R.id.summary_text_1, "Akatsuki </> Dev  Muka'z : Photo");
+        expanded.setTextViewText(R.id.summary_preview_1, "Photo envoyee");
         expanded.setTextViewText(R.id.summary_avatar_2, "JW");
-        expanded.setTextViewText(R.id.summary_text_2, "jacobi  Bonjour mon grand comment...");
+        expanded.setTextViewText(R.id.summary_text_2, "jacobi • maintenant");
+        expanded.setTextViewText(
+            R.id.summary_preview_2,
+            "Bonjour mon grand comment vas-tu ? Je voulais verifier si l'article est toujours disponible."
+        );
         expanded.setTextViewText(R.id.summary_avatar_3, "RS");
-        expanded.setTextViewText(R.id.summary_text_3, "Ressi  Merci");
+        expanded.setTextViewText(R.id.summary_text_3, "Ressi • 2 min");
+        expanded.setTextViewText(R.id.summary_preview_3, "Merci");
 
         NotificationCompat.Builder builder = baseBuilder(context)
             .setContentTitle("Bizo")

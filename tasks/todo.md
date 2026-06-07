@@ -377,3 +377,11 @@
 - Verification: notification-lab XML resources passed `xmllint --noout`.
 - Verification: notification-lab workflow run `27105357879` completed successfully.
 - Verification: installed the workflow APK and captured `/tmp/bizo-notification-multi-summary-no-inner-header.png`.
+
+# Android Notification Lab WhatsApp Expanded Match
+
+- [ ] Make the compact Bizo grouped notification show the app summary/header immediately, like WhatsApp compact grouped notifications.
+- [ ] Make the expanded Bizo grouped notification use larger conversation avatars.
+- [ ] Add a right chevron visual per expanded conversation row.
+- [ ] Add one expanded conversation state with full text and action buttons.
+- [ ] Validate XML/YAML, push, build, install, and capture compact/expanded states.
