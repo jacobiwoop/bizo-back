@@ -303,5 +303,16 @@
 - [x] Reduce compact custom-view margins and make the small notification icon visually quieter.
 - [x] Add an ADB/app-triggerable `MessagingStyle` comparison notification.
 - [x] Use a bitmap-backed `Person.icon` for the `MessagingStyle` avatar and avoid `setLargeIcon()`.
-- [ ] Validate XML/YAML and run the GitHub Actions build.
-- [ ] Record review result.
+- [x] Validate XML/YAML and run the GitHub Actions build.
+- [x] Record review result.
+
+## Review
+
+- Updated compact/expanded custom `RemoteViews` so the avatar is centered initials text instead of a cropped vector image.
+- Removed the duplicated internal chevron from the individual custom notification; Android keeps its own expansion affordance.
+- Made the notification small icon visually quieter by reducing the actual mark inside its vector canvas.
+- Added `SHOW_MESSAGING_STYLE`, a separate Android `MessagingStyle` comparison path.
+- The `MessagingStyle` sender avatar now follows the WhatsApp-style path: generated bitmap avatar, `IconCompat.createWithBitmap(bitmap)`, then `Person.Builder().setIcon(...)`; no `setLargeIcon()` is used.
+- Verification: notification-lab XML resources passed `xmllint --noout`.
+- Verification: GitHub workflow YAML parsed successfully.
+- CI verification: `Android Notification Lab` run `27103408705` completed successfully on commit `98fdd09`.
