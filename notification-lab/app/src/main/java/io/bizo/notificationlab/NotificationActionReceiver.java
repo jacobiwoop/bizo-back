@@ -34,6 +34,11 @@ public class NotificationActionReceiver extends BroadcastReceiver {
             return;
         }
 
+        if ("io.bizo.notificationlab.SHOW_MULTI_SUMMARY_JACOBI_OPEN".equals(action)) {
+            BizoLabNotifications.showMultiSummaryJacobiOpen(context);
+            return;
+        }
+
         if ("io.bizo.notificationlab.SHOW_ALL".equals(action)) {
             BizoLabNotifications.showMessage(context);
             BizoLabNotifications.showGroup(context);

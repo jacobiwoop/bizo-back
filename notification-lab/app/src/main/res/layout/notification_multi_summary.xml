@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:maxLines="1"
-        android:text="Bizo Notif Lab • 3 messages de 2 discussions • maintenant"
+        android:text="Bizo • 3 messages de 2 discussions • maintenant"
         android:textColor="#D8D2CA"
         android:textSize="12sp" />
 

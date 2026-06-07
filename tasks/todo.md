@@ -380,9 +380,12 @@
 
 # Android Notification Lab WhatsApp Expanded Match
 
-- [ ] Make the compact Bizo grouped notification show the app summary/header immediately, like WhatsApp compact grouped notifications.
-- [ ] Keep the compact custom view short enough to avoid Android compact-height clipping.
-- [ ] Make the expanded Bizo grouped notification use larger conversation avatars.
-- [ ] Add a right chevron visual per expanded conversation row.
-- [ ] Add one expanded conversation state with full text and action buttons.
+- [x] Make the compact Bizo grouped notification show the app summary/header immediately, like WhatsApp compact grouped notifications.
+- [x] Keep the compact custom view short enough to avoid Android compact-height clipping.
+- [x] Rename notification-lab visible app identity from `Bizo Notif Lab` to `Bizo`.
+- [x] Remove the duplicated internal summary/header from expanded grouped notifications.
+- [x] Make the expanded grouped notification closed by default, with no conversation actions visible.
+- [x] Make the expanded Bizo grouped notification use larger conversation avatars.
+- [x] Add a right chevron visual per expanded conversation row.
+- [x] Add one reposted expanded-conversation state with full text and action buttons after tapping Jacobi's chevron.
 - [ ] Validate XML/YAML, push, build, install, and capture compact/expanded states.

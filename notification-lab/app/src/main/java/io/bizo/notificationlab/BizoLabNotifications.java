@@ -12,6 +12,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Build;
+import android.view.View;
 import android.widget.RemoteViews;
 
 import androidx.core.app.Person;
@@ -165,29 +166,49 @@ public final class BizoLabNotifications {
     }
 
     public static void showMultiSummary(Context context) {
+        showMultiSummary(context, false);
+    }
+
+    public static void showMultiSummaryJacobiOpen(Context context) {
+        showMultiSummary(context, true);
+    }
+
+    private static void showMultiSummary(Context context, boolean jacobiOpen) {
         ensureChannel(context);
 
         RemoteViews compact = new RemoteViews(context.getPackageName(), R.layout.notification_multi_summary);
-        compact.setTextViewText(R.id.summary_header, "Bizo Notif Lab • 3 messages de 2 discuss... • maintenant");
+        compact.setTextViewText(R.id.summary_header, "Bizo • 3 messages de 2 discuss... • maintenant");
         compact.setTextViewText(R.id.summary_avatar_1, "AK");
         compact.setTextViewText(R.id.summary_text_1, "Akatsuki </> Dev  Muka'z : Photo");
         compact.setTextViewText(R.id.summary_avatar_2, "JW");
         compact.setTextViewText(R.id.summary_text_2, "jacobi  Bonjour mon grand comment...");
 
         RemoteViews expanded = new RemoteViews(context.getPackageName(), R.layout.notification_multi_summary_expanded);
-        expanded.setTextViewText(R.id.summary_header, "Bizo Notif Lab • 3 messages de 2 discuss... • maintenant");
         expanded.setTextViewText(R.id.summary_avatar_1, "AK");
         expanded.setTextViewText(R.id.summary_text_1, "Akatsuki </> Dev  Muka'z : Photo");
         expanded.setTextViewText(R.id.summary_preview_1, "Photo envoyee");
         expanded.setTextViewText(R.id.summary_avatar_2, "JW");
         expanded.setTextViewText(R.id.summary_text_2, "jacobi • maintenant");
-        expanded.setTextViewText(
-            R.id.summary_preview_2,
-            "Bonjour mon grand comment vas-tu ? Je voulais verifier si l'article est toujours disponible."
+        expanded.setTextViewText(R.id.summary_preview_2, jacobiOpen
+            ? "Bonjour mon grand comment vas-tu ? Je voulais verifier si l'article est toujours disponible."
+            : "Bonjour mon grand comment..."
         );
         expanded.setTextViewText(R.id.summary_avatar_3, "RS");
         expanded.setTextViewText(R.id.summary_text_3, "Ressi • 2 min");
         expanded.setTextViewText(R.id.summary_preview_3, "Merci");
+        expanded.setImageViewResource(
+            R.id.summary_chevron_2,
+            jacobiOpen ? R.drawable.ic_chevron_up : R.drawable.ic_chevron_down
+        );
+        expanded.setViewVisibility(R.id.summary_actions, jacobiOpen ? View.VISIBLE : View.GONE);
+        expanded.setOnClickPendingIntent(
+            R.id.summary_chevron_2,
+            actionIntent(context, jacobiOpen
+                ? "io.bizo.notificationlab.SHOW_MULTI_SUMMARY"
+                : "io.bizo.notificationlab.SHOW_MULTI_SUMMARY_JACOBI_OPEN",
+                202
+            )
+        );
 
         NotificationCompat.Builder builder = baseBuilder(context)
             .setContentTitle("Bizo")
@@ -223,6 +244,16 @@ public final class BizoLabNotifications {
         return PendingIntent.getActivity(
             context,
             100,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+    }
+
+    private static PendingIntent actionIntent(Context context, String action, int requestCode) {
+        Intent intent = new Intent(context, NotificationActionReceiver.class).setAction(action);
+        return PendingIntent.getBroadcast(
+            context,
+            requestCode,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
