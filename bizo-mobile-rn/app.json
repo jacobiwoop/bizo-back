@@ -61,6 +61,7 @@
           "color": "#111111"
         }
       ],
+      "./plugins/with-firebase-notification-color-replace",
       [
         "expo-image-picker",
         {
