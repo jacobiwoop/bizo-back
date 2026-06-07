@@ -169,7 +169,7 @@
 - [x] Change backend message pushes to data-only for rich local rendering and avoid duplicate system notifications.
 - [x] Keep non-message pushes on the existing Expo/FCM path.
 - [x] Run backend tests and mobile typecheck.
-- [ ] Push to trigger debug and production Android builds.
+- [x] Push to trigger debug and production Android builds.
 
 ## Review
 
@@ -182,3 +182,4 @@
 - Verification: `npm run typecheck` passed in `bizo-mobile-rn`.
 - Verification: `npx expo config --json` resolved the Firebase config plugins.
 - Verification: `php artisan test tests/Feature/SocialTest.php tests/Feature/NotificationsTest.php` passed.
+- Deployment: pushed commit `6c6cc82` and deployed the backend container on the server.
