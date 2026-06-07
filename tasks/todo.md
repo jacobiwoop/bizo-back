@@ -323,5 +323,13 @@
 - [x] Identify that Xiaomi/Android still shows only the app small icon in compact view without a registered conversation shortcut.
 - [x] Register a long-lived dynamic shortcut for `jacobi` using the same bitmap-backed `Person.icon`.
 - [x] Attach `setShortcutId("bizo-lab-jacobi")` and `addPerson(jacobi)` to the `MessagingStyle` notification.
-- [ ] Validate and rebuild the notification lab.
-- [ ] Re-test with explicit ADB broadcast and screenshot.
+- [x] Validate and rebuild the notification lab.
+- [x] Re-test with explicit ADB broadcast and screenshot.
+
+## Review
+
+- CI verification: `Android Notification Lab` run `27103913398` completed successfully on commit `1bbca34`.
+- Installed `/tmp/bizo-notification-lab-27103913398/app-debug.apk` after uninstalling the old debug-signed lab APK.
+- Verified `dumpsys shortcut io.bizo.notificationlab` contains dynamic long-lived shortcut `bizo-lab-jacobi` with a stored bitmap icon.
+- Verified `dumpsys notification` shows `id=4203`, `android.template=Notification$MessagingStyle`, `shortcut=bizo-lab-jacobi`, `android.people.list`, and `android.largeIcon=null`.
+- Screenshot verification: `/tmp/bizo-notification-messagingstyle-shortcut.png` shows the large `JW` conversation avatar on the left with the small app icon as a badge overlay.
