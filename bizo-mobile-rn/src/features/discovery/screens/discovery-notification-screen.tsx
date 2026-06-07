@@ -38,7 +38,7 @@ function NotificationAnatomyPreview() {
           <View className="ml-3 flex-1">
             <View className="flex-row items-center">
               <View className="items-center">
-                <View className="h-10 w-10 items-center justify-center rounded-full bg-[#E8ECFF]">
+                <View className="h-10 w-10 items-center justify-center rounded-[12px] bg-[#E8ECFF]">
                   <Text className="text-[13px] font-bold text-[#2F66F3]">JW</Text>
                 </View>
               </View>
