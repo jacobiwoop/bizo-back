@@ -366,5 +366,14 @@
 - [x] Split compact and expanded custom views so compact height does not clip the grouped rows.
 - [x] Remove the duplicated inner Bizo header/icon so Android's system app identity is the only header.
 - [x] Validate XML/YAML before pushing the correction.
-- [ ] Run the GitHub Actions build for the final corrected lab APK.
-- [ ] Install and capture the final rendering.
+- [x] Run the GitHub Actions build for the final corrected lab APK.
+- [x] Install and capture the final rendering.
+
+## Review
+
+- Removed the duplicated inner Bizo app icon/header from the multi-summary custom layout.
+- Compact and expanded views now draw only conversation rows; Android keeps the outer app icon, app identity area, and chevron.
+- Removed the extra row start margin that made discussions appear twice-offset from the system icon.
+- Verification: notification-lab XML resources passed `xmllint --noout`.
+- Verification: notification-lab workflow run `27105357879` completed successfully.
+- Verification: installed the workflow APK and captured `/tmp/bizo-notification-multi-summary-no-inner-header.png`.
