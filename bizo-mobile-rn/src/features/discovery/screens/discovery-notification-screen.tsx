@@ -26,7 +26,7 @@ function AnatomyMarker({ label }: { label: string }) {
 
 function NotificationAnatomyPreview() {
   return (
-    <View className="mx-4 mb-6 rounded-[20px] bg-white px-4 py-4 shadow-soft">
+    <View className="mx-4 mb-4 rounded-[20px] bg-white px-4 py-4 shadow-soft">
       <View className="mb-4">
         <Text className="text-[18px] font-semibold text-[#111111]">Anatomie d'une notification</Text>
         <Text className="mt-1 text-[12px] leading-4 text-[#686868]">
@@ -103,7 +103,7 @@ export function DiscoveryNotificationScreen() {
           activeItem={activeSegment}
           onSelect={setActiveSegment}
         />
-        <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 100, paddingTop: 18 }}>
+        <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 100, paddingTop: 8 }}>
           <NotificationAnatomyPreview />
           <View className="gap-6">
             {discoveryNotifications.map((notification) => (
