@@ -289,4 +289,6 @@
 - Added GitHub Actions workflow `Android Notification Lab` to build and upload the debug APK artifact.
 - Verification: all notification lab XML resources passed `xmllint --noout`.
 - Verification: `.github/workflows/notification-lab-android.yml` parsed as valid YAML.
-- Local Gradle compile was attempted, but the Gradle distribution download timed out locally; the workflow installs Gradle 8.10.2 and will perform the full APK build on GitHub.
+- First GitHub compile reached `:app:checkDebugAarMetadata` and exposed the missing AndroidX flag.
+- Added `notification-lab/gradle.properties` with `android.useAndroidX=true`.
+- Local Gradle compile was attempted, but the Gradle distribution download timed out locally; the workflow installs Gradle 8.10.2 and performs the full APK build on GitHub.
