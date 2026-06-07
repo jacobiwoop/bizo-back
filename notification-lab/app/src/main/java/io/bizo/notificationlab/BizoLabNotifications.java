@@ -173,7 +173,6 @@ public final class BizoLabNotifications {
         compact.setTextViewText(R.id.summary_text_1, "Akatsuki </> Dev  Muka'z : Photo");
         compact.setTextViewText(R.id.summary_avatar_2, "JW");
         compact.setTextViewText(R.id.summary_text_2, "jacobi  Bonjour mon grand comment...");
-        compact.setTextViewText(R.id.summary_more, "1 autre");
 
         RemoteViews expanded = new RemoteViews(context.getPackageName(), R.layout.notification_multi_summary_expanded);
         expanded.setTextViewText(R.id.summary_header, "Bizo Notif Lab • 3 messages de 2 discuss... • maintenant");
