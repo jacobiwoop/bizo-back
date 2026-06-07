@@ -90,6 +90,7 @@ Priorite ecran par ecran :
 
 - image Docker dediee Expo Android : `bizo-mobile-rn/Dockerfile.android`
 - script serveur dedie : `scripts/build-mobile-expo-apk.sh`
+- les workflows Android GitHub Actions se declenchent sur les changements dans `bizo-mobile-rn/**`
 - sortie attendue :
   - `/home/admin/bizo-storage/mobile-builds/latest/app-debug.apk`
   - `/home/admin/bizo-storage/mobile-builds/releases/...apk`
