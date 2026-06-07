@@ -187,3 +187,16 @@
 - Deployment: pushed commit `6c6cc82` and deployed the backend container on the server.
 - CI verification: debug workflow run `27095520568` passed in 25m42s.
 - CI verification: production workflow run `27095520561` passed.
+
+# Notification Anatomy Preview
+
+- [x] Locate the Home notification route and existing notification screen structure.
+- [x] Add a visual notification anatomy block showing app logo, conversation avatar, text, and optional rich media roles.
+- [x] Run mobile typecheck.
+- [x] Record the review result.
+
+## Review
+
+- Added a notification anatomy preview at the top of `/notification`.
+- The preview separates the app logo, conversation avatar, sender name, message body, and disabled rich image/`largeIcon` slot.
+- Verification: `npm run typecheck` passed in `bizo-mobile-rn`.
