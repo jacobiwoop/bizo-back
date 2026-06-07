@@ -67,12 +67,13 @@ export function DiscoveryNotificationScreen() {
     <DiscoveryScreenFrame background="#F3F3F3">
       <View className="flex-1 bg-[#F3F3F3]">
         <DiscoveryTitleHeader title="Notification" onBack={() => router.back()} />
-        <DiscoveryNotificationSegments
-          items={discoveryNotificationSegments}
-          activeItem={activeSegment}
-          onSelect={setActiveSegment}
-        />
-        <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 100, paddingTop: 8 }}>
+        <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 100 }}>
+          <DiscoveryNotificationSegments
+            items={discoveryNotificationSegments}
+            activeItem={activeSegment}
+            onSelect={setActiveSegment}
+          />
+          <View className="mt-3" />
           <NotificationAnatomyPreview />
           <View className="gap-6">
             {discoveryNotifications.map((notification) => (
