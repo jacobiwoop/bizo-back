@@ -17,6 +17,8 @@ import android.widget.RemoteViews;
 import androidx.core.app.Person;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.pm.ShortcutInfoCompat;
+import androidx.core.content.pm.ShortcutManagerCompat;
 import androidx.core.graphics.drawable.IconCompat;
 
 public final class BizoLabNotifications {
@@ -59,15 +61,18 @@ public final class BizoLabNotifications {
         ensureChannel(context);
 
         Bitmap jacobiAvatar = createInitialsAvatarBitmap(context, "JW", 96, 0xFFE8ECFF, 0xFF2F66F3);
+        IconCompat jacobiIcon = IconCompat.createWithBitmap(jacobiAvatar);
 
         Person jacobi = new Person.Builder()
             .setName("jacobi")
-            .setIcon(IconCompat.createWithBitmap(jacobiAvatar))
+            .setIcon(jacobiIcon)
             .build();
 
         Person me = new Person.Builder()
             .setName("Bizo")
             .build();
+
+        registerConversationShortcut(context, jacobi, jacobiIcon);
 
         NotificationCompat.MessagingStyle style = new NotificationCompat.MessagingStyle(me)
             .setConversationTitle("jacobi")
@@ -81,7 +86,8 @@ public final class BizoLabNotifications {
             .setContentTitle("jacobi")
             .setContentText("Bonjour, je suis interesse par ton article...")
             .setStyle(style)
-            .setShortcutId("bizo-lab-jacobi");
+            .setShortcutId("bizo-lab-jacobi")
+            .addPerson(jacobi);
 
         NotificationManagerCompat.from(context).notify(MESSAGING_STYLE_ID, builder.build());
     }
@@ -130,6 +136,23 @@ public final class BizoLabNotifications {
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
+    }
+
+    private static void registerConversationShortcut(Context context, Person person, IconCompat icon) {
+        Intent intent = new Intent(context, MainActivity.class)
+            .setAction(Intent.ACTION_VIEW)
+            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        ShortcutInfoCompat shortcut = new ShortcutInfoCompat.Builder(context, "bizo-lab-jacobi")
+            .setShortLabel("jacobi")
+            .setLongLabel("jacobi")
+            .setIcon(icon)
+            .setPerson(person)
+            .setLongLived(true)
+            .setIntent(intent)
+            .build();
+
+        ShortcutManagerCompat.pushDynamicShortcut(context, shortcut);
     }
 
     private static Bitmap createInitialsAvatarBitmap(

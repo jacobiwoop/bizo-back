@@ -316,3 +316,12 @@
 - Verification: notification-lab XML resources passed `xmllint --noout`.
 - Verification: GitHub workflow YAML parsed successfully.
 - CI verification: `Android Notification Lab` run `27103408705` completed successfully on commit `98fdd09`.
+
+# Android Notification Lab Conversation Shortcut
+
+- [x] Confirm via screenshot and `dumpsys notification` that the current `MessagingStyle` notification is posted as `id=4203` with `android.largeIcon=null`.
+- [x] Identify that Xiaomi/Android still shows only the app small icon in compact view without a registered conversation shortcut.
+- [x] Register a long-lived dynamic shortcut for `jacobi` using the same bitmap-backed `Person.icon`.
+- [x] Attach `setShortcutId("bizo-lab-jacobi")` and `addPerson(jacobi)` to the `MessagingStyle` notification.
+- [ ] Validate and rebuild the notification lab.
+- [ ] Re-test with explicit ADB broadcast and screenshot.

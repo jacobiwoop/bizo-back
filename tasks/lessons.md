@@ -20,3 +20,4 @@
 - Do not set Notifee `largeIcon` for Bizo message notifications unless the product explicitly wants a sender/listing image to compete with the app logo. `AndroidPerson.icon` is still acceptable for the conversation avatar, with initials as fallback when no profile image exists.
 - For custom Android notification prototypes, optimize the inner `RemoteViews` content, not the system frame. Android still owns the outer card, app icon slot, expansion affordance, and some margins.
 - For Android `MessagingStyle` avatars, use a bitmap-backed `Person.icon` via `IconCompat.createWithBitmap(bitmap)`. Do not use `setLargeIcon()` for the sender avatar, because it competes with app identity and is not the WhatsApp-style conversation avatar path.
+- If `MessagingStyle` posts correctly but Android still shows only the app icon, register a long-lived conversation shortcut with the same `Person` and icon, then attach that shortcut ID and person to the notification.
