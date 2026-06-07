@@ -49,6 +49,17 @@ class Conversation extends Model
         return 0;
     }
 
+    public function messageNotificationImageFor(User $sender, User $recipient): ?string
+    {
+        $this->loadMissing('listing');
+
+        if ($this->listing && $this->listing->owner_id === $recipient->id) {
+            return $sender->photo_url ?: $this->listing_photo;
+        }
+
+        return $this->listing_photo ?: $sender->photo_url;
+    }
+
     public function listing(): BelongsTo
     {
         return $this->belongsTo(Listing::class);

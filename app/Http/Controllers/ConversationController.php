@@ -85,13 +85,16 @@ class ConversationController extends Controller
         ]);
 
         if ($listing->owner) {
+            $pushImageUrl = $conversation->messageNotificationImageFor($buyer, $listing->owner);
+
             SendPushNotification::dispatch(
                 $listing->owner,
                 'Nouveau message',
                 $validated['message'],
-                ['type' => 'new_message', 'conv_id' => $conversation->id],
+                $this->messagePushData($conversation, $buyer, 'new_message', $validated['message']),
                 'new_message',
-                $conversation->listing_photo
+                $pushImageUrl,
+                true
             );
         }
 
@@ -118,5 +121,23 @@ class ConversationController extends Controller
 
             event(new ConversationSummaryUpdated($conversation, $user));
         }
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function messagePushData(Conversation $conversation, User $sender, string $type, string $body): array
+    {
+        return [
+            'type' => $type,
+            'conv_id' => $conversation->id,
+            'body' => $body,
+            'title' => 'Nouveau message',
+            'sender_id' => $sender->id,
+            'sender_name' => $sender->display_name ?: $sender->username ?: 'Bizo',
+            'sender_photo_url' => $sender->photo_url ?: '',
+            'listing_title' => $conversation->listing_title ?: '',
+            'listing_photo_url' => $conversation->listing_photo ?: '',
+        ];
     }
 }

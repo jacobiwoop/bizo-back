@@ -35,6 +35,13 @@ function conversationPreview(conversation: ConversationResource): string {
   return "Conversation ouverte";
 }
 
+function userInitials(name?: string | null): string {
+  const parts = (name || "Bizo").trim().split(/\s+/).filter(Boolean);
+  const initials = parts.slice(0, 2).map((part) => part[0]).join("");
+
+  return initials.toUpperCase() || "B";
+}
+
 function InboxHeader({ onBack }: { onBack: () => void }) {
   return (
     <SafeAreaView edges={["top"]} style={styles.headerSafeArea}>
@@ -162,7 +169,7 @@ function ConversationRow({
           <Image source={avatar} style={{ width: 52, height: 52, borderRadius: 26 }} contentFit="cover" />
         ) : (
           <View style={styles.avatarFallback}>
-            <Text style={styles.avatarInitial}>{(item.other_user?.display_name || "B").slice(0, 1).toUpperCase()}</Text>
+            <Text style={styles.avatarInitial}>{userInitials(item.other_user?.display_name)}</Text>
           </View>
         )}
       </View>

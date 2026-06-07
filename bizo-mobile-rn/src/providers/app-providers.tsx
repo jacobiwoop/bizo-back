@@ -7,6 +7,7 @@ import {
   configureNotificationHandler,
   registerAndroidPushNotifications,
 } from "@/src/features/notifications/register-push-notifications";
+import { registerForegroundNativeMessageNotifications } from "@/src/features/notifications/native-message-notifications";
 import { queryClient } from "@/src/lib/query-client";
 import { getProfile } from "@/src/lib/api/auth";
 import { disconnectRealtimeClient } from "@/src/lib/realtime/client";
@@ -20,6 +21,7 @@ function SessionBootstrap() {
 
   useEffect(() => {
     configureNotificationHandler();
+    return registerForegroundNativeMessageNotifications();
   }, []);
 
   useEffect(() => {

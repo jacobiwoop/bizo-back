@@ -19,7 +19,7 @@ class FcmService
     /**
      * Envoie une notification push via Firebase FCM HTTP v1.
      */
-    public function send(string $fcmToken, string $title, string $body, array $data = [], ?string $imageUrl = null): void
+    public function send(string $fcmToken, string $title, string $body, array $data = [], ?string $imageUrl = null, bool $dataOnly = false): void
     {
         $accessToken = $this->getAccessToken();
 
@@ -28,6 +28,32 @@ class FcmService
         }
 
         $resolvedImageUrl = $this->resolveImageUrl($imageUrl);
+        $stringData = array_map('strval', $data);
+        $stringData['title'] ??= $title;
+        $stringData['body'] ??= $body;
+
+        if ($resolvedImageUrl) {
+            $stringData['image_url'] = $resolvedImageUrl;
+            $stringData['notification_avatar_url'] ??= $resolvedImageUrl;
+        }
+
+        $message = [
+            'token' => $fcmToken,
+            'data' => $stringData,
+            'android' => [
+                'priority' => 'high',
+            ],
+        ];
+
+        if ($dataOnly) {
+            Http::withToken($accessToken)
+                ->post("https://fcm.googleapis.com/v1/projects/{$this->projectId}/messages:send", [
+                    'message' => $message,
+                ]);
+
+            return;
+        }
+
         $notification = [
             'title' => $title,
             'body' => $body,
@@ -45,17 +71,12 @@ class FcmService
             $androidNotification['image'] = $resolvedImageUrl;
         }
 
+        $message['notification'] = $notification;
+        $message['android']['notification'] = $androidNotification;
+
         Http::withToken($accessToken)
             ->post("https://fcm.googleapis.com/v1/projects/{$this->projectId}/messages:send", [
-                'message' => [
-                    'token' => $fcmToken,
-                    'notification' => $notification,
-                    'data' => array_map('strval', $data),
-                    'android' => [
-                        'priority' => 'high',
-                        'notification' => $androidNotification,
-                    ],
-                ],
+                'message' => $message,
             ]);
     }
 

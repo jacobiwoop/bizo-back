@@ -101,14 +101,16 @@ class MessageController extends Controller
         if ($recipient) {
             $type = $validated['type'] === 'troc_proposal' ? 'troc_proposal' : 'new_message';
             $body = $validated['type'] === 'text' ? $validated['text'] : 'Nouveau message';
+            $pushImageUrl = $conversation->messageNotificationImageFor($user, $recipient);
 
             SendPushNotification::dispatch(
                 $recipient,
                 'Nouveau message',
                 $body,
-                ['type' => $type, 'conv_id' => $conversation->id],
+                $this->messagePushData($conversation, $user, $type, $body),
                 $type,
-                $conversation->listing_photo
+                $pushImageUrl,
+                true
             );
         }
 
@@ -151,5 +153,23 @@ class MessageController extends Controller
 
             event(new ConversationSummaryUpdated($conversation, $user));
         }
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function messagePushData(Conversation $conversation, User $sender, string $type, string $body): array
+    {
+        return [
+            'type' => $type,
+            'conv_id' => $conversation->id,
+            'body' => $body,
+            'title' => 'Nouveau message',
+            'sender_id' => $sender->id,
+            'sender_name' => $sender->display_name ?: $sender->username ?: 'Bizo',
+            'sender_photo_url' => $sender->photo_url ?: '',
+            'listing_title' => $conversation->listing_title ?: '',
+            'listing_photo_url' => $conversation->listing_photo ?: '',
+        ];
     }
 }

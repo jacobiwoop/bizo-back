@@ -13,3 +13,6 @@
 - The Messages tab badge must read the shared `["conversations"]` query and subscribe to the user conversations channel in the custom tabbar, otherwise unread counts update only inside the inbox screen.
 - The Messages inbox filters each need their own unread badge: `Tous` sums all conversations, `J'achete` sums buyer conversations, and `Je vends` sums seller conversations using the same role-resolution logic as filtering.
 - Do not run Laravel queue workers in the app container with `--max-time` as a one-shot background process. Wrap it in a restart loop or use a real supervisor, otherwise push jobs stop after one hour and notifications stay queued.
+- For message push images, choose the image from the recipient's point of view: sellers receiving buyer messages should see the sender profile image, while buyers receiving seller replies should see the listing image with sender profile fallback.
+- FCM `notification.image` is rich notification media/large image on Android; it does not replace the small left app icon. A true conversation-style left avatar requires a native notification renderer.
+- For WhatsApp-style message notifications on Android, use data-only FCM plus Notifee `AndroidStyle.MESSAGING`; sending an FCM `notification` block at the same time risks duplicate notifications and prevents full control of the row avatar.

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Events\ConversationMessageCreated;
 use App\Events\ConversationSummaryUpdated;
+use App\Jobs\SendPushNotification;
 use App\Models\Conversation;
 use App\Models\Favorite;
 use App\Models\Listing;
@@ -13,8 +14,10 @@ use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use ReflectionClass;
 use Tests\TestCase;
 
 class SocialTest extends TestCase
@@ -51,6 +54,24 @@ class SocialTest extends TestCase
         sort($ids);
 
         return "{$ids[0]}_{$ids[1]}_{$this->listing->id}";
+    }
+
+    private function pushedNotificationImageUrl(SendPushNotification $job): ?string
+    {
+        $reflection = new ReflectionClass($job);
+        $property = $reflection->getProperty('imageUrl');
+        $property->setAccessible(true);
+
+        return $property->getValue($job);
+    }
+
+    private function pushedNotificationDataOnly(SendPushNotification $job): bool
+    {
+        $reflection = new ReflectionClass($job);
+        $property = $reflection->getProperty('dataOnly');
+        $property->setAccessible(true);
+
+        return $property->getValue($job);
     }
 
     public function test_can_create_conversation_with_first_message(): void
@@ -179,6 +200,102 @@ class SocialTest extends TestCase
 
         Event::assertDispatched(ConversationMessageCreated::class, 1);
         Event::assertDispatched(ConversationSummaryUpdated::class, 2);
+    }
+
+    public function test_message_notification_uses_sender_photo_when_seller_receives_buyer_message(): void
+    {
+        Queue::fake();
+        Event::fake([
+            ConversationMessageCreated::class,
+            ConversationSummaryUpdated::class,
+        ]);
+
+        $this->buyer->update(['photo_url' => 'https://example.com/buyer.webp']);
+
+        $conversation = Conversation::create([
+            'id' => $this->conversationId(),
+            'listing_id' => $this->listing->id,
+            'listing_title' => $this->listing->title,
+            'listing_photo' => 'https://example.com/listing.webp',
+            'participant_1' => min($this->seller->id, $this->buyer->id),
+            'participant_2' => max($this->seller->id, $this->buyer->id),
+        ]);
+
+        $this->actingAs($this->buyer)
+            ->postJson("/api/v1/conversations/{$conversation->id}/messages", [
+                'type' => 'text',
+                'text' => 'Toujours disponible ?',
+            ])
+            ->assertCreated();
+
+        Queue::assertPushed(SendPushNotification::class, function (SendPushNotification $job) {
+            return $this->pushedNotificationImageUrl($job) === 'https://example.com/buyer.webp'
+                && $this->pushedNotificationDataOnly($job);
+        });
+    }
+
+    public function test_message_notification_uses_listing_photo_when_buyer_receives_seller_reply(): void
+    {
+        Queue::fake();
+        Event::fake([
+            ConversationMessageCreated::class,
+            ConversationSummaryUpdated::class,
+        ]);
+
+        $this->seller->update(['photo_url' => 'https://example.com/seller.webp']);
+
+        $conversation = Conversation::create([
+            'id' => $this->conversationId(),
+            'listing_id' => $this->listing->id,
+            'listing_title' => $this->listing->title,
+            'listing_photo' => 'https://example.com/listing.webp',
+            'participant_1' => min($this->seller->id, $this->buyer->id),
+            'participant_2' => max($this->seller->id, $this->buyer->id),
+        ]);
+
+        $this->actingAs($this->seller)
+            ->postJson("/api/v1/conversations/{$conversation->id}/messages", [
+                'type' => 'text',
+                'text' => 'Oui, toujours disponible.',
+            ])
+            ->assertCreated();
+
+        Queue::assertPushed(SendPushNotification::class, function (SendPushNotification $job) {
+            return $this->pushedNotificationImageUrl($job) === 'https://example.com/listing.webp'
+                && $this->pushedNotificationDataOnly($job);
+        });
+    }
+
+    public function test_message_notification_falls_back_to_sender_photo_when_buyer_receives_seller_reply_without_listing_photo(): void
+    {
+        Queue::fake();
+        Event::fake([
+            ConversationMessageCreated::class,
+            ConversationSummaryUpdated::class,
+        ]);
+
+        $this->seller->update(['photo_url' => 'https://example.com/seller.webp']);
+
+        $conversation = Conversation::create([
+            'id' => $this->conversationId(),
+            'listing_id' => $this->listing->id,
+            'listing_title' => $this->listing->title,
+            'listing_photo' => null,
+            'participant_1' => min($this->seller->id, $this->buyer->id),
+            'participant_2' => max($this->seller->id, $this->buyer->id),
+        ]);
+
+        $this->actingAs($this->seller)
+            ->postJson("/api/v1/conversations/{$conversation->id}/messages", [
+                'type' => 'text',
+                'text' => 'Oui, toujours disponible.',
+            ])
+            ->assertCreated();
+
+        Queue::assertPushed(SendPushNotification::class, function (SendPushNotification $job) {
+            return $this->pushedNotificationImageUrl($job) === 'https://example.com/seller.webp'
+                && $this->pushedNotificationDataOnly($job);
+        });
     }
 
     public function test_can_mark_conversation_messages_as_read(): void

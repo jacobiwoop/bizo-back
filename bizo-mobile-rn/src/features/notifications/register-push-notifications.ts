@@ -1,4 +1,5 @@
 import * as Notifications from "expo-notifications";
+import messaging from "@react-native-firebase/messaging";
 import { Platform } from "react-native";
 
 import { updateFcmToken } from "@/src/lib/api/auth";
@@ -52,8 +53,8 @@ export async function registerAndroidPushNotifications() {
     return null;
   }
 
-  const deviceToken = await Notifications.getDevicePushTokenAsync();
-  const fcmToken = deviceToken.data;
+  await messaging().requestPermission();
+  const fcmToken = await messaging().getToken();
 
   if (!fcmToken) {
     return null;

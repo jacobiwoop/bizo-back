@@ -35,6 +35,13 @@ function formatMessageTime(value: string): string {
   return new Date(value).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 }
 
+function userInitials(name?: string | null): string {
+  const parts = (name || "Bizo").trim().split(/\s+/).filter(Boolean);
+  const initials = parts.slice(0, 2).map((part) => part[0]).join("");
+
+  return initials.toUpperCase() || "B";
+}
+
 function ChatHeader({ conversation, onBack }: { conversation?: ConversationResource | null; onBack: () => void }) {
   const avatar = resolveMediaUrl(conversation?.other_user?.photo_url ?? null);
   const name = conversation?.other_user?.display_name || "Conversation";
@@ -53,7 +60,7 @@ function ChatHeader({ conversation, onBack }: { conversation?: ConversationResou
                 <Image source={avatar} style={{ width: 36, height: 36, borderRadius: 18 }} contentFit="cover" />
               ) : (
                 <View className="h-9 w-9 items-center justify-center rounded-full bg-[#EDEEEF]">
-                  <Text className="text-[13px] font-black text-[#5F5E5E]">{name.slice(0, 1).toUpperCase()}</Text>
+                  <Text className="text-[13px] font-black text-[#5F5E5E]">{userInitials(name)}</Text>
                 </View>
               )}
             </View>

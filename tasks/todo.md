@@ -133,3 +133,52 @@
 - [x] Add optional image support to FCM notifications.
 - [x] Pass the conversation listing photo when dispatching message push notifications.
 - [x] Run notification and messaging backend tests.
+
+# Message Avatar Fallbacks
+
+- [x] Use the listing photo first for message notification images.
+- [x] Fall back to the sender profile photo when the listing has no photo.
+- [x] Show user initials when a chat participant has no profile photo.
+- [x] Add a profile image to the Jacobi test account on production.
+- [x] Run backend notification tests and mobile typecheck.
+
+# Message Push Image Role Rule
+
+- [x] Document the native limitation: Android keeps the app icon as the small left notification icon; FCM image is shown as rich/large notification media.
+- [x] Send the sender profile photo when the listing seller receives a buyer message.
+- [x] Send the listing photo when the buyer receives a seller reply, with sender profile fallback.
+- [x] Update backend tests around the role-aware image rule.
+- [x] Run backend notification and messaging tests.
+- [x] Run mobile typecheck for the chat initials fallback changes.
+
+## Review
+
+- Centralized message notification image selection on the `Conversation` model.
+- Seller recipients now receive the sender profile image first, then listing fallback.
+- Buyer recipients now receive the listing image first, then sender profile fallback.
+- Kept Android notification rendering unchanged: the app icon remains the small left icon unless we add a native notification renderer later.
+- Verification: `php artisan test tests/Feature/SocialTest.php tests/Feature/NotificationsTest.php` passed.
+- Verification: `npm run typecheck` passed in `bizo-mobile-rn`.
+
+# Native Messaging Notifications
+
+- [x] Install native notification renderer dependencies: Notifee and React Native Firebase Messaging.
+- [x] Configure Expo native plugins for Firebase Android builds.
+- [x] Register Firebase Messaging foreground/background handlers at app entry.
+- [x] Render message pushes locally with Notifee `MESSAGING` style and remote avatar icon.
+- [x] Change backend message pushes to data-only for rich local rendering and avoid duplicate system notifications.
+- [x] Keep non-message pushes on the existing Expo/FCM path.
+- [x] Run backend tests and mobile typecheck.
+- [ ] Push to trigger debug and production Android builds.
+
+## Review
+
+- Added Notifee and React Native Firebase Messaging dependencies.
+- Switched the mobile entrypoint to `index.js` so the background FCM handler is registered before Expo Router.
+- Added a native message notification renderer using Notifee `AndroidStyle.MESSAGING` and `person.icon`.
+- Switched Android push token registration to Firebase Messaging token retrieval.
+- Message push jobs now use FCM data-only payloads so Notifee owns the visible notification and avoids duplicate system notifications.
+- Non-message push notifications still use the existing FCM notification payload path.
+- Verification: `npm run typecheck` passed in `bizo-mobile-rn`.
+- Verification: `npx expo config --json` resolved the Firebase config plugins.
+- Verification: `php artisan test tests/Feature/SocialTest.php tests/Feature/NotificationsTest.php` passed.
