@@ -30,7 +30,7 @@ function NotificationAnatomyPreview() {
         <View className="flex-row rounded-[16px] bg-[#1E1E1E] px-3 py-3">
           <View className="items-center">
             <View className="h-11 w-11 items-center justify-center overflow-hidden rounded-[12px] bg-white">
-              <Image source={logoSource} style={{ height: 38, width: 38 }} contentFit="contain" />
+              <Image source={logoSource} style={{ height: 30, width: 30 }} contentFit="contain" />
             </View>
             <Text className="mt-2 text-center text-[10px] font-semibold text-white">Bizo</Text>
           </View>
