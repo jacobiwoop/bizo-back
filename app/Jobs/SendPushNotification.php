@@ -21,6 +21,7 @@ class SendPushNotification implements ShouldQueue
         private readonly string $body,
         private readonly array $data = [],
         private readonly string $type = 'new_message',
+        private readonly ?string $imageUrl = null,
     ) {}
 
     public function handle(FcmService $fcm): void
@@ -48,7 +49,7 @@ class SendPushNotification implements ShouldQueue
 
         // Push FCM si token disponible
         if ($this->user->fcm_token) {
-            $fcm->send($this->user->fcm_token, $this->title, $this->body, $this->data);
+            $fcm->send($this->user->fcm_token, $this->title, $this->body, $this->data, $this->imageUrl);
         }
     }
 }

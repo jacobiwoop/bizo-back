@@ -51,7 +51,11 @@ chown -R www-data:www-data storage bootstrap/cache
 
 if [ "$RUN_QUEUE" = "true" ]; then
   echo "==> Demarrage queue worker..."
-  php artisan queue:work --sleep=5 --tries=3 --timeout=90 --max-time=3600 &
+  while true; do
+    php artisan queue:work --sleep=5 --tries=3 --timeout=90 --max-time=3600
+    echo "==> Queue worker arrete, redemarrage dans 2s..."
+    sleep 2
+  done &
 fi
 
 if [ "$RUN_SCHEDULER" = "true" ]; then

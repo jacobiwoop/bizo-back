@@ -4,7 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\Notification;
 use App\Models\User;
+use App\Services\FcmService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\URL;
+use ReflectionClass;
 use Tests\TestCase;
 
 class NotificationsTest extends TestCase
@@ -79,5 +82,21 @@ class NotificationsTest extends TestCase
             'user_id' => $user->id,
             'is_read' => false,
         ]);
+    }
+
+    public function test_fcm_notification_image_url_is_resolved_to_public_url(): void
+    {
+        URL::forceRootUrl('https://bizo.example');
+        URL::forceScheme('https');
+
+        $reflection = new ReflectionClass(FcmService::class);
+        $method = $reflection->getMethod('resolveImageUrl');
+        $method->setAccessible(true);
+        $service = app(FcmService::class);
+
+        $this->assertSame('https://cdn.example/listing.webp', $method->invoke($service, 'https://cdn.example/listing.webp'));
+        $this->assertSame('https://bizo.example/storage/photos/listing.webp', $method->invoke($service, '/storage/photos/listing.webp'));
+        $this->assertSame('https://bizo.example/storage/photos/listing.webp', $method->invoke($service, 'storage/photos/listing.webp'));
+        $this->assertNull($method->invoke($service, null));
     }
 }

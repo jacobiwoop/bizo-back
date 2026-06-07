@@ -90,7 +90,8 @@ class ConversationController extends Controller
                 'Nouveau message',
                 $validated['message'],
                 ['type' => 'new_message', 'conv_id' => $conversation->id],
-                'new_message'
+                'new_message',
+                $conversation->listing_photo
             );
         }
 

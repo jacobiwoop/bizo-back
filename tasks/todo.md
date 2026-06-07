@@ -127,3 +127,9 @@
 - [x] Use the same buyer/seller role resolution for filtering and badge totals.
 - [x] Show a badge on a filter only when its unread total is greater than zero.
 - [x] Run mobile typecheck.
+
+# Message Push Notification Image
+
+- [x] Add optional image support to FCM notifications.
+- [x] Pass the conversation listing photo when dispatching message push notifications.
+- [x] Run notification and messaging backend tests.

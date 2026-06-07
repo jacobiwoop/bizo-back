@@ -107,7 +107,8 @@ class MessageController extends Controller
                 'Nouveau message',
                 $body,
                 ['type' => $type, 'conv_id' => $conversation->id],
-                $type
+                $type,
+                $conversation->listing_photo
             );
         }
 

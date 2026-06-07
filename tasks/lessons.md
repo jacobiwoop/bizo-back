@@ -12,3 +12,4 @@
 - In the Messages inbox, use the other user's profile photo first, then the listing photo, then the initial fallback.
 - The Messages tab badge must read the shared `["conversations"]` query and subscribe to the user conversations channel in the custom tabbar, otherwise unread counts update only inside the inbox screen.
 - The Messages inbox filters each need their own unread badge: `Tous` sums all conversations, `J'achete` sums buyer conversations, and `Je vends` sums seller conversations using the same role-resolution logic as filtering.
+- Do not run Laravel queue workers in the app container with `--max-time` as a one-shot background process. Wrap it in a restart loop or use a real supervisor, otherwise push jobs stop after one hour and notifications stay queued.
