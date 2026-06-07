@@ -51,6 +51,12 @@ adb shell am broadcast -a io.bizo.notificationlab.SHOW_MESSAGING_STYLE
 
 This variant follows the WhatsApp-style path: create a bitmap avatar, wrap it with `IconCompat.createWithBitmap(...)`, pass it to `Person.Builder().setIcon(...)`, register a long-lived conversation shortcut with the same person/icon, set that shortcut ID on the notification, and do not call `setLargeIcon(...)`.
 
+Official Android grouped messaging-style comparison:
+
+```bash
+adb shell am broadcast -a io.bizo.notificationlab.SHOW_GROUP_MESSAGING_STYLE
+```
+
 Both:
 
 ```bash

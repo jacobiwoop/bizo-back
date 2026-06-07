@@ -26,6 +26,7 @@ public final class BizoLabNotifications {
     private static final int MESSAGE_ID = 4201;
     private static final int GROUP_ID = 4202;
     private static final int MESSAGING_STYLE_ID = 4203;
+    private static final int GROUP_MESSAGING_STYLE_ID = 4204;
 
     private BizoLabNotifications() {}
 
@@ -72,7 +73,7 @@ public final class BizoLabNotifications {
             .setName("Bizo")
             .build();
 
-        registerConversationShortcut(context, jacobi, jacobiIcon);
+        registerConversationShortcut(context, "bizo-lab-jacobi", "jacobi", jacobi, jacobiIcon);
 
         NotificationCompat.MessagingStyle style = new NotificationCompat.MessagingStyle(me)
             .setConversationTitle("jacobi")
@@ -90,6 +91,57 @@ public final class BizoLabNotifications {
             .addPerson(jacobi);
 
         NotificationManagerCompat.from(context).notify(MESSAGING_STYLE_ID, builder.build());
+    }
+
+    public static void showGroupMessagingStyle(Context context) {
+        ensureChannel(context);
+
+        IconCompat jacobiIcon = IconCompat.createWithBitmap(
+            createInitialsAvatarBitmap(context, "JW", 96, 0xFFE8ECFF, 0xFF2F66F3)
+        );
+        IconCompat ressiIcon = IconCompat.createWithBitmap(
+            createInitialsAvatarBitmap(context, "RS", 96, 0xFFF1E8DF, 0xFF7C4A18)
+        );
+        IconCompat akatsukiIcon = IconCompat.createWithBitmap(
+            createInitialsAvatarBitmap(context, "AK", 96, 0xFF2A2F3A, 0xFFFFFFFF)
+        );
+
+        Person jacobi = new Person.Builder()
+            .setName("jacobi")
+            .setIcon(jacobiIcon)
+            .build();
+        Person ressi = new Person.Builder()
+            .setName("Ressi")
+            .setIcon(ressiIcon)
+            .build();
+        Person akatsuki = new Person.Builder()
+            .setName("Akatsuki </> Dev")
+            .setIcon(akatsukiIcon)
+            .build();
+        Person me = new Person.Builder()
+            .setName("Bizo")
+            .build();
+
+        registerConversationShortcut(context, "bizo-lab-group", "Groupe Bizo", jacobi, jacobiIcon);
+
+        long now = System.currentTimeMillis();
+        NotificationCompat.MessagingStyle style = new NotificationCompat.MessagingStyle(me)
+            .setConversationTitle("Groupe Bizo")
+            .setGroupConversation(true)
+            .addMessage("Muka'z : Photo", now - 180_000, akatsuki)
+            .addMessage("Merci", now - 120_000, ressi)
+            .addMessage("Bonjour mon grand comment vas-tu ?", now - 60_000, jacobi);
+
+        NotificationCompat.Builder builder = baseBuilder(context)
+            .setContentTitle("Groupe Bizo")
+            .setContentText("3 messages de 3 discussions")
+            .setStyle(style)
+            .setShortcutId("bizo-lab-group")
+            .addPerson(jacobi)
+            .addPerson(ressi)
+            .addPerson(akatsuki);
+
+        NotificationManagerCompat.from(context).notify(GROUP_MESSAGING_STYLE_ID, builder.build());
     }
 
     public static void showGroup(Context context) {
@@ -115,6 +167,7 @@ public final class BizoLabNotifications {
         NotificationManagerCompat.from(context).cancel(MESSAGE_ID);
         NotificationManagerCompat.from(context).cancel(GROUP_ID);
         NotificationManagerCompat.from(context).cancel(MESSAGING_STYLE_ID);
+        NotificationManagerCompat.from(context).cancel(GROUP_MESSAGING_STYLE_ID);
     }
 
     private static NotificationCompat.Builder baseBuilder(Context context) {
@@ -138,14 +191,20 @@ public final class BizoLabNotifications {
         );
     }
 
-    private static void registerConversationShortcut(Context context, Person person, IconCompat icon) {
+    private static void registerConversationShortcut(
+        Context context,
+        String shortcutId,
+        String label,
+        Person person,
+        IconCompat icon
+    ) {
         Intent intent = new Intent(context, MainActivity.class)
             .setAction(Intent.ACTION_VIEW)
             .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-        ShortcutInfoCompat shortcut = new ShortcutInfoCompat.Builder(context, "bizo-lab-jacobi")
-            .setShortLabel("jacobi")
-            .setLongLabel("jacobi")
+        ShortcutInfoCompat shortcut = new ShortcutInfoCompat.Builder(context, shortcutId)
+            .setShortLabel(label)
+            .setLongLabel(label)
             .setIcon(icon)
             .setPerson(person)
             .setLongLived(true)

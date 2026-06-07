@@ -43,12 +43,18 @@ public class MainActivity extends Activity {
         messagingStyle.setOnClickListener(v -> BizoLabNotifications.showMessagingStyle(this));
         root.addView(messagingStyle);
 
+        Button groupMessagingStyle = new Button(this);
+        groupMessagingStyle.setText("Show group MessagingStyle notification");
+        groupMessagingStyle.setOnClickListener(v -> BizoLabNotifications.showGroupMessagingStyle(this));
+        root.addView(groupMessagingStyle);
+
         Button all = new Button(this);
         all.setText("Show all");
         all.setOnClickListener(v -> {
             BizoLabNotifications.showMessage(this);
             BizoLabNotifications.showGroup(this);
             BizoLabNotifications.showMessagingStyle(this);
+            BizoLabNotifications.showGroupMessagingStyle(this);
         });
         root.addView(all);
 

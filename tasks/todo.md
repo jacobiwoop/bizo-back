@@ -333,3 +333,13 @@
 - Verified `dumpsys shortcut io.bizo.notificationlab` contains dynamic long-lived shortcut `bizo-lab-jacobi` with a stored bitmap icon.
 - Verified `dumpsys notification` shows `id=4203`, `android.template=Notification$MessagingStyle`, `shortcut=bizo-lab-jacobi`, `android.people.list`, and `android.largeIcon=null`.
 - Screenshot verification: `/tmp/bizo-notification-messagingstyle-shortcut.png` shows the large `JW` conversation avatar on the left with the small app icon as a badge overlay.
+
+# Android Notification Lab Group MessagingStyle
+
+- [x] Add an official Android `MessagingStyle` group notification variant.
+- [x] Use multiple bitmap-backed `Person.icon` senders.
+- [x] Register a long-lived group conversation shortcut.
+- [x] Add a dedicated app button and ADB broadcast action.
+- [x] Keep the existing custom `RemoteViews` group for comparison.
+- [ ] Validate and run the GitHub Actions build.
+- [ ] Record review result.
