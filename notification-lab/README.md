@@ -43,6 +43,14 @@ Grouped compact/expanded notification:
 adb shell am broadcast -a io.bizo.notificationlab.SHOW_GROUP
 ```
 
+Official Android messaging-style comparison:
+
+```bash
+adb shell am broadcast -a io.bizo.notificationlab.SHOW_MESSAGING_STYLE
+```
+
+This variant follows the WhatsApp-style path: create a bitmap avatar, wrap it with `IconCompat.createWithBitmap(...)`, pass it to `Person.Builder().setIcon(...)`, and do not call `setLargeIcon(...)`.
+
 Both:
 
 ```bash

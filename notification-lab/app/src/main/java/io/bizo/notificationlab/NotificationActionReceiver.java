@@ -19,9 +19,15 @@ public class NotificationActionReceiver extends BroadcastReceiver {
             return;
         }
 
+        if ("io.bizo.notificationlab.SHOW_MESSAGING_STYLE".equals(action)) {
+            BizoLabNotifications.showMessagingStyle(context);
+            return;
+        }
+
         if ("io.bizo.notificationlab.SHOW_ALL".equals(action)) {
             BizoLabNotifications.showMessage(context);
             BizoLabNotifications.showGroup(context);
+            BizoLabNotifications.showMessagingStyle(context);
             return;
         }
 

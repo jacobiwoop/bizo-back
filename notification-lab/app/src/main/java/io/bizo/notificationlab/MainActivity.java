@@ -38,11 +38,17 @@ public class MainActivity extends Activity {
         group.setOnClickListener(v -> BizoLabNotifications.showGroup(this));
         root.addView(group);
 
+        Button messagingStyle = new Button(this);
+        messagingStyle.setText("Show MessagingStyle notification");
+        messagingStyle.setOnClickListener(v -> BizoLabNotifications.showMessagingStyle(this));
+        root.addView(messagingStyle);
+
         Button all = new Button(this);
-        all.setText("Show both");
+        all.setText("Show all");
         all.setOnClickListener(v -> {
             BizoLabNotifications.showMessage(this);
             BizoLabNotifications.showGroup(this);
+            BizoLabNotifications.showMessagingStyle(this);
         });
         root.addView(all);
 

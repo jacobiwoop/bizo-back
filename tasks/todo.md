@@ -294,3 +294,14 @@
 - Local Gradle compile was attempted, but the Gradle distribution download timed out locally; GitHub Actions performed the full APK build.
 - CI verification: `Android Notification Lab` run `27101222843` completed successfully on commit `0c219cc`.
 - CI artifact: `bizo-notification-lab-debug-apk`, size `2192587` bytes.
+
+# Android Notification Lab Compact Refinement
+
+- [x] Document the Android system-frame limitation and the target inner-content approach.
+- [x] Remove the duplicate in-layout chevron from compact/expanded message custom views.
+- [x] Replace the vector avatar with a centered initials text avatar in custom RemoteViews.
+- [x] Reduce compact custom-view margins and make the small notification icon visually quieter.
+- [x] Add an ADB/app-triggerable `MessagingStyle` comparison notification.
+- [x] Use a bitmap-backed `Person.icon` for the `MessagingStyle` avatar and avoid `setLargeIcon()`.
+- [ ] Validate XML/YAML and run the GitHub Actions build.
+- [ ] Record review result.
