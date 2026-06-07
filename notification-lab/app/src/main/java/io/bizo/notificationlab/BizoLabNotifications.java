@@ -168,7 +168,7 @@ public final class BizoLabNotifications {
         ensureChannel(context);
 
         RemoteViews summary = new RemoteViews(context.getPackageName(), R.layout.notification_multi_summary);
-        summary.setTextViewText(R.id.summary_header, "Bizo • 3 messages de 2 discussions • maintenant");
+        summary.setTextViewText(R.id.summary_header, "Bizo • 3 messages de 2 discuss... • maintenant");
         summary.setTextViewText(R.id.summary_avatar_1, "AK");
         summary.setTextViewText(R.id.summary_text_1, "Akatsuki </> Dev  Muka'z : Photo");
         summary.setTextViewText(R.id.summary_avatar_2, "JW");

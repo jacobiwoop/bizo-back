@@ -1,7 +1,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/bizo_notification_bg"
+    android:background="@drawable/bizo_summary_flat_bg"
+    android:paddingEnd="4dp"
     android:orientation="vertical">
 
     <LinearLayout
@@ -11,13 +12,13 @@
         android:orientation="horizontal">
 
         <FrameLayout
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
             android:background="@drawable/bizo_header_icon_bg">
 
             <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:layout_gravity="center"
                 android:src="@drawable/bizo_notification_small" />
         </FrameLayout>
@@ -38,20 +39,20 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="84dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginStart="56dp"
+        android:layout_marginTop="8dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
             android:id="@+id/summary_avatar_1"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:background="@drawable/avatar_bg_warm"
             android:gravity="center"
             android:text="AK"
             android:textColor="#7C4A18"
-            android:textSize="11sp"
+            android:textSize="10sp"
             android:textStyle="bold" />
 
         <TextView
@@ -64,26 +65,27 @@
             android:maxLines="1"
             android:text="Akatsuki &lt;/&gt; Dev  Muka'z : Photo"
             android:textColor="#F1F1F1"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="84dp"
-        android:layout_marginTop="6dp"
+        android:layout_marginStart="56dp"
+        android:layout_marginTop="5dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
             android:id="@+id/summary_avatar_2"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:background="@drawable/avatar_bg_blue"
             android:gravity="center"
             android:text="JW"
             android:textColor="#2F66F3"
-            android:textSize="11sp"
+            android:textSize="10sp"
             android:textStyle="bold" />
 
         <TextView
@@ -96,6 +98,7 @@
             android:maxLines="1"
             android:text="jacobi  Bonjour mon grand comment..."
             android:textColor="#F1F1F1"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:textStyle="bold" />
     </LinearLayout>
 </LinearLayout>
