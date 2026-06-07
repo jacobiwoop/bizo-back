@@ -388,4 +388,17 @@
 - [x] Make the expanded Bizo grouped notification use larger conversation avatars.
 - [x] Add a right chevron visual per expanded conversation row.
 - [x] Add one reposted expanded-conversation state with full text and action buttons after tapping Jacobi's chevron.
-- [ ] Validate XML/YAML, push, build, install, and capture compact/expanded states.
+- [x] Add open states for AK, Jacobi, Ressi, and Cyber.
+- [x] Add a simulated state where Jacobi is removed from the custom group.
+- [x] Add a MessagingStyle variant with native reply/read/silence actions.
+- [x] Add grouped child notifications to test real per-conversation swipe.
+- [x] Validate XML/YAML before push.
+- [ ] Push, build, install, and capture compact/expanded/action/swipe states.
+
+## Review
+
+- Custom group now supports four rows and reposted open states for each row.
+- Conversation actions are hidden in the first expanded state and shown only under the opened row.
+- Added `Show MessagingStyle with actions` to compare native Android messaging actions.
+- Added `Show grouped child notifications` to test swipe behavior with separate child notifications.
+- Verification so far: notification-lab XML resources passed `xmllint --noout`; workflow YAML parsed successfully.

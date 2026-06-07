@@ -18,6 +18,7 @@ import android.widget.RemoteViews;
 import androidx.core.app.Person;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.app.RemoteInput;
 import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.core.content.pm.ShortcutManagerCompat;
 import androidx.core.graphics.drawable.IconCompat;
@@ -29,6 +30,18 @@ public final class BizoLabNotifications {
     private static final int MESSAGING_STYLE_ID = 4203;
     private static final int GROUP_MESSAGING_STYLE_ID = 4204;
     private static final int MULTI_SUMMARY_ID = 4205;
+    private static final int MESSAGING_STYLE_ACTIONS_ID = 4206;
+    private static final int CHILD_GROUP_SUMMARY_ID = 4210;
+    private static final int CHILD_GROUP_AK_ID = 4211;
+    private static final int CHILD_GROUP_JACOBI_ID = 4212;
+    private static final int CHILD_GROUP_RESSI_ID = 4213;
+    private static final int CHILD_GROUP_CYBER_ID = 4214;
+    private static final String CHILD_GROUP_KEY = "bizo-lab-child-conversations";
+    private static final String OPEN_NONE = "none";
+    private static final String OPEN_AK = "ak";
+    private static final String OPEN_JACOBI = "jacobi";
+    private static final String OPEN_RESSI = "ressi";
+    private static final String OPEN_CYBER = "cyber";
 
     private BizoLabNotifications() {}
 
@@ -146,6 +159,79 @@ public final class BizoLabNotifications {
         NotificationManagerCompat.from(context).notify(GROUP_MESSAGING_STYLE_ID, builder.build());
     }
 
+    public static void showMessagingStyleWithActions(Context context) {
+        ensureChannel(context);
+
+        Bitmap jacobiAvatar = createInitialsAvatarBitmap(context, "JW", 96, 0xFFE8ECFF, 0xFF2F66F3);
+        IconCompat jacobiIcon = IconCompat.createWithBitmap(jacobiAvatar);
+        Person jacobi = new Person.Builder()
+            .setName("jacobi")
+            .setIcon(jacobiIcon)
+            .build();
+        Person me = new Person.Builder()
+            .setName("Bizo")
+            .build();
+
+        registerConversationShortcut(context, "bizo-lab-jacobi-actions", "jacobi", jacobi, jacobiIcon);
+
+        long now = System.currentTimeMillis();
+        NotificationCompat.MessagingStyle style = new NotificationCompat.MessagingStyle(me)
+            .setConversationTitle("jacobi")
+            .addMessage("Bonjour mon grand comment vas-tu ?", now - 180_000, jacobi)
+            .addMessage("Oui, l'article est toujours disponible.", now - 120_000, me)
+            .addMessage("Je peux passer aujourd'hui ?", now - 60_000, jacobi);
+
+        RemoteInput replyInput = new RemoteInput.Builder("bizo_reply_text")
+            .setLabel("Repondre a jacobi")
+            .build();
+
+        NotificationCompat.Action reply = new NotificationCompat.Action.Builder(
+            R.drawable.bizo_notification_small,
+            "Repondre",
+            actionIntent(context, "io.bizo.notificationlab.MESSAGE_REPLY", 301)
+        )
+            .addRemoteInput(replyInput)
+            .setAllowGeneratedReplies(true)
+            .build();
+
+        NotificationCompat.Builder builder = baseBuilder(context)
+            .setContentTitle("jacobi")
+            .setContentText("Je peux passer aujourd'hui ?")
+            .setStyle(style)
+            .setShortcutId("bizo-lab-jacobi-actions")
+            .addPerson(jacobi)
+            .addAction(reply)
+            .addAction(R.drawable.bizo_notification_small, "Marquer comme lu", actionIntent(context, "io.bizo.notificationlab.MARK_READ", 302))
+            .addAction(R.drawable.bizo_notification_small, "Silence", actionIntent(context, "io.bizo.notificationlab.SILENCE", 303));
+
+        NotificationManagerCompat.from(context).notify(MESSAGING_STYLE_ACTIONS_ID, builder.build());
+    }
+
+    public static void showChildGroup(Context context) {
+        ensureChannel(context);
+
+        NotificationManagerCompat manager = NotificationManagerCompat.from(context);
+        manager.notify(CHILD_GROUP_AK_ID, childConversationBuilder(context, "Akatsuki </> Dev", "Muka'z : Photo", CHILD_GROUP_AK_ID).build());
+        manager.notify(CHILD_GROUP_JACOBI_ID, childConversationBuilder(context, "jacobi", "Bonjour mon grand comment...", CHILD_GROUP_JACOBI_ID).build());
+        manager.notify(CHILD_GROUP_RESSI_ID, childConversationBuilder(context, "Ressi", "Merci", CHILD_GROUP_RESSI_ID).build());
+        manager.notify(CHILD_GROUP_CYBER_ID, childConversationBuilder(context, "Cyber Torch", "Aliou : Sticker", CHILD_GROUP_CYBER_ID).build());
+
+        NotificationCompat.Builder summary = baseBuilder(context)
+            .setContentTitle("Bizo")
+            .setContentText("4 conversations")
+            .setGroup(CHILD_GROUP_KEY)
+            .setGroupSummary(true)
+            .setSubText("4 conversations")
+            .setStyle(new NotificationCompat.InboxStyle()
+                .addLine("Akatsuki </> Dev  Muka'z : Photo")
+                .addLine("jacobi  Bonjour mon grand comment...")
+                .addLine("Ressi  Merci")
+                .addLine("Cyber Torch  Aliou : Sticker")
+                .setSummaryText("4 conversations"));
+
+        manager.notify(CHILD_GROUP_SUMMARY_ID, summary.build());
+    }
+
     public static void showGroup(Context context) {
         ensureChannel(context);
 
@@ -166,53 +252,123 @@ public final class BizoLabNotifications {
     }
 
     public static void showMultiSummary(Context context) {
-        showMultiSummary(context, false);
+        showMultiSummary(context, OPEN_NONE, false);
+    }
+
+    public static void showMultiSummaryAkOpen(Context context) {
+        showMultiSummary(context, OPEN_AK, false);
     }
 
     public static void showMultiSummaryJacobiOpen(Context context) {
-        showMultiSummary(context, true);
+        showMultiSummary(context, OPEN_JACOBI, false);
     }
 
-    private static void showMultiSummary(Context context, boolean jacobiOpen) {
+    public static void showMultiSummaryRessiOpen(Context context) {
+        showMultiSummary(context, OPEN_RESSI, false);
+    }
+
+    public static void showMultiSummaryCyberOpen(Context context) {
+        showMultiSummary(context, OPEN_CYBER, false);
+    }
+
+    public static void showMultiSummaryWithoutJacobi(Context context) {
+        showMultiSummary(context, OPEN_NONE, true);
+    }
+
+    private static void showMultiSummary(Context context, String openConversation, boolean hideJacobi) {
         ensureChannel(context);
 
         RemoteViews compact = new RemoteViews(context.getPackageName(), R.layout.notification_multi_summary);
-        compact.setTextViewText(R.id.summary_header, "Bizo • 3 messages de 2 discuss... • maintenant");
+        compact.setTextViewText(R.id.summary_header, hideJacobi
+            ? "Bizo • 3 messages de 3 discuss... • maintenant"
+            : "Bizo • 4 messages de 4 discuss... • maintenant"
+        );
         compact.setTextViewText(R.id.summary_avatar_1, "AK");
         compact.setTextViewText(R.id.summary_text_1, "Akatsuki </> Dev  Muka'z : Photo");
         compact.setTextViewText(R.id.summary_avatar_2, "JW");
-        compact.setTextViewText(R.id.summary_text_2, "jacobi  Bonjour mon grand comment...");
+        compact.setTextViewText(R.id.summary_text_2, hideJacobi ? "Ressi  Merci" : "jacobi  Bonjour mon grand comment...");
 
         RemoteViews expanded = new RemoteViews(context.getPackageName(), R.layout.notification_multi_summary_expanded);
-        expanded.setTextViewText(R.id.summary_avatar_1, "AK");
-        expanded.setTextViewText(R.id.summary_text_1, "Akatsuki </> Dev  Muka'z : Photo");
-        expanded.setTextViewText(R.id.summary_preview_1, "Photo envoyee");
-        expanded.setTextViewText(R.id.summary_avatar_2, "JW");
-        expanded.setTextViewText(R.id.summary_text_2, "jacobi • maintenant");
-        expanded.setTextViewText(R.id.summary_preview_2, jacobiOpen
-            ? "Bonjour mon grand comment vas-tu ? Je voulais verifier si l'article est toujours disponible."
-            : "Bonjour mon grand comment..."
+        bindConversationRow(
+            context,
+            expanded,
+            R.id.summary_row_1,
+            R.id.summary_avatar_1,
+            R.id.summary_text_1,
+            R.id.summary_preview_1,
+            R.id.summary_chevron_1,
+            R.id.summary_actions_1,
+            "AK",
+            "Akatsuki </> Dev  Muka'z : Photo",
+            "Photo envoyee",
+            "Le vendeur a ajoute trois photos de l'article.",
+            OPEN_AK,
+            openConversation,
+            "io.bizo.notificationlab.SHOW_MULTI_SUMMARY_AK_OPEN",
+            201,
+            true
         );
-        expanded.setTextViewText(R.id.summary_avatar_3, "RS");
-        expanded.setTextViewText(R.id.summary_text_3, "Ressi • 2 min");
-        expanded.setTextViewText(R.id.summary_preview_3, "Merci");
-        expanded.setImageViewResource(
+        bindConversationRow(
+            context,
+            expanded,
+            R.id.summary_row_2,
+            R.id.summary_avatar_2,
+            R.id.summary_text_2,
+            R.id.summary_preview_2,
             R.id.summary_chevron_2,
-            jacobiOpen ? R.drawable.ic_chevron_up : R.drawable.ic_chevron_down
+            R.id.summary_actions_2,
+            "JW",
+            "jacobi • maintenant",
+            "Bonjour mon grand comment...",
+            "Bonjour mon grand comment vas-tu ? Je voulais verifier si l'article est toujours disponible.",
+            OPEN_JACOBI,
+            openConversation,
+            "io.bizo.notificationlab.SHOW_MULTI_SUMMARY_JACOBI_OPEN",
+            202,
+            !hideJacobi
         );
-        expanded.setViewVisibility(R.id.summary_actions, jacobiOpen ? View.VISIBLE : View.GONE);
-        expanded.setOnClickPendingIntent(
-            R.id.summary_chevron_2,
-            actionIntent(context, jacobiOpen
-                ? "io.bizo.notificationlab.SHOW_MULTI_SUMMARY"
-                : "io.bizo.notificationlab.SHOW_MULTI_SUMMARY_JACOBI_OPEN",
-                202
-            )
+        bindConversationRow(
+            context,
+            expanded,
+            R.id.summary_row_3,
+            R.id.summary_avatar_3,
+            R.id.summary_text_3,
+            R.id.summary_preview_3,
+            R.id.summary_chevron_3,
+            R.id.summary_actions_3,
+            "RS",
+            "Ressi • 2 min",
+            "Merci",
+            "Merci, je te confirme des que je suis pret.",
+            OPEN_RESSI,
+            openConversation,
+            "io.bizo.notificationlab.SHOW_MULTI_SUMMARY_RESSI_OPEN",
+            203,
+            true
+        );
+        bindConversationRow(
+            context,
+            expanded,
+            R.id.summary_row_4,
+            R.id.summary_avatar_4,
+            R.id.summary_text_4,
+            R.id.summary_preview_4,
+            R.id.summary_chevron_4,
+            R.id.summary_actions_4,
+            "CT",
+            "Cyber Torch • 4 min",
+            "Aliou : Sticker",
+            "Aliou : Sticker coeur recu dans la conversation.",
+            OPEN_CYBER,
+            openConversation,
+            "io.bizo.notificationlab.SHOW_MULTI_SUMMARY_CYBER_OPEN",
+            204,
+            true
         );
 
         NotificationCompat.Builder builder = baseBuilder(context)
             .setContentTitle("Bizo")
-            .setContentText("3 messages de 2 discussions")
+            .setContentText(hideJacobi ? "3 messages de 3 discussions" : "4 messages de 4 discussions")
             .setCustomContentView(compact)
             .setCustomBigContentView(expanded)
             .setStyle(new NotificationCompat.DecoratedCustomViewStyle());
@@ -226,6 +382,12 @@ public final class BizoLabNotifications {
         NotificationManagerCompat.from(context).cancel(MESSAGING_STYLE_ID);
         NotificationManagerCompat.from(context).cancel(GROUP_MESSAGING_STYLE_ID);
         NotificationManagerCompat.from(context).cancel(MULTI_SUMMARY_ID);
+        NotificationManagerCompat.from(context).cancel(MESSAGING_STYLE_ACTIONS_ID);
+        NotificationManagerCompat.from(context).cancel(CHILD_GROUP_SUMMARY_ID);
+        NotificationManagerCompat.from(context).cancel(CHILD_GROUP_AK_ID);
+        NotificationManagerCompat.from(context).cancel(CHILD_GROUP_JACOBI_ID);
+        NotificationManagerCompat.from(context).cancel(CHILD_GROUP_RESSI_ID);
+        NotificationManagerCompat.from(context).cancel(CHILD_GROUP_CYBER_ID);
     }
 
     private static NotificationCompat.Builder baseBuilder(Context context) {
@@ -256,6 +418,52 @@ public final class BizoLabNotifications {
             requestCode,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+    }
+
+    private static NotificationCompat.Builder childConversationBuilder(
+        Context context,
+        String title,
+        String message,
+        int requestCode
+    ) {
+        return baseBuilder(context)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setGroup(CHILD_GROUP_KEY)
+            .setContentIntent(openIntent(context))
+            .setDeleteIntent(actionIntent(context, "io.bizo.notificationlab.MARK_READ", requestCode + 1000));
+    }
+
+    private static void bindConversationRow(
+        Context context,
+        RemoteViews views,
+        int rowId,
+        int avatarId,
+        int titleId,
+        int previewId,
+        int chevronId,
+        int actionsId,
+        String initials,
+        String title,
+        String closedPreview,
+        String openPreview,
+        String rowKey,
+        String openConversation,
+        String openAction,
+        int requestCode,
+        boolean visible
+    ) {
+        boolean isOpen = rowKey.equals(openConversation);
+        views.setViewVisibility(rowId, visible ? View.VISIBLE : View.GONE);
+        views.setTextViewText(avatarId, initials);
+        views.setTextViewText(titleId, title);
+        views.setTextViewText(previewId, isOpen ? openPreview : closedPreview);
+        views.setImageViewResource(chevronId, isOpen ? R.drawable.ic_chevron_up : R.drawable.ic_chevron_down);
+        views.setViewVisibility(actionsId, isOpen ? View.VISIBLE : View.GONE);
+        views.setOnClickPendingIntent(
+            chevronId,
+            actionIntent(context, isOpen ? "io.bizo.notificationlab.SHOW_MULTI_SUMMARY" : openAction, requestCode)
         );
     }
 

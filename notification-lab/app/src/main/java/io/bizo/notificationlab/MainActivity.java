@@ -48,6 +48,16 @@ public class MainActivity extends Activity {
         groupMessagingStyle.setOnClickListener(v -> BizoLabNotifications.showGroupMessagingStyle(this));
         root.addView(groupMessagingStyle);
 
+        Button messagingStyleActions = new Button(this);
+        messagingStyleActions.setText("Show MessagingStyle with actions");
+        messagingStyleActions.setOnClickListener(v -> BizoLabNotifications.showMessagingStyleWithActions(this));
+        root.addView(messagingStyleActions);
+
+        Button childGroup = new Button(this);
+        childGroup.setText("Show grouped child notifications");
+        childGroup.setOnClickListener(v -> BizoLabNotifications.showChildGroup(this));
+        root.addView(childGroup);
+
         Button multiSummary = new Button(this);
         multiSummary.setText("Show multi-discussion summary");
         multiSummary.setOnClickListener(v -> BizoLabNotifications.showMultiSummary(this));
@@ -60,6 +70,8 @@ public class MainActivity extends Activity {
             BizoLabNotifications.showGroup(this);
             BizoLabNotifications.showMessagingStyle(this);
             BizoLabNotifications.showGroupMessagingStyle(this);
+            BizoLabNotifications.showMessagingStyleWithActions(this);
+            BizoLabNotifications.showChildGroup(this);
             BizoLabNotifications.showMultiSummary(this);
         });
         root.addView(all);

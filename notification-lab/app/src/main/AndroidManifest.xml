@@ -26,8 +26,17 @@
                 <action android:name="io.bizo.notificationlab.SHOW_GROUP" />
                 <action android:name="io.bizo.notificationlab.SHOW_MESSAGING_STYLE" />
                 <action android:name="io.bizo.notificationlab.SHOW_GROUP_MESSAGING_STYLE" />
+                <action android:name="io.bizo.notificationlab.SHOW_MESSAGING_STYLE_ACTIONS" />
+                <action android:name="io.bizo.notificationlab.SHOW_CHILD_GROUP" />
                 <action android:name="io.bizo.notificationlab.SHOW_MULTI_SUMMARY" />
+                <action android:name="io.bizo.notificationlab.SHOW_MULTI_SUMMARY_AK_OPEN" />
                 <action android:name="io.bizo.notificationlab.SHOW_MULTI_SUMMARY_JACOBI_OPEN" />
+                <action android:name="io.bizo.notificationlab.SHOW_MULTI_SUMMARY_RESSI_OPEN" />
+                <action android:name="io.bizo.notificationlab.SHOW_MULTI_SUMMARY_CYBER_OPEN" />
+                <action android:name="io.bizo.notificationlab.SHOW_MULTI_SUMMARY_WITHOUT_JACOBI" />
+                <action android:name="io.bizo.notificationlab.MESSAGE_REPLY" />
+                <action android:name="io.bizo.notificationlab.MARK_READ" />
+                <action android:name="io.bizo.notificationlab.SILENCE" />
                 <action android:name="io.bizo.notificationlab.SHOW_ALL" />
                 <action android:name="io.bizo.notificationlab.CLEAR" />
             </intent-filter>
