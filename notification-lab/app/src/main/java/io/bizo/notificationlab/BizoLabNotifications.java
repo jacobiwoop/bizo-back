@@ -188,7 +188,7 @@ public final class BizoLabNotifications {
         NotificationCompat.Action reply = new NotificationCompat.Action.Builder(
             R.drawable.bizo_notification_small,
             "Repondre",
-            actionIntent(context, "io.bizo.notificationlab.MESSAGE_REPLY", 301)
+            mutableActionIntent(context, "io.bizo.notificationlab.MESSAGE_REPLY", 301)
         )
             .addRemoteInput(replyInput)
             .setAllowGeneratedReplies(true)
@@ -418,6 +418,16 @@ public final class BizoLabNotifications {
             requestCode,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+    }
+
+    private static PendingIntent mutableActionIntent(Context context, String action, int requestCode) {
+        Intent intent = new Intent(context, NotificationActionReceiver.class).setAction(action);
+        return PendingIntent.getBroadcast(
+            context,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE
         );
     }
 

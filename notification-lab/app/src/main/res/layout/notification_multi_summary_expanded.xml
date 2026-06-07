@@ -14,19 +14,19 @@
 
         <TextView
             android:id="@+id/summary_avatar_1"
-            android:layout_width="54dp"
-            android:layout_height="54dp"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
             android:background="@drawable/avatar_bg_warm"
             android:gravity="center"
             android:text="AK"
             android:textColor="#7C4A18"
-            android:textSize="17sp"
+            android:textSize="15sp"
             android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="10dp"
             android:layout_weight="1"
             android:orientation="vertical">
 
@@ -38,26 +38,26 @@
                 android:maxLines="1"
                 android:text="Akatsuki &lt;/&gt; Dev  Muka'z : Photo"
                 android:textColor="#F1F1F1"
-                android:textSize="17sp"
+                android:textSize="15sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/summary_preview_1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
+                android:layout_marginTop="2dp"
                 android:ellipsize="end"
-                android:maxLines="2"
+                android:maxLines="1"
                 android:text="Photo envoyee"
                 android:textColor="#D8D2CA"
-                android:textSize="14sp" />
+                android:textSize="13sp" />
         </LinearLayout>
 
         <ImageView
             android:id="@+id/summary_chevron_1"
-            android:layout_width="34dp"
-            android:layout_height="34dp"
-            android:padding="8dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:padding="7dp"
             android:src="@drawable/ic_chevron_down" />
     </LinearLayout>
 
@@ -65,7 +65,7 @@
         android:id="@+id/summary_actions_1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="5dp"
         android:orientation="horizontal"
         android:visibility="gone">
 
@@ -74,25 +74,25 @@
             android:layout_height="wrap_content"
             android:text="Repondre"
             android:textColor="#FFB476"
-            android:textSize="15sp"
+            android:textSize="13sp"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="28dp"
+            android:layout_marginStart="20dp"
             android:text="Marquer comme lu"
             android:textColor="#FFB476"
-            android:textSize="15sp"
+            android:textSize="13sp"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="28dp"
+            android:layout_marginStart="20dp"
             android:text="Silence"
             android:textColor="#FFB476"
-            android:textSize="15sp"
+            android:textSize="13sp"
             android:textStyle="bold" />
     </LinearLayout>
 
@@ -100,25 +100,25 @@
         android:id="@+id/summary_row_2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
+        android:layout_marginTop="8dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
             android:id="@+id/summary_avatar_2"
-            android:layout_width="54dp"
-            android:layout_height="54dp"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
             android:background="@drawable/avatar_bg_blue"
             android:gravity="center"
             android:text="JW"
             android:textColor="#2F66F3"
-            android:textSize="17sp"
+            android:textSize="15sp"
             android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="10dp"
             android:layout_weight="1"
             android:orientation="vertical">
 
@@ -130,26 +130,26 @@
                 android:maxLines="1"
                 android:text="jacobi • maintenant"
                 android:textColor="#F1F1F1"
-                android:textSize="17sp"
+                android:textSize="15sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/summary_preview_2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
+                android:layout_marginTop="2dp"
                 android:ellipsize="end"
-                android:maxLines="3"
+                android:maxLines="2"
                 android:text="Bonjour mon grand comment..."
                 android:textColor="#D8D2CA"
-                android:textSize="14sp" />
+                android:textSize="13sp" />
         </LinearLayout>
 
         <ImageView
             android:id="@+id/summary_chevron_2"
-            android:layout_width="34dp"
-            android:layout_height="34dp"
-            android:padding="8dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:padding="7dp"
             android:src="@drawable/ic_chevron_down" />
     </LinearLayout>
 
@@ -157,7 +157,7 @@
         android:id="@+id/summary_actions_2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="5dp"
         android:orientation="horizontal"
         android:visibility="gone">
 
@@ -166,25 +166,25 @@
             android:layout_height="wrap_content"
             android:text="Repondre"
             android:textColor="#FFB476"
-            android:textSize="15sp"
+            android:textSize="13sp"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="28dp"
+            android:layout_marginStart="20dp"
             android:text="Marquer comme lu"
             android:textColor="#FFB476"
-            android:textSize="15sp"
+            android:textSize="13sp"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="28dp"
+            android:layout_marginStart="20dp"
             android:text="Silence"
             android:textColor="#FFB476"
-            android:textSize="15sp"
+            android:textSize="13sp"
             android:textStyle="bold" />
     </LinearLayout>
 
@@ -192,25 +192,25 @@
         android:id="@+id/summary_row_3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
+        android:layout_marginTop="8dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
             android:id="@+id/summary_avatar_3"
-            android:layout_width="54dp"
-            android:layout_height="54dp"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
             android:background="@drawable/avatar_bg_dark"
             android:gravity="center"
             android:text="RS"
             android:textColor="#F1F1F1"
-            android:textSize="17sp"
+            android:textSize="15sp"
             android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="10dp"
             android:layout_weight="1"
             android:orientation="vertical">
 
@@ -222,26 +222,26 @@
                 android:maxLines="1"
                 android:text="Ressi • 2 min"
                 android:textColor="#F1F1F1"
-                android:textSize="17sp"
+                android:textSize="15sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/summary_preview_3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
+                android:layout_marginTop="2dp"
                 android:ellipsize="end"
-                android:maxLines="2"
+                android:maxLines="1"
                 android:text="Merci"
                 android:textColor="#D8D2CA"
-                android:textSize="14sp" />
+                android:textSize="13sp" />
         </LinearLayout>
 
         <ImageView
             android:id="@+id/summary_chevron_3"
-            android:layout_width="34dp"
-            android:layout_height="34dp"
-            android:padding="8dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:padding="7dp"
             android:src="@drawable/ic_chevron_down" />
     </LinearLayout>
 
@@ -249,7 +249,7 @@
         android:id="@+id/summary_actions_3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="5dp"
         android:orientation="horizontal"
         android:visibility="gone">
 
@@ -258,25 +258,25 @@
             android:layout_height="wrap_content"
             android:text="Repondre"
             android:textColor="#FFB476"
-            android:textSize="15sp"
+            android:textSize="13sp"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="28dp"
+            android:layout_marginStart="20dp"
             android:text="Marquer comme lu"
             android:textColor="#FFB476"
-            android:textSize="15sp"
+            android:textSize="13sp"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="28dp"
+            android:layout_marginStart="20dp"
             android:text="Silence"
             android:textColor="#FFB476"
-            android:textSize="15sp"
+            android:textSize="13sp"
             android:textStyle="bold" />
     </LinearLayout>
 
@@ -284,25 +284,25 @@
         android:id="@+id/summary_row_4"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
+        android:layout_marginTop="8dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
             android:id="@+id/summary_avatar_4"
-            android:layout_width="54dp"
-            android:layout_height="54dp"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
             android:background="@drawable/avatar_bg_dark"
             android:gravity="center"
             android:text="CT"
             android:textColor="#F1F1F1"
-            android:textSize="17sp"
+            android:textSize="15sp"
             android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="10dp"
             android:layout_weight="1"
             android:orientation="vertical">
 
@@ -314,26 +314,26 @@
                 android:maxLines="1"
                 android:text="Cyber Torch • 4 min"
                 android:textColor="#F1F1F1"
-                android:textSize="17sp"
+                android:textSize="15sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/summary_preview_4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
+                android:layout_marginTop="2dp"
                 android:ellipsize="end"
-                android:maxLines="2"
+                android:maxLines="1"
                 android:text="Aliou : Sticker"
                 android:textColor="#D8D2CA"
-                android:textSize="14sp" />
+                android:textSize="13sp" />
         </LinearLayout>
 
         <ImageView
             android:id="@+id/summary_chevron_4"
-            android:layout_width="34dp"
-            android:layout_height="34dp"
-            android:padding="8dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:padding="7dp"
             android:src="@drawable/ic_chevron_down" />
     </LinearLayout>
 
@@ -341,7 +341,7 @@
         android:id="@+id/summary_actions_4"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="5dp"
         android:orientation="horizontal"
         android:visibility="gone">
 
@@ -350,25 +350,25 @@
             android:layout_height="wrap_content"
             android:text="Repondre"
             android:textColor="#FFB476"
-            android:textSize="15sp"
+            android:textSize="13sp"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="28dp"
+            android:layout_marginStart="20dp"
             android:text="Marquer comme lu"
             android:textColor="#FFB476"
-            android:textSize="15sp"
+            android:textSize="13sp"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="28dp"
+            android:layout_marginStart="20dp"
             android:text="Silence"
             android:textColor="#FFB476"
-            android:textSize="15sp"
+            android:textSize="13sp"
             android:textStyle="bold" />
     </LinearLayout>
 </LinearLayout>
