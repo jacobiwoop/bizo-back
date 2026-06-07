@@ -270,3 +270,23 @@
 - The grouped notification preview now expands/collapses from its header chevron.
 - Expanded grouped state shows larger conversation rows with avatar, sender, time, message preview, and per-row chevrons.
 - Verification: `npm run typecheck` passed in `bizo-mobile-rn`.
+
+# Android Notification Lab
+
+- [x] Create a standalone Android notification lab app outside Bizo mobile runtime.
+- [x] Provide local Bizo logo and sample image/vector assets for notification rendering tests.
+- [x] Add ADB-triggerable compact, expanded, and grouped notification examples.
+- [x] Add a GitHub Actions workflow to build and upload the lab APK.
+- [x] Validate Gradle project configuration.
+- [x] Record review result.
+
+## Review
+
+- Added `notification-lab`, a standalone Android app with package `io.bizo.notificationlab`.
+- Added local Bizo logo, notification icon, avatar placeholders, and listing thumbnail drawables for offline rendering tests.
+- Added native `RemoteViews` layouts for compact message, expanded message, and grouped notification prototypes.
+- Added ADB broadcast triggers: `SHOW_MESSAGE`, `SHOW_GROUP`, `SHOW_ALL`, and `CLEAR`.
+- Added GitHub Actions workflow `Android Notification Lab` to build and upload the debug APK artifact.
+- Verification: all notification lab XML resources passed `xmllint --noout`.
+- Verification: `.github/workflows/notification-lab-android.yml` parsed as valid YAML.
+- Local Gradle compile was attempted, but the Gradle distribution download timed out locally; the workflow installs Gradle 8.10.2 and will perform the full APK build on GitHub.

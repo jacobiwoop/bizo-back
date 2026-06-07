@@ -1,0 +1,32 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:allowBackup="false"
+        android:icon="@drawable/bizo_logo_mark"
+        android:label="Bizo Notif Lab"
+        android:roundIcon="@drawable/bizo_logo_mark"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name=".NotificationActionReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="io.bizo.notificationlab.SHOW_MESSAGE" />
+                <action android:name="io.bizo.notificationlab.SHOW_GROUP" />
+                <action android:name="io.bizo.notificationlab.SHOW_ALL" />
+                <action android:name="io.bizo.notificationlab.CLEAR" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>
