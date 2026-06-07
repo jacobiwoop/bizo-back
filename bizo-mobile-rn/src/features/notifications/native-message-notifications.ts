@@ -34,6 +34,10 @@ function conversationIdFrom(data: MessagePushData): string | undefined {
   return normalizeText(data.conv_id) ?? normalizeText(data.conversation_id);
 }
 
+function conversationAvatarUrlFrom(data: MessagePushData): string | undefined {
+  return normalizeText(data.notification_avatar_url) ?? normalizeText(data.sender_photo_url);
+}
+
 async function ensureNativeMessageChannel() {
   if (Platform.OS !== "android") {
     return;
@@ -62,10 +66,12 @@ export async function displayNativeMessageNotification(remoteMessage: FirebaseMe
   const conversationId = conversationIdFrom(data);
   const senderName = normalizeText(data.sender_name) ?? normalizeText(data.title) ?? "Nouveau message";
   const body = normalizeText(data.body) ?? "Nouveau message";
+  const conversationAvatarUrl = conversationAvatarUrlFrom(data);
   const sender = {
     id: normalizeText(data.sender_id) ?? senderName,
     name: senderName,
     important: true,
+    ...(conversationAvatarUrl ? { icon: conversationAvatarUrl } : {}),
   };
 
   await ensureNativeMessageChannel();
