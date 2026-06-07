@@ -170,6 +170,8 @@
 - [x] Keep non-message pushes on the existing Expo/FCM path.
 - [x] Run backend tests and mobile typecheck.
 - [x] Push to trigger debug and production Android builds.
+- [x] Fix Firebase Messaging Android manifest color conflict in CI after Expo prebuild.
+- [x] Verify debug and production Android workflows complete successfully.
 
 ## Review
 
@@ -183,3 +185,5 @@
 - Verification: `npx expo config --json` resolved the Firebase config plugins.
 - Verification: `php artisan test tests/Feature/SocialTest.php tests/Feature/NotificationsTest.php` passed.
 - Deployment: pushed commit `6c6cc82` and deployed the backend container on the server.
+- CI verification: debug workflow run `27095520568` passed in 25m42s.
+- CI verification: production workflow run `27095520561` passed.

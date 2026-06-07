@@ -16,3 +16,4 @@
 - For message push images, choose the image from the recipient's point of view: sellers receiving buyer messages should see the sender profile image, while buyers receiving seller replies should see the listing image with sender profile fallback.
 - FCM `notification.image` is rich notification media/large image on Android; it does not replace the small left app icon. A true conversation-style left avatar requires a native notification renderer.
 - For WhatsApp-style message notifications on Android, use data-only FCM plus Notifee `AndroidStyle.MESSAGING`; sending an FCM `notification` block at the same time risks duplicate notifications and prevents full control of the row avatar.
+- If an Expo config plugin cannot reliably add AndroidManifest `tools:replace` after native library manifests are merged, patch the generated manifest in the CI workflow immediately after `expo prebuild` and before Gradle.
