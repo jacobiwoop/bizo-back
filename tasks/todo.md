@@ -257,3 +257,16 @@
 - The individual preview chevron now expands only the current message text.
 - Added a separate grouped compact preview block inspired by the provided screenshot.
 - Verification: `npm run typecheck` passed in `bizo-mobile-rn`.
+
+# Grouped Notification Expanded Preview
+
+- [x] Make grouped notification chevron interactive.
+- [x] Add expanded grouped layout with detailed conversation rows.
+- [x] Run mobile typecheck.
+- [x] Record the review result.
+
+## Review
+
+- The grouped notification preview now expands/collapses from its header chevron.
+- Expanded grouped state shows larger conversation rows with avatar, sender, time, message preview, and per-row chevrons.
+- Verification: `npm run typecheck` passed in `bizo-mobile-rn`.
