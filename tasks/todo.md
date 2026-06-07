@@ -291,4 +291,6 @@
 - Verification: `.github/workflows/notification-lab-android.yml` parsed as valid YAML.
 - First GitHub compile reached `:app:checkDebugAarMetadata` and exposed the missing AndroidX flag.
 - Added `notification-lab/gradle.properties` with `android.useAndroidX=true`.
-- Local Gradle compile was attempted, but the Gradle distribution download timed out locally; the workflow installs Gradle 8.10.2 and performs the full APK build on GitHub.
+- Local Gradle compile was attempted, but the Gradle distribution download timed out locally; GitHub Actions performed the full APK build.
+- CI verification: `Android Notification Lab` run `27101222843` completed successfully on commit `0c219cc`.
+- CI artifact: `bizo-notification-lab-debug-apk`, size `2192587` bytes.
