@@ -27,3 +27,4 @@
 - For grouped message notifications, the first expanded state should show only the conversation list. Full text and actions like reply/read/silence should appear only after a specific conversation row is opened, which can be modeled by reposting the notification in a row-open state.
 - Keep custom notification `RemoteViews` short on MIUI. Four large rows plus actions can clip or visually overlap compact and expanded views, so use smaller avatars/text/margins or move the four-conversation swipe test to native child notifications.
 - Android inline reply actions using `RemoteInput` should use a mutable `PendingIntent`; immutable reply intents can break or crash on some Android builds.
+- For custom multi-discussion summaries, adapt to high message volume by showing the top conversations plus a `+ X autres conversations` row. Do not try to render every conversation in one custom notification.

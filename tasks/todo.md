@@ -392,6 +392,7 @@
 - [x] Add a simulated state where Jacobi is removed from the custom group.
 - [x] Add a MessagingStyle variant with native reply/read/silence actions.
 - [x] Add grouped child notifications to test real per-conversation swipe.
+- [x] Adapt custom multi-summary overflow to visible top conversations plus a `+ X autres conversations` row.
 - [x] Validate XML/YAML before push.
 - [ ] Push, build, install, and capture compact/expanded/action/swipe states.
 

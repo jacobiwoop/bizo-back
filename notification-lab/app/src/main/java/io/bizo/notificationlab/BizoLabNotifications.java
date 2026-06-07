@@ -41,7 +41,6 @@ public final class BizoLabNotifications {
     private static final String OPEN_AK = "ak";
     private static final String OPEN_JACOBI = "jacobi";
     private static final String OPEN_RESSI = "ressi";
-    private static final String OPEN_CYBER = "cyber";
 
     private BizoLabNotifications() {}
 
@@ -268,7 +267,7 @@ public final class BizoLabNotifications {
     }
 
     public static void showMultiSummaryCyberOpen(Context context) {
-        showMultiSummary(context, OPEN_CYBER, false);
+        showMultiSummary(context, OPEN_NONE, false);
     }
 
     public static void showMultiSummaryWithoutJacobi(Context context) {
@@ -280,8 +279,8 @@ public final class BizoLabNotifications {
 
         RemoteViews compact = new RemoteViews(context.getPackageName(), R.layout.notification_multi_summary);
         compact.setTextViewText(R.id.summary_header, hideJacobi
-            ? "Bizo • 3 messages de 3 discuss... • maintenant"
-            : "Bizo • 4 messages de 4 discuss... • maintenant"
+            ? "Bizo • 5 messages de 5 discuss... • maintenant"
+            : "Bizo • 6 messages de 6 discuss... • maintenant"
         );
         compact.setTextViewText(R.id.summary_avatar_1, "AK");
         compact.setTextViewText(R.id.summary_text_1, "Akatsuki </> Dev  Muka'z : Photo");
@@ -355,20 +354,21 @@ public final class BizoLabNotifications {
             R.id.summary_preview_4,
             R.id.summary_chevron_4,
             R.id.summary_actions_4,
-            "CT",
-            "Cyber Torch • 4 min",
-            "Aliou : Sticker",
-            "Aliou : Sticker coeur recu dans la conversation.",
-            OPEN_CYBER,
+            "+3",
+            hideJacobi ? "+ 2 autres conversations" : "+ 3 autres conversations",
+            "Ouvrir Bizo pour tout voir",
+            "Ouvrir Bizo pour tout voir",
+            OPEN_NONE,
             openConversation,
-            "io.bizo.notificationlab.SHOW_MULTI_SUMMARY_CYBER_OPEN",
+            "io.bizo.notificationlab.SHOW_MULTI_SUMMARY",
             204,
             true
         );
+        expanded.setViewVisibility(R.id.summary_chevron_4, View.GONE);
 
         NotificationCompat.Builder builder = baseBuilder(context)
             .setContentTitle("Bizo")
-            .setContentText(hideJacobi ? "3 messages de 3 discussions" : "4 messages de 4 discussions")
+            .setContentText(hideJacobi ? "5 messages de 5 discussions" : "6 messages de 6 discussions")
             .setCustomContentView(compact)
             .setCustomBigContentView(expanded)
             .setStyle(new NotificationCompat.DecoratedCustomViewStyle());
