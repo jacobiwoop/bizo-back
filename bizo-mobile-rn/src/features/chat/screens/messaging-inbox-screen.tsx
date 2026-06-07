@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import { useQuery } from "@tanstack/react-query";
-import { Clock3, ImageIcon, MessageCircle, Search } from "lucide-react-native";
+import { ChevronLeft, MessageCircle, Search } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -8,7 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { getConversations, type ConversationResource } from "@/src/lib/api/interactions";
 import { resolveMediaUrl } from "@/src/lib/api/media";
 import { queryClient } from "@/src/lib/query-client";
-import { getRealtimeEcho, logRealtime } from "@/src/lib/realtime/client";
+import { getRealtimeClient, logRealtime } from "@/src/lib/realtime/client";
 import { useSessionStore } from "@/src/store/session";
 
 function formatConversationTime(value: string | null): string {
@@ -35,16 +35,15 @@ function conversationPreview(conversation: ConversationResource): string {
   return "Conversation ouverte";
 }
 
-function InboxHeader() {
+function InboxHeader({ onBack }: { onBack: () => void }) {
   return (
     <SafeAreaView edges={["top"]} style={styles.headerSafeArea}>
       <View style={styles.header}>
-        <View style={styles.headerTitleRow}>
-          <Text style={styles.headerTitle}>Messages</Text>
-        </View>
-        <View style={styles.headerIcon}>
-          <MessageCircle color="#745B00" size={22} strokeWidth={2.2} />
-        </View>
+        <Pressable accessibilityRole="button" style={styles.backButton} onPress={onBack}>
+          <ChevronLeft color="#1A1A1A" size={28} strokeWidth={2.5} />
+        </Pressable>
+        <Text style={styles.headerTitle}>Messages</Text>
+        <View style={styles.headerSpacer} />
       </View>
     </SafeAreaView>
   );
@@ -67,37 +66,76 @@ function SearchBar({ onChangeText, value }: { onChangeText: (value: string) => v
   );
 }
 
-type InboxMode = "selling" | "buying";
+type InboxMode = "all" | "buying" | "selling";
 
 type ConversationSummaryPayload = {
   conversation?: ConversationResource;
 };
 
+function resolveConversationRole(conversation: ConversationResource, userId?: string | null): "buyer" | "seller" | null {
+  if (conversation.current_user_role) {
+    return conversation.current_user_role;
+  }
+
+  if (!userId || !conversation.listing_owner_id) {
+    return null;
+  }
+
+  return conversation.listing_owner_id === userId ? "seller" : "buyer";
+}
+
+function matchesInboxMode(conversation: ConversationResource, mode: InboxMode, userId?: string | null): boolean {
+  if (mode === "all") {
+    return true;
+  }
+
+  const role = resolveConversationRole(conversation, userId);
+
+  if (!role) {
+    return true;
+  }
+
+  return mode === "selling" ? role === "seller" : role === "buyer";
+}
+
 function InboxModeSwitch({
+  counts,
   mode,
   onChange,
 }: {
+  counts: Record<InboxMode, number>;
   mode: InboxMode;
   onChange: (mode: InboxMode) => void;
 }) {
+  const items: Array<{ label: string; value: InboxMode }> = [
+    { label: "Tous", value: "all" },
+    { label: "J'achete", value: "buying" },
+    { label: "Je vends", value: "selling" },
+  ];
+
   return (
     <View style={styles.modeSwitch}>
-      <Pressable
-        onPress={() => onChange("selling")}
-        style={[styles.modeButton, mode === "selling" ? styles.modeButtonActive : styles.modeButtonInactive]}
-      >
-        <Text style={[styles.modeButtonText, mode === "selling" ? styles.modeButtonTextActive : styles.modeButtonTextInactive]}>
-          Je vends
-        </Text>
-      </Pressable>
-      <Pressable
-        onPress={() => onChange("buying")}
-        style={[styles.modeButton, mode === "buying" ? styles.modeButtonActive : styles.modeButtonInactive]}
-      >
-        <Text style={[styles.modeButtonText, mode === "buying" ? styles.modeButtonTextActive : styles.modeButtonTextInactive]}>
-          J'achete
-        </Text>
-      </Pressable>
+      {items.map((item) => {
+        const active = mode === item.value;
+        const unreadCount = counts[item.value];
+
+        return (
+          <Pressable
+            key={item.value}
+            onPress={() => onChange(item.value)}
+            style={[styles.modeButton, active ? styles.modeButtonActive : styles.modeButtonInactive]}
+          >
+            <Text style={[styles.modeButtonText, active ? styles.modeButtonTextActive : styles.modeButtonTextInactive]}>
+              {item.label}
+            </Text>
+            {unreadCount > 0 ? (
+              <View style={styles.modeBadge}>
+                <Text style={styles.modeBadgeText}>{unreadCount > 99 ? "99+" : unreadCount}</Text>
+              </View>
+            ) : null}
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -110,7 +148,7 @@ function ConversationRow({
   onPress: () => void;
 }) {
   const unread = item.unread_count > 0;
-  const avatar = resolveMediaUrl(item.other_user?.photo_url ?? null);
+  const avatar = resolveMediaUrl(item.other_user?.photo_url ?? item.listing_photo ?? null);
   const listing = item.listing_title || "Annonce";
   const time = formatConversationTime(item.last_message_at ?? item.created_at);
 
@@ -119,7 +157,7 @@ function ConversationRow({
       style={[styles.conversationRow, unread ? styles.conversationRowUnread : styles.conversationRowRead]}
       onPress={onPress}
     >
-      <View>
+      <View style={styles.avatarWrap}>
         {avatar ? (
           <Image source={avatar} style={{ width: 52, height: 52, borderRadius: 26 }} contentFit="cover" />
         ) : (
@@ -136,12 +174,11 @@ function ConversationRow({
           <Text style={styles.conversationTime}>{time}</Text>
         </View>
         <View style={styles.conversationMetaRow}>
-          {item.listing_photo ? <ImageIcon color="#5F5E5E" size={16} strokeWidth={2} /> : <Clock3 color="#5F5E5E" size={15} strokeWidth={2} />}
           <Text style={styles.conversationPreview} numberOfLines={1}>
             {conversationPreview(item)}
           </Text>
-          <View style={[styles.listingBadge, unread ? styles.listingBadgeUnread : styles.listingBadgeRead]}>
-            <Text style={[styles.listingBadgeText, unread ? styles.listingBadgeTextUnread : styles.listingBadgeTextRead]} numberOfLines={1}>
+          <View style={styles.listingBadge}>
+            <Text style={styles.listingBadgeText} numberOfLines={1}>
               {listing}
             </Text>
           </View>
@@ -166,11 +203,17 @@ function InboxState({ message, title }: { message: string; title: string }) {
   );
 }
 
-export function MessagingInboxScreen({ onOpenConversation }: { onOpenConversation: (conversationId: string) => void }) {
+export function MessagingInboxScreen({
+  onBack,
+  onOpenConversation,
+}: {
+  onBack: () => void;
+  onOpenConversation: (conversationId: string) => void;
+}) {
   const token = useSessionStore((state) => state.token);
   const userId = useSessionStore((state) => state.user?.id ?? null);
   const [query, setQuery] = useState("");
-  const [mode, setMode] = useState<InboxMode>("buying");
+  const [mode, setMode] = useState<InboxMode>("all");
   const conversationsQuery = useQuery({
     enabled: Boolean(token),
     queryFn: getConversations,
@@ -183,14 +226,14 @@ export function MessagingInboxScreen({ onOpenConversation }: { onOpenConversatio
       return;
     }
 
-    const echo = getRealtimeEcho(token);
-    if (!echo) {
+    const realtime = getRealtimeClient(token);
+    if (!realtime) {
       logRealtime("inbox subscription skipped");
       return;
     }
 
     const channelName = `users.${userId}.conversations`;
-    const channel = echo.private(channelName);
+    const channel = realtime.subscribePrivate(channelName);
     logRealtime("subscribing inbox", { channelName });
 
     const handleSummaryUpdate = (payload: ConversationSummaryPayload) => {
@@ -212,33 +255,38 @@ export function MessagingInboxScreen({ onOpenConversation }: { onOpenConversatio
       });
     };
 
-    channel.listen(".conversation.summary.updated", handleSummaryUpdate);
-    channel.subscribed(() => logRealtime("inbox subscribed", { channelName }));
-    channel.error((error: unknown) => logRealtime("inbox subscription error", { channelName, error }));
+    channel.bind("conversation.summary.updated", handleSummaryUpdate);
+    channel.bind(".conversation.summary.updated", handleSummaryUpdate);
+    channel.bind("pusher:subscription_succeeded", () => logRealtime("inbox subscribed", { channelName }));
+    channel.bind("pusher:subscription_error", (error: unknown) => logRealtime("inbox subscription error", { channelName, error }));
 
     return () => {
       logRealtime("leaving inbox", { channelName });
-      channel.stopListening(".conversation.summary.updated", handleSummaryUpdate);
-      echo.leave(channelName);
+      channel.unbind("conversation.summary.updated", handleSummaryUpdate);
+      channel.unbind(".conversation.summary.updated", handleSummaryUpdate);
+      realtime.unsubscribePrivate(channelName);
     };
   }, [token, userId]);
 
   const conversations = conversationsQuery.data ?? [];
   const normalizedQuery = query.trim().toLowerCase();
-  const modeConversations = conversations.filter((conversation) => {
-    if (conversation.current_user_role) {
-      return mode === "selling"
-        ? conversation.current_user_role === "seller"
-        : conversation.current_user_role === "buyer";
+  const unreadCounts = conversations.reduce<Record<InboxMode, number>>((totals, conversation) => {
+    const unreadCount = conversation.unread_count;
+    const role = resolveConversationRole(conversation, userId);
+
+    totals.all += unreadCount;
+
+    if (role === "buyer") {
+      totals.buying += unreadCount;
     }
 
-    if (!userId || !conversation.listing_owner_id) {
-      return true;
+    if (role === "seller") {
+      totals.selling += unreadCount;
     }
 
-    const userOwnsListing = conversation.listing_owner_id === userId;
-    return mode === "selling" ? userOwnsListing : !userOwnsListing;
-  });
+    return totals;
+  }, { all: 0, buying: 0, selling: 0 });
+  const modeConversations = conversations.filter((conversation) => matchesInboxMode(conversation, mode, userId));
   const visibleConversations = normalizedQuery
     ? modeConversations.filter((conversation) => {
         const haystack = [
@@ -252,16 +300,18 @@ export function MessagingInboxScreen({ onOpenConversation }: { onOpenConversatio
     : modeConversations;
   const emptyMessage = query
     ? "Aucune conversation ne correspond a cette recherche."
-    : mode === "selling"
+    : mode === "all"
+      ? "Vos conversations apparaitront ici."
+      : mode === "selling"
       ? "Les acheteurs qui vous contactent apparaitront ici."
       : "Contactez un vendeur depuis une annonce pour demarrer une discussion.";
 
   return (
     <View style={styles.screen}>
-      <InboxHeader />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 96, paddingHorizontal: 16, paddingTop: 16 }}>
+      <InboxHeader onBack={onBack} />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <SearchBar onChangeText={setQuery} value={query} />
-        <InboxModeSwitch mode={mode} onChange={setMode} />
+        <InboxModeSwitch counts={unreadCounts} mode={mode} onChange={setMode} />
         {!token ? (
           <InboxState title="Connexion requise" message="Connectez-vous pour voir vos conversations." />
         ) : conversationsQuery.isLoading ? (
@@ -272,7 +322,7 @@ export function MessagingInboxScreen({ onOpenConversation }: { onOpenConversatio
         ) : conversationsQuery.error ? (
           <InboxState title="Messages indisponibles" message="Impossible de charger vos conversations pour le moment." />
         ) : visibleConversations.length ? (
-          <View style={styles.conversationsBox}>
+          <View style={styles.conversationsList}>
             {visibleConversations.map((item) => (
               <ConversationRow key={item.id} item={item} onPress={() => onOpenConversation(item.id)} />
             ))}
@@ -288,16 +338,25 @@ export function MessagingInboxScreen({ onOpenConversation }: { onOpenConversatio
 const styles = StyleSheet.create({
   avatarFallback: {
     alignItems: "center",
-    backgroundColor: "#EDEEEF",
+    backgroundColor: "#EBE1D1",
     borderRadius: 26,
     height: 52,
     justifyContent: "center",
     width: 52,
   },
   avatarInitial: {
-    color: "#5F5E5E",
+    color: "#4E4633",
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "800",
+  },
+  avatarWrap: {
+    flexShrink: 0,
+  },
+  backButton: {
+    alignItems: "center",
+    height: 40,
+    justifyContent: "center",
+    width: 40,
   },
   conversationContent: {
     flex: 1,
@@ -308,43 +367,46 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     gap: 8,
+    minWidth: 0,
   },
   conversationName: {
-    color: "#151C27",
+    color: "#1A1A1A",
     flex: 1,
-    fontSize: 18,
+    fontSize: 16,
   },
   conversationNameRead: {
-    fontWeight: "500",
-  },
-  conversationNameUnread: {
     fontWeight: "700",
   },
+  conversationNameUnread: {
+    fontWeight: "800",
+  },
   conversationPreview: {
-    color: "#5F5E5E",
+    color: "#9CA3AF",
     flex: 1,
     fontSize: 14,
+    fontWeight: "500",
     minWidth: 0,
   },
   conversationRow: {
     alignItems: "center",
-    borderBottomColor: "rgba(209, 197, 172, 0.1)",
+    backgroundColor: "#FFFFFF",
+    borderBottomColor: "rgba(209, 197, 172, 0.5)",
     borderBottomWidth: 1,
     flexDirection: "row",
-    height: 80,
+    minHeight: 76,
     paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   conversationRowRead: {
     backgroundColor: "#FFFFFF",
   },
   conversationRowUnread: {
-    backgroundColor: "#FAFAFA",
-    borderLeftColor: "#5B5BD6",
-    borderLeftWidth: 3,
+    backgroundColor: "#FFFFFF",
   },
   conversationTime: {
-    color: "#5F5E5E",
+    color: "#4E4633",
     fontSize: 12,
+    fontWeight: "500",
     marginLeft: 8,
   },
   conversationTopRow: {
@@ -353,17 +415,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 2,
   },
-  conversationsBox: {
+  conversationsList: {
     backgroundColor: "#FFFFFF",
-    borderColor: "rgba(209, 197, 172, 0.1)",
-    borderRadius: 12,
-    borderWidth: 1,
-    elevation: 2,
     overflow: "hidden",
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.06,
-    shadowRadius: 18,
   },
   header: {
     alignItems: "center",
@@ -372,119 +426,118 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
   },
-  headerIcon: {
-    alignItems: "center",
+  headerSafeArea: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    height: 40,
-    justifyContent: "center",
+    borderBottomColor: "rgba(209, 197, 172, 0.35)",
+    borderBottomWidth: 1,
+  },
+  headerSpacer: {
     width: 40,
   },
-  headerSafeArea: {
-    backgroundColor: "#F9F9FF",
-    elevation: 2,
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.06,
-    shadowRadius: 18,
-  },
   headerTitle: {
-    color: "#151C27",
-    fontSize: 24,
-    fontWeight: "700",
-  },
-  headerTitleRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 16,
+    color: "#1A1A1A",
+    fontSize: 28,
+    fontWeight: "800",
   },
   listingBadge: {
-    borderRadius: 999,
+    backgroundColor: "#F1E7D6",
+    borderRadius: 8,
+    maxWidth: 136,
     paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  listingBadgeRead: {
-    backgroundColor: "#DCE2F3",
+    paddingVertical: 3,
   },
   listingBadgeText: {
+    color: "#4E4633",
     fontSize: 10,
-    fontWeight: "700",
-  },
-  listingBadgeTextRead: {
-    color: "#5F5E5E",
-  },
-  listingBadgeTextUnread: {
-    color: "#241A00",
-  },
-  listingBadgeUnread: {
-    backgroundColor: "#F5C518",
+    fontWeight: "800",
   },
   modeButton: {
     alignItems: "center",
     borderRadius: 999,
     flex: 1,
-    height: 40,
+    flexDirection: "row",
+    gap: 6,
+    height: 38,
     justifyContent: "center",
   },
   modeButtonActive: {
-    backgroundColor: "#191C1D",
+    backgroundColor: "#FFFFFF",
+    elevation: 1,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 5,
   },
   modeButtonInactive: {
     backgroundColor: "transparent",
   },
   modeButtonText: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   modeButtonTextActive: {
-    color: "#FFFFFF",
+    color: "#1A1A1A",
   },
   modeButtonTextInactive: {
-    color: "#5F5E5E",
+    color: "#4E4633",
+  },
+  modeBadge: {
+    alignItems: "center",
+    backgroundColor: "#F5C518",
+    borderRadius: 999,
+    justifyContent: "center",
+    minWidth: 18,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+  },
+  modeBadgeText: {
+    color: "#241A00",
+    fontSize: 9,
+    fontWeight: "900",
   },
   modeSwitch: {
-    backgroundColor: "#ECEEF3",
+    backgroundColor: "#F3F4F6",
     borderRadius: 999,
     flexDirection: "row",
-    gap: 6,
+    gap: 4,
     marginBottom: 16,
     padding: 4,
   },
   loadingBox: {
     alignItems: "center",
     backgroundColor: "#FFFFFF",
-    borderRadius: 12,
+    borderRadius: 8,
     justifyContent: "center",
     paddingVertical: 48,
   },
   loadingText: {
-    color: "#5F5E5E",
+    color: "#4E4633",
     fontSize: 13,
     fontWeight: "600",
     marginTop: 12,
   },
+  scrollContent: {
+    paddingBottom: 96,
+    paddingTop: 16,
+  },
   screen: {
-    backgroundColor: "#F9F9FF",
+    backgroundColor: "#FFFFFF",
     flex: 1,
   },
   searchBox: {
     backgroundColor: "#F3F4F6",
-    borderColor: "rgba(209, 197, 172, 0.2)",
+    borderColor: "rgba(209, 197, 172, 0.6)",
     borderRadius: 999,
     borderWidth: 1,
-    elevation: 2,
-    marginBottom: 24,
+    marginBottom: 14,
+    marginHorizontal: 16,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.06,
-    shadowRadius: 18,
   },
   searchInput: {
-    color: "#151C27",
+    color: "#1A1A1A",
     flex: 1,
-    fontSize: 16,
+    fontSize: 15,
     marginLeft: 12,
   },
   searchRow: {
@@ -494,22 +547,23 @@ const styles = StyleSheet.create({
   stateBox: {
     alignItems: "center",
     backgroundColor: "#FFFFFF",
-    borderColor: "rgba(209, 197, 172, 0.1)",
-    borderRadius: 12,
+    borderColor: "rgba(209, 197, 172, 0.45)",
+    borderRadius: 8,
     borderWidth: 1,
     justifyContent: "center",
+    marginHorizontal: 16,
     paddingHorizontal: 24,
     paddingVertical: 48,
   },
   stateMessage: {
-    color: "#5F5E5E",
+    color: "#4E4633",
     fontSize: 13,
     lineHeight: 20,
     marginTop: 8,
     textAlign: "center",
   },
   stateTitle: {
-    color: "#151C27",
+    color: "#1A1A1A",
     fontSize: 18,
     fontWeight: "900",
     marginTop: 16,
@@ -518,11 +572,12 @@ const styles = StyleSheet.create({
   unreadPill: {
     alignItems: "center",
     backgroundColor: "#F5C518",
-    borderRadius: 10,
-    height: 20,
+    borderRadius: 11,
+    height: 22,
     justifyContent: "center",
     marginLeft: 16,
-    width: 20,
+    minWidth: 22,
+    paddingHorizontal: 6,
   },
   unreadPillText: {
     color: "#1A1A1A",

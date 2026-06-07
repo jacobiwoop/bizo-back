@@ -5,3 +5,10 @@
 - In Expo Router tab screens, prefer the `router` singleton for simple push callbacks passed to children. A route-level `useRouter()` hook can surface "Couldn't find a navigation context" in the dev client when the tab screen is rendered during navigation.
 - If NativeWind/css-interop throws a navigation context error while printing an upgrade warning, remove `className` from that small screen/component and use `StyleSheet`. The warning serializer can touch Expo Router internals through React element props in development.
 - Do not nest `KeyboardAvoidingView` around `KeyboardAwareScrollView` on auth forms. Use one keyboard movement strategy per screen, otherwise the form jumps up and then repositions when the keyboard opens or closes.
+- On chat screens, a keyboard-sticky input is not enough by itself. The message list and input must share a keyboard-avoiding parent so the conversation remains visible while typing.
+- In React Native, `pusher-js/react-native` may expose its constructor as `Pusher` on the imported module instead of as the module/default value. Resolve named exports before declaring realtime unavailable.
+- `pusher-js/react-native` still requires a `cluster` option even when Reverb uses explicit `wsHost`/`wssPort`. Without it, the inbox crashes with "Options object must provide a cluster".
+- For the Messages inbox redesign, keep three filters in this order: `Tous`, `J'achete`, `Je vends`. Keep the top back button, and use listing-title badges on the right while preserving the template badge color language.
+- In the Messages inbox, use the other user's profile photo first, then the listing photo, then the initial fallback.
+- The Messages tab badge must read the shared `["conversations"]` query and subscribe to the user conversations channel in the custom tabbar, otherwise unread counts update only inside the inbox screen.
+- The Messages inbox filters each need their own unread badge: `Tous` sums all conversations, `J'achete` sums buyer conversations, and `Je vends` sums seller conversations using the same role-resolution logic as filtering.

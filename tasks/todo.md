@@ -58,6 +58,14 @@
 - [x] Stabilize chat states, read marking, and send feedback.
 - [x] Run mobile and backend verification.
 
+# Messaging Realtime + Keyboard Correction
+
+- [x] Replace the React Native Echo wrapper with a direct Pusher/Reverb client.
+- [x] Add subscription and connection logs for inbox/thread realtime.
+- [x] Keep the chat input and message list visible when the keyboard opens.
+- [x] Run mobile typecheck.
+- [x] Record the result in this file and capture the lesson from the correction.
+
 ## Review
 
 - Removed Home/Search mock listing data and fallback remote images.
@@ -73,5 +81,49 @@
 - Made `J'achete` the default inbox mode and added backend role metadata for reliable filtering.
 - Added Reverb/Echo realtime subscriptions for inbox summaries and conversation messages.
 - Added optimistic text sending, send failure feedback, and mutation-based read marking in chat threads.
+- Replaced the mobile Echo wrapper with direct Pusher/Reverb subscriptions to avoid React Native constructor interop failures.
+- Changed the chat thread keyboard handling so the whole conversation screen avoids the keyboard, not only the input bar.
 - Verification: `npm run typecheck` passed in `bizo-mobile-rn`.
 - Verification: `php artisan test` passed.
+
+# Realtime Manual Test
+
+- [x] Login as the second test account through the API.
+- [x] Find the conversation shared with the active tester account.
+- [x] Send one message through the backend API.
+- [x] Watch app/realtime logs for delivery.
+- [x] Fix the React Native Pusher constructor resolver after logs showed the subscription was skipped.
+- [x] Fix the React Native Pusher `cluster` option redbox shown on the phone.
+- [x] Reload the dev client and re-test delivery on the corrected bundle.
+
+# Chat Keyboard Visibility
+
+- [x] Replace the thread message ScrollView with a keyboard-aware chat scroll container.
+- [x] Preserve auto-scroll behavior when new messages arrive.
+- [x] Keep the composer visible while typing.
+- [x] Run mobile typecheck.
+
+# Messages Inbox Template Redesign
+
+- [x] Redesign the conversation list from `msgconv.html`, not the direct thread.
+- [x] Keep the bottom navbar untouched.
+- [x] Add top back button.
+- [x] Use filters in order: Tous, J'achete, Je vends.
+- [x] Replace type badges with right-side listing title badges.
+- [x] Use neutral grey badge color when backend does not provide a real conversation type.
+- [x] Run mobile typecheck.
+
+# Messages Navbar Unread Badge
+
+- [x] Read the global conversations query in the custom tabbar.
+- [x] Sum `unread_count` across conversations.
+- [x] Show a numbered badge on the Messages tab only when unread total is greater than zero.
+- [x] Subscribe the tabbar to conversation summary realtime updates.
+- [x] Run mobile typecheck.
+
+# Messages Inbox Filter Unread Badges
+
+- [x] Compute unread totals for `Tous`, `J'achete`, and `Je vends`.
+- [x] Use the same buyer/seller role resolution for filtering and badge totals.
+- [x] Show a badge on a filter only when its unread total is greater than zero.
+- [x] Run mobile typecheck.

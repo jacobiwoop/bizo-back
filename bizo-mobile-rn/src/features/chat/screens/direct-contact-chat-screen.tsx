@@ -1,9 +1,9 @@
 import { CheckCheck, ChevronLeft, Image as ImageIcon, Info, Mic, MoreVertical, Send, Shield, UserCircle, X } from "lucide-react-native";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { useEffect, useRef, useState, type ElementRef } from "react";
+import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
 import { Image } from "expo-image";
-import { KeyboardProvider, KeyboardStickyView } from "react-native-keyboard-controller";
+import { KeyboardAvoidingView, KeyboardChatScrollView, KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
@@ -16,7 +16,7 @@ import {
 } from "@/src/lib/api/interactions";
 import { resolveMediaUrl } from "@/src/lib/api/media";
 import { queryClient } from "@/src/lib/query-client";
-import { getRealtimeEcho, logRealtime } from "@/src/lib/realtime/client";
+import { getRealtimeClient, logRealtime } from "@/src/lib/realtime/client";
 import { useSessionStore } from "@/src/store/session";
 
 type MessageCreatedPayload = {
@@ -174,14 +174,15 @@ function ChatMessages({
   onRetry?: () => void;
   userId?: string | null;
 }) {
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ElementRef<typeof KeyboardChatScrollView>>(null);
 
   return (
-    <ScrollView
+    <KeyboardChatScrollView
       ref={scrollRef}
       className="flex-1"
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
+      keyboardLiftBehavior="whenAtEnd"
       contentContainerStyle={{ gap: 24, paddingBottom: 24, paddingHorizontal: 16, paddingTop: 24 }}
       onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}
     >
@@ -209,7 +210,7 @@ function ChatMessages({
           ) : null}
         </View>
       )}
-    </ScrollView>
+    </KeyboardChatScrollView>
   );
 }
 
@@ -360,14 +361,14 @@ export function DirectContactChatScreen({ conversationId, onBack }: { conversati
       return;
     }
 
-    const echo = getRealtimeEcho(token);
-    if (!echo) {
+    const realtime = getRealtimeClient(token);
+    if (!realtime) {
       logRealtime("conversation subscription skipped", { conversationId });
       return;
     }
 
     const channelName = `conversation.${conversationId}`;
-    const channel = echo.private(channelName);
+    const channel = realtime.subscribePrivate(channelName);
     logRealtime("subscribing conversation", { channelName });
 
     const handleMessageCreated = (payload: MessageCreatedPayload) => {
@@ -383,53 +384,53 @@ export function DirectContactChatScreen({ conversationId, onBack }: { conversati
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
     };
 
-    channel.listen(".conversation.message.created", handleMessageCreated);
-    channel.subscribed(() => logRealtime("conversation subscribed", { channelName }));
-    channel.error((error: unknown) => logRealtime("conversation subscription error", { channelName, error }));
+    channel.bind("conversation.message.created", handleMessageCreated);
+    channel.bind(".conversation.message.created", handleMessageCreated);
+    channel.bind("pusher:subscription_succeeded", () => logRealtime("conversation subscribed", { channelName }));
+    channel.bind("pusher:subscription_error", (error: unknown) => logRealtime("conversation subscription error", { channelName, error }));
 
     return () => {
       logRealtime("leaving conversation", { channelName });
-      channel.stopListening(".conversation.message.created", handleMessageCreated);
-      echo.leave(channelName);
+      channel.unbind("conversation.message.created", handleMessageCreated);
+      channel.unbind(".conversation.message.created", handleMessageCreated);
+      realtime.unsubscribePrivate(channelName);
     };
   }, [conversationId, token]);
 
   return (
     <KeyboardProvider>
-    <View className="flex-1 bg-[#F9FAFB]">
-      <ChatHeader conversation={conversationQuery.data} onBack={onBack} />
-      <InfoBanner />
-      {conversationQuery.error || messagesQuery.error ? (
-        <View className="flex-1 items-center justify-center px-6">
-          <Text className="text-center text-[18px] font-black text-[#151C27]">Conversation indisponible</Text>
-          <Text className="mt-2 text-center text-[13px] leading-5 text-[#6B7280]">Impossible de charger cette discussion pour le moment.</Text>
-          <Pressable
-            className="mt-4 rounded-full bg-[#1A1A1A] px-5 py-3"
-            onPress={() => {
-              conversationQuery.refetch();
-              messagesQuery.refetch();
-            }}
-          >
-            <Text className="text-[13px] font-bold text-white">Reessayer</Text>
-          </Pressable>
-        </View>
-      ) : (
-        <ChatMessages
-          conversation={conversationQuery.data}
-          isLoading={conversationQuery.isLoading || messagesQuery.isLoading}
-          messages={messagesQuery.data ?? []}
-          onRetry={() => messagesQuery.refetch()}
-          userId={user?.id}
-        />
-      )}
-      <KeyboardStickyView>
+      <KeyboardAvoidingView behavior="padding" style={{ backgroundColor: "#F9FAFB", flex: 1 }}>
+        <ChatHeader conversation={conversationQuery.data} onBack={onBack} />
+        <InfoBanner />
+        {conversationQuery.error || messagesQuery.error ? (
+          <View className="flex-1 items-center justify-center px-6">
+            <Text className="text-center text-[18px] font-black text-[#151C27]">Conversation indisponible</Text>
+            <Text className="mt-2 text-center text-[13px] leading-5 text-[#6B7280]">Impossible de charger cette discussion pour le moment.</Text>
+            <Pressable
+              className="mt-4 rounded-full bg-[#1A1A1A] px-5 py-3"
+              onPress={() => {
+                conversationQuery.refetch();
+                messagesQuery.refetch();
+              }}
+            >
+              <Text className="text-[13px] font-bold text-white">Reessayer</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <ChatMessages
+            conversation={conversationQuery.data}
+            isLoading={conversationQuery.isLoading || messagesQuery.isLoading}
+            messages={messagesQuery.data ?? []}
+            onRetry={() => messagesQuery.refetch()}
+            userId={user?.id}
+          />
+        )}
         <ChatInputBar
           disabled={Boolean(conversationQuery.error || messagesQuery.error)}
           error={sendMutation.error ? "Message non envoye. Verifiez votre connexion et reessayez." : null}
           onSend={(text) => sendMutation.mutate(text)}
         />
-      </KeyboardStickyView>
-    </View>
+      </KeyboardAvoidingView>
     </KeyboardProvider>
   );
 }
