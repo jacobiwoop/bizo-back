@@ -363,5 +363,8 @@
 - [x] Offset conversation rows under the header with small avatars and sender/message text.
 - [x] Keep Android's system chevron only; do not draw an internal chevron.
 - [x] Add a dedicated app button and ADB broadcast action.
-- [ ] Validate and run the GitHub Actions build.
-- [ ] Install and capture the new rendering.
+- [x] Split compact and expanded custom views so compact height does not clip the grouped rows.
+- [x] Remove the duplicated inner Bizo header/icon so Android's system app identity is the only header.
+- [x] Validate XML/YAML before pushing the correction.
+- [ ] Run the GitHub Actions build for the final corrected lab APK.
+- [ ] Install and capture the final rendering.

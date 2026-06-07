@@ -168,12 +168,12 @@ public final class BizoLabNotifications {
         ensureChannel(context);
 
         RemoteViews compact = new RemoteViews(context.getPackageName(), R.layout.notification_multi_summary);
-        compact.setTextViewText(R.id.summary_header, "Bizo • 3 messages de 2 discuss... • maintenant");
+        compact.setTextViewText(R.id.summary_avatar_1, "AK");
         compact.setTextViewText(R.id.summary_text_1, "Akatsuki </> Dev  Muka'z : Photo");
+        compact.setTextViewText(R.id.summary_avatar_2, "JW");
         compact.setTextViewText(R.id.summary_text_2, "jacobi  Bonjour mon grand comment...");
 
         RemoteViews expanded = new RemoteViews(context.getPackageName(), R.layout.notification_multi_summary_expanded);
-        expanded.setTextViewText(R.id.summary_header, "Bizo • 3 messages de 2 discuss... • maintenant");
         expanded.setTextViewText(R.id.summary_avatar_1, "AK");
         expanded.setTextViewText(R.id.summary_text_1, "Akatsuki </> Dev  Muka'z : Photo");
         expanded.setTextViewText(R.id.summary_avatar_2, "JW");
