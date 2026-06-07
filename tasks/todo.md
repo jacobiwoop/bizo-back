@@ -231,3 +231,16 @@
 - Kept sender photos only on `AndroidPerson.icon`; no `largeIcon`, so the sender/listing image should not replace the primary notification identity.
 - Native limitation: Notifee/Android `MESSAGING` style does not expose full custom layout control for radius, exact padding, custom chevron placement, or arbitrary React Native notification UI.
 - Verification: `npm run typecheck` passed in `bizo-mobile-rn`.
+
+# Notification Preview Expand Action
+
+- [x] Make the preview chevron interactive.
+- [x] Add compact and expanded preview states.
+- [x] Run mobile typecheck.
+- [x] Record the review result.
+
+## Review
+
+- The `/notification` preview chevron now toggles between compact and expanded states.
+- Expanded state shows a divider and two additional message rows using rounded-square avatars.
+- Verification: `npm run typecheck` passed in `bizo-mobile-rn`.
