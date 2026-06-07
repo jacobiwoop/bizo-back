@@ -200,3 +200,17 @@
 - Added a notification anatomy preview at the top of `/notification`.
 - The preview separates the app logo, conversation avatar, sender name, message body, and disabled rich image/`largeIcon` slot.
 - Verification: `npm run typecheck` passed in `bizo-mobile-rn`.
+
+# Claude Notification Spec Alignment
+
+- [x] Read `claude-info.md` notification layout spec.
+- [x] Align the `/notification` preview with the compact individual message state.
+- [x] Keep the preview clean, without inline annotation labels inside the mock notification.
+- [x] Run mobile typecheck.
+- [x] Record the review result.
+
+## Review
+
+- Updated the `/notification` preview to match Claude's compact individual message spec.
+- The mock notification now uses a 52x52 rounded-square avatar, sender/timestamp row, one-line message preview, and a right chevron button.
+- Verification: `npm run typecheck` passed in `bizo-mobile-rn`.

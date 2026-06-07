@@ -1,5 +1,5 @@
-import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import { ChevronDown } from "lucide-react-native";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 
@@ -14,45 +14,36 @@ import {
   discoveryNotificationSegments,
 } from "@/src/features/discovery/mocks/discovery-mocks";
 
-const logoSource = require("../../../../assets/icon-svg/logo_b_unique.png");
-
 function NotificationAnatomyPreview() {
   return (
     <View className="mx-4 mb-4 rounded-[20px] bg-white px-4 py-4 shadow-soft">
       <View className="mb-4">
-        <Text className="text-[18px] font-semibold text-[#111111]">Anatomie d'une notification</Text>
+        <Text className="text-[18px] font-semibold text-[#111111]">Apercu message compact</Text>
         <Text className="mt-1 text-[12px] leading-4 text-[#686868]">
-          Le logo Bizo reste l'identite principale. La photo de l'expediteur reste l'avatar conversationnel.
+          Format cible: logo app garde l'identite Bizo, avatar carre arrondi pour l'expediteur.
         </Text>
       </View>
 
-      <View className="rounded-[18px] bg-[#F4F4F4] px-3 py-3">
-        <View className="flex-row rounded-[16px] bg-[#1E1E1E] px-3 py-3">
-          <View className="items-center">
-            <View className="h-11 w-11 items-center justify-center overflow-hidden rounded-[12px] bg-white">
-              <Image source={logoSource} style={{ height: 30, width: 30 }} contentFit="contain" />
-            </View>
-            <Text className="mt-2 text-center text-[10px] font-semibold text-white">Bizo</Text>
+      <View className="min-h-[72px] flex-row items-center rounded-[16px] bg-[#1A1A1A] px-[14px] py-3">
+        <View className="h-[52px] w-[52px] items-center justify-center rounded-[10px] bg-[#E8ECFF]">
+          <Text className="text-[17px] font-bold text-[#2F66F3]">JW</Text>
+        </View>
+
+        <View className="ml-3 flex-1 justify-center">
+          <View className="flex-row items-center justify-between">
+            <Text className="max-w-[65%] text-[15px] font-bold text-white" numberOfLines={1}>
+              jacobi
+            </Text>
+            <Text className="text-[13px] text-[#9CA3AF]">• 2 min</Text>
           </View>
 
-          <View className="ml-3 flex-1">
-            <View className="flex-row items-center">
-              <View className="items-center">
-                <View className="h-10 w-10 items-center justify-center rounded-[12px] bg-[#E8ECFF]">
-                  <Text className="text-[13px] font-bold text-[#2F66F3]">JW</Text>
-                </View>
-              </View>
+          <Text className="mt-1 text-[14px] text-[#9CA3AF]" numberOfLines={1}>
+            Test notif logo Bizo 17:27:47
+          </Text>
+        </View>
 
-              <View className="ml-3 flex-1">
-                <Text className="text-[15px] font-semibold text-white" numberOfLines={1}>
-                  jacobi
-                </Text>
-                <Text className="mt-2 text-[13px] leading-4 text-[#E4E4E4]" numberOfLines={2}>
-                  Test notif logo Bizo 17:27:47
-                </Text>
-              </View>
-            </View>
-          </View>
+        <View className="ml-[10px] h-9 w-9 items-center justify-center rounded-full bg-[#2D2D2D]">
+          <ChevronDown color="#FFFFFF" size={18} strokeWidth={2.2} />
         </View>
       </View>
     </View>
