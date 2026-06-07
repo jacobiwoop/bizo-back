@@ -2,7 +2,6 @@ import notifee, {
   AndroidCategory,
   AndroidImportance,
   AndroidStyle,
-  type AndroidPerson,
 } from "@notifee/react-native";
 import messaging, { type FirebaseMessagingTypes } from "@react-native-firebase/messaging";
 import { Platform } from "react-native";
@@ -35,14 +34,6 @@ function conversationIdFrom(data: MessagePushData): string | undefined {
   return normalizeText(data.conv_id) ?? normalizeText(data.conversation_id);
 }
 
-function avatarUrlFrom(data: MessagePushData): string | undefined {
-  return (
-    normalizeText(data.notification_avatar_url) ??
-    normalizeText(data.sender_photo_url) ??
-    normalizeText(data.listing_photo_url)
-  );
-}
-
 async function ensureNativeMessageChannel() {
   if (Platform.OS !== "android") {
     return;
@@ -71,12 +62,10 @@ export async function displayNativeMessageNotification(remoteMessage: FirebaseMe
   const conversationId = conversationIdFrom(data);
   const senderName = normalizeText(data.sender_name) ?? normalizeText(data.title) ?? "Nouveau message";
   const body = normalizeText(data.body) ?? "Nouveau message";
-  const avatarUrl = avatarUrlFrom(data);
-  const sender: AndroidPerson = {
+  const sender = {
     id: normalizeText(data.sender_id) ?? senderName,
     name: senderName,
     important: true,
-    ...(avatarUrl ? { icon: avatarUrl } : {}),
   };
 
   await ensureNativeMessageChannel();
@@ -93,10 +82,8 @@ export async function displayNativeMessageNotification(remoteMessage: FirebaseMe
       autoCancel: true,
       category: AndroidCategory.MESSAGE,
       channelId: BIZO_NATIVE_MESSAGE_CHANNEL_ID,
-      circularLargeIcon: true,
       color: "#111111",
       groupId: conversationId ? `conversation-${conversationId}` : "bizo-messages",
-      largeIcon: avatarUrl,
       pressAction: {
         id: "default",
       },
