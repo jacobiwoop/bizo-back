@@ -26,6 +26,7 @@
                 <action android:name="io.bizo.notificationlab.SHOW_GROUP" />
                 <action android:name="io.bizo.notificationlab.SHOW_MESSAGING_STYLE" />
                 <action android:name="io.bizo.notificationlab.SHOW_GROUP_MESSAGING_STYLE" />
+                <action android:name="io.bizo.notificationlab.SHOW_MULTI_SUMMARY" />
                 <action android:name="io.bizo.notificationlab.SHOW_ALL" />
                 <action android:name="io.bizo.notificationlab.CLEAR" />
             </intent-filter>

@@ -355,3 +355,13 @@
 - Verification: notification-lab XML resources passed `xmllint --noout`.
 - Verification: GitHub workflow YAML parsed successfully.
 - CI verification: `Android Notification Lab` run `27104198671` completed successfully on commit `cd42b26`.
+
+# Android Notification Lab Multi-Conversation Summary
+
+- [x] Add a WhatsApp-like multi-discussion summary notification variant.
+- [x] Use the app icon in the header, not a single large conversation shortcut avatar.
+- [x] Offset conversation rows under the header with small avatars and sender/message text.
+- [x] Keep Android's system chevron only; do not draw an internal chevron.
+- [x] Add a dedicated app button and ADB broadcast action.
+- [ ] Validate and run the GitHub Actions build.
+- [ ] Install and capture the new rendering.

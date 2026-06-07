@@ -48,6 +48,11 @@ public class MainActivity extends Activity {
         groupMessagingStyle.setOnClickListener(v -> BizoLabNotifications.showGroupMessagingStyle(this));
         root.addView(groupMessagingStyle);
 
+        Button multiSummary = new Button(this);
+        multiSummary.setText("Show multi-discussion summary");
+        multiSummary.setOnClickListener(v -> BizoLabNotifications.showMultiSummary(this));
+        root.addView(multiSummary);
+
         Button all = new Button(this);
         all.setText("Show all");
         all.setOnClickListener(v -> {
@@ -55,6 +60,7 @@ public class MainActivity extends Activity {
             BizoLabNotifications.showGroup(this);
             BizoLabNotifications.showMessagingStyle(this);
             BizoLabNotifications.showGroupMessagingStyle(this);
+            BizoLabNotifications.showMultiSummary(this);
         });
         root.addView(all);
 

@@ -27,6 +27,7 @@ public final class BizoLabNotifications {
     private static final int GROUP_ID = 4202;
     private static final int MESSAGING_STYLE_ID = 4203;
     private static final int GROUP_MESSAGING_STYLE_ID = 4204;
+    private static final int MULTI_SUMMARY_ID = 4205;
 
     private BizoLabNotifications() {}
 
@@ -163,11 +164,32 @@ public final class BizoLabNotifications {
         NotificationManagerCompat.from(context).notify(GROUP_ID, builder.build());
     }
 
+    public static void showMultiSummary(Context context) {
+        ensureChannel(context);
+
+        RemoteViews summary = new RemoteViews(context.getPackageName(), R.layout.notification_multi_summary);
+        summary.setTextViewText(R.id.summary_header, "Bizo • 3 messages de 2 discussions • maintenant");
+        summary.setTextViewText(R.id.summary_avatar_1, "AK");
+        summary.setTextViewText(R.id.summary_text_1, "Akatsuki </> Dev  Muka'z : Photo");
+        summary.setTextViewText(R.id.summary_avatar_2, "JW");
+        summary.setTextViewText(R.id.summary_text_2, "jacobi  Bonjour mon grand comment...");
+
+        NotificationCompat.Builder builder = baseBuilder(context)
+            .setContentTitle("Bizo")
+            .setContentText("3 messages de 2 discussions")
+            .setCustomContentView(summary)
+            .setCustomBigContentView(summary)
+            .setStyle(new NotificationCompat.DecoratedCustomViewStyle());
+
+        NotificationManagerCompat.from(context).notify(MULTI_SUMMARY_ID, builder.build());
+    }
+
     public static void clear(Context context) {
         NotificationManagerCompat.from(context).cancel(MESSAGE_ID);
         NotificationManagerCompat.from(context).cancel(GROUP_ID);
         NotificationManagerCompat.from(context).cancel(MESSAGING_STYLE_ID);
         NotificationManagerCompat.from(context).cancel(GROUP_MESSAGING_STYLE_ID);
+        NotificationManagerCompat.from(context).cancel(MULTI_SUMMARY_ID);
     }
 
     private static NotificationCompat.Builder baseBuilder(Context context) {

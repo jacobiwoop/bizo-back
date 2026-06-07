@@ -57,6 +57,12 @@ Official Android grouped messaging-style comparison:
 adb shell am broadcast -a io.bizo.notificationlab.SHOW_GROUP_MESSAGING_STYLE
 ```
 
+WhatsApp-like multi-discussion custom summary:
+
+```bash
+adb shell am broadcast -a io.bizo.notificationlab.SHOW_MULTI_SUMMARY
+```
+
 Both:
 
 ```bash
