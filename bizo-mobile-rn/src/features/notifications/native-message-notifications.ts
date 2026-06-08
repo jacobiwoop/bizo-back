@@ -5,6 +5,7 @@ import notifee, {
 } from "@notifee/react-native";
 import messaging, { type FirebaseMessagingTypes } from "@react-native-firebase/messaging";
 import { Platform } from "react-native";
+import { showBizoCustomMessageNotification } from "@/src/features/notifications/bizo-custom-notifications";
 
 export const BIZO_NATIVE_MESSAGE_CHANNEL_ID = "bizo-alerts";
 
@@ -67,6 +68,7 @@ export async function displayNativeMessageNotification(remoteMessage: FirebaseMe
   const senderName = normalizeText(data.sender_name) ?? normalizeText(data.title) ?? "Nouveau message";
   const body = normalizeText(data.body) ?? "Nouveau message";
   const conversationAvatarUrl = conversationAvatarUrlFrom(data);
+  const listingTitle = normalizeText(data.listing_title);
   const timestamp = Date.now();
   const sender = {
     id: normalizeText(data.sender_id) ?? senderName,
@@ -76,6 +78,23 @@ export async function displayNativeMessageNotification(remoteMessage: FirebaseMe
   };
 
   await ensureNativeMessageChannel();
+
+  try {
+    const renderedByCustomModule = await showBizoCustomMessageNotification({
+      notificationId: conversationId ? `conversation-${conversationId}` : remoteMessage.messageId,
+      conversationId,
+      senderName,
+      body,
+      avatarUrl: conversationAvatarUrl,
+      listingTitle,
+    });
+
+    if (renderedByCustomModule) {
+      return;
+    }
+  } catch (error) {
+    console.warn("[notifications] Custom Bizo notification renderer failed; falling back to Notifee.", error);
+  }
 
   await notifee.displayNotification({
     id: conversationId ? `conversation-${conversationId}` : remoteMessage.messageId,

@@ -54,6 +54,7 @@
         }
       ],
       "./plugins/with-native-startup-animation",
+      "./plugins/with-bizo-custom-notifications",
       [
         "expo-notifications",
         {

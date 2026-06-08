@@ -403,3 +403,22 @@
 - Added `Show MessagingStyle with actions` to compare native Android messaging actions.
 - Added `Show grouped child notifications` to test swipe behavior with separate child notifications.
 - Verification so far: notification-lab XML resources passed `xmllint --noout`; workflow YAML parsed successfully.
+
+# Bizo Mobile Native Notification Module
+
+- [x] Add an Expo prebuild plugin that injects the Android native notification module after `expo prebuild --clean`.
+- [x] Port the validated notification-lab RemoteViews layouts/drawables into the mobile Android project during prebuild.
+- [x] Add a React Native bridge module with a minimal `showMessageNotification(payload)` API.
+- [x] Wire message FCM handling to prefer the custom native renderer on Android and keep Notifee as fallback.
+- [x] Run mobile typecheck and source-level XML/YAML validation.
+- [ ] Run native Android build verification through GitHub Actions only.
+- [ ] Push to trigger debug and production mobile builds.
+
+## Review
+
+- Added `with-bizo-custom-notifications`, an Expo prebuild plugin that writes the Android bridge module, package, RemoteViews layouts, and notification drawables into generated Android sources.
+- The message FCM handler now tries `BizoCustomNotifications.showMessageNotification(...)` first on Android and falls back to Notifee if the native module is unavailable or throws.
+- Verification: `npm run typecheck` passed in `bizo-mobile-rn`.
+- Verification: new custom notification XML resources passed `xmllint --noout`.
+- Verification: debug and production workflow YAML parsed successfully.
+- Native Gradle/build verification is intentionally left to GitHub Actions per project rule.
